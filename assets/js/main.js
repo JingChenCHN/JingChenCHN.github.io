@@ -3,38 +3,57 @@
    --------------------------------------------------------------------------
    Edit the SITE object below to update your name, role, contacts and links.
    Post lists are rendered from assets/posts.json — add/remove entries there.
+
+   Bilingual:
+   - Strings are either plain text or { en, zh } objects; t() picks the
+     current language. The visitor's choice is stored in localStorage.
+   - Hand-written pages mark translated blocks with data-lang="en" / "zh";
+     applyLang() shows only the current language (default: Chinese).
    ========================================================================== */
+
+/* -------------------------------------------------------------------------- */
+/*  Language                                                                  */
+/* -------------------------------------------------------------------------- */
+let lang = localStorage.getItem("site-lang") || "zh";
+const t = (o) =>
+  typeof o === "string" ? o : (o && (o[lang] || o.en || o.zh)) || "";
 
 const SITE = {
   // ---- Basic info ------------------------------------------------------
   name: "Jing Chen",                 // your display name
   avatar: "assets/img/avatar.svg",   // path to your photo (or placeholder)
-  role: "Product Manager",           // one-line job / field
-  location: "China",                 // set to "" to hide this row
+  role: { en: "Product Manager", zh: "产品经理" },
+  location: { en: "China", zh: "中国" },   // set to "" to hide this row
 
   // ---- Contact / social links (shown in the sidebar) -------------------
   contacts: [
     { icon: "email",    label: "hemo8212@outlook.com", href: "mailto:hemo8212@outlook.com" },
     { icon: "github",   label: "GitHub",               href: "https://github.com/JingChenCHN" },
-    { icon: "rss",      label: "RSS Feed",             href: "blog.html" },
+    { icon: "rss",      label: "RSS",                  href: "blog.html" },
   ],
 
   // ---- Sidebar "profile" box (short bio) -------------------------------
-  bio: "Product manager, passionate about building products that solve real problems. I write about product thinking and the technology behind it.",
+  bio: {
+    en: "Product manager, passionate about building products that solve real problems. I write about product thinking and the technology behind it.",
+    zh: "产品经理，热衷于打造能解决真实问题的产品。我会在这里写一些关于产品思考以及背后技术的文章。",
+  },
 
   // ---- Nav bar links ----------------------------------------------------
   nav: [
-    { label: "Home",     href: "index.html" },
-    { label: "Blog",     href: "blog.html" },
-    { label: "Projects", href: "projects.html" },
-    { label: "Timeline", href: "timeline.html" },
-    { label: "About",    href: "about.html" },
+    { label: { en: "Home",     zh: "首页" },   href: "index.html" },
+    { label: { en: "Blog",     zh: "博客" },   href: "blog.html" },
+    { label: { en: "Projects", zh: "项目" },   href: "projects.html" },
+    { label: { en: "Timeline", zh: "时间线" }, href: "timeline.html" },
+    { label: { en: "About",    zh: "关于" },   href: "about.html" },
   ],
 
   // ---- Footer ------------------------------------------------------------
   footer: {
     copyright: "© 2026 Jing Chen",
-    extra: 'Built with <a href="https://pages.github.com/">GitHub Pages</a>',
+    extra: {
+      en: 'Built with <a href="https://pages.github.com/">GitHub Pages</a>',
+      zh: '基于 <a href="https://pages.github.com/">GitHub Pages</a> 构建',
+    },
   },
 };
 
@@ -70,7 +89,7 @@ function renderHeader() {
   const nav = SITE.nav
     .map(
       (n) =>
-        `<a href="${n.href}" class="${page === n.href ? "active" : ""}">${n.label}</a>`
+        `<a href="${n.href}" class="${page === n.href ? "active" : ""}">${t(n.label)}</a>`
     )
     .join("");
   host.innerHTML = `
@@ -78,6 +97,10 @@ function renderHeader() {
       <div class="header-inner">
         <a class="brand" href="index.html">${SITE.name}</a>
         <nav class="nav">${nav}</nav>
+        <div class="lang-toggle" role="group" aria-label="Language / 语言">
+          <button type="button" data-lang-btn="zh" class="${lang === "zh" ? "active" : ""}">中文</button>
+          <button type="button" data-lang-btn="en" class="${lang === "en" ? "active" : ""}">EN</button>
+        </div>
       </div>
     </header>`;
 }
@@ -96,15 +119,15 @@ function renderSidebar() {
       <div class="profile">
         <img class="avatar" src="${SITE.avatar}" alt="${SITE.name}" />
         <p class="name">${SITE.name}</p>
-        <p class="role">${SITE.role}</p>
+        <p class="role">${t(SITE.role)}</p>
         <ul class="contact-list">
-          ${SITE.location ? `<li>${iconHTML("location")}<span>${SITE.location}</span></li>` : ""}
+          ${SITE.location ? `<li>${iconHTML("location")}<span>${t(SITE.location)}</span></li>` : ""}
           ${contacts}
         </ul>
       </div>
       <div class="sidebar-box">
-        <h4>Profile</h4>
-        <p>${SITE.bio}</p>
+        <h4>${t({ en: "Profile", zh: "简介" })}</h4>
+        <p>${t(SITE.bio)}</p>
       </div>
     </aside>`;
 }
@@ -114,7 +137,7 @@ function renderFooter() {
   if (!host) return;
   host.innerHTML = `
     <footer class="site-footer">
-      ${SITE.footer.copyright} &nbsp;·&nbsp; ${SITE.footer.extra}
+      ${SITE.footer.copyright} &nbsp;·&nbsp; ${t(SITE.footer.extra)}
     </footer>`;
 }
 
@@ -123,7 +146,11 @@ function renderFooter() {
 /* -------------------------------------------------------------------------- */
 function fmtDate(iso) {
   const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  return d.toLocaleDateString(lang === "zh" ? "zh-CN" : "en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 /* Posts live in /blog/, so pages inside that folder need one level up. */
@@ -134,14 +161,17 @@ function postsPath() {
 }
 
 function postCard(p) {
-  const tags = (p.tags || [])
-    .map((t) => `<a class="tag" href="blog.html">${t}</a>`)
+  const title = t({ en: p.title, zh: p.title_zh || p.title });
+  const excerpt = t({ en: p.excerpt, zh: p.excerpt_zh || p.excerpt });
+  const tagArr = lang === "zh" ? p.tags_zh || p.tags : p.tags;
+  const tags = (tagArr || [])
+    .map((tag) => `<a class="tag" href="blog.html">${tag}</a>`)
     .join("");
   return `
     <li>
-      <h3 class="post-title"><a href="${p.file}">${p.title}</a></h3>
+      <h3 class="post-title"><a href="${p.file}">${title}</a></h3>
       <span class="post-date">${fmtDate(p.date)}</span>
-      <p class="post-excerpt">${p.excerpt}</p>
+      <p class="post-excerpt">${excerpt}</p>
       <div class="post-tags">${tags}</div>
     </li>`;
 }
@@ -169,6 +199,27 @@ function renderPosts() {
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Language switching                                                        */
+/* -------------------------------------------------------------------------- */
+function applyLang() {
+  document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+  document.querySelectorAll("[data-lang]").forEach((el) => {
+    el.hidden = el.dataset.lang !== lang;
+  });
+}
+
+function setLang(next) {
+  if (next === lang) return;
+  lang = next;
+  localStorage.setItem("site-lang", lang);
+  renderHeader();
+  renderSidebar();
+  renderFooter();
+  renderPosts();
+  applyLang();
+}
+
+/* -------------------------------------------------------------------------- */
 /*  Init                                                                      */
 /* -------------------------------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
@@ -176,4 +227,11 @@ document.addEventListener("DOMContentLoaded", () => {
   renderSidebar();
   renderFooter();
   renderPosts();
+  applyLang();
+});
+
+/* Event delegation — survives the header being re-rendered on each switch. */
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-lang-btn]");
+  if (btn) setLang(btn.dataset.langBtn);
 });

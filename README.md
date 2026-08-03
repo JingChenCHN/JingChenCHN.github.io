@@ -3,6 +3,10 @@
 Personal website built in the style of [lilianweng.github.io](https://lilianweng.github.io/),
 hosted on **GitHub Pages**. Pure static HTML / CSS / JS — no build step required.
 
+The site is **bilingual (中文 / English)**, defaulting to Chinese. A toggle in the
+top header switches the whole site — the visitor's choice is remembered in
+`localStorage`.
+
 ```
 .
 ├── index.html          # Homepage (recent posts + sidebar)
@@ -27,18 +31,29 @@ Almost everything lives in **`assets/js/main.js`** → the `SITE` object at the 
 - `contacts` — email & social links shown in the sidebar
 - `nav` — top navigation items
 
+Bilingual fields (`role`, `location`, `bio`, nav `label`s, footer `extra`) are
+objects of the form `{ "en": "...", "zh": "..." }`. The `name` and `contacts`
+are the same in both languages.
+
 ### Add a new blog post
 
 1. Copy `blog/welcome.html` to `blog/your-post-name.html` and edit the content.
-2. Add an entry to `assets/posts.json`:
+   Posts are bilingual: write the Chinese body inside `<div data-lang="zh">…</div>`
+   and the English body inside `<div data-lang="en" hidden>…</div>` (keep the
+   `hidden` on the English block so the Chinese version shows first). Titles and
+   labels use the same pattern with `<span data-lang="…">`.
+2. Add an entry to `assets/posts.json` with both languages:
 
 ```json
 {
   "title": "Your post title",
+  "title_zh": "你的文章标题",
   "slug": "your-post-name",
   "date": "2026-08-03",
-  "tags": ["Tag A", "Tag B"],
+  "tags": ["Tag A"],
+  "tags_zh": ["标签"],
   "excerpt": "One-line summary shown on the Blog page.",
+  "excerpt_zh": "博客页面上显示的一行摘要。",
   "file": "blog/your-post-name.html"
 }
 ```

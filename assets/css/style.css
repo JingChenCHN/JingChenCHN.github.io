@@ -76,6 +76,34 @@ img { max-width: 100%; }
 .nav a.active { color: var(--link); font-weight: 600; }
 
 /* --------------------------------------------------------------------------
+   Language toggle
+   -------------------------------------------------------------------------- */
+.lang-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.lang-toggle button {
+  border: none;
+  background: var(--bg);
+  color: var(--text-muted);
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+.lang-toggle button.active {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+.lang-toggle button:hover:not(.active) {
+  color: var(--text);
+  background: var(--bg-soft);
+}
+
+/* --------------------------------------------------------------------------
    Layout containers
    -------------------------------------------------------------------------- */
 .container { max-width: 1150px; margin: 0 auto; padding: 40px 24px 80px; }

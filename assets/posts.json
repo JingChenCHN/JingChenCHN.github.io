@@ -1,10 +1,13 @@
 [
   {
     "title": "Welcome to my website",
+    "title_zh": "欢迎来到我的网站",
     "slug": "welcome",
     "date": "2026-08-03",
     "tags": ["Announcement"],
+    "tags_zh": ["公告"],
     "excerpt": "A brief note to introduce myself and this website. It also doubles as a template for writing future posts.",
+    "excerpt_zh": "一篇介绍本站和我的短文，同时作为以后写文章时的模板。",
     "file": "blog/welcome.html"
   }
 ]

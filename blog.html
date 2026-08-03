@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Blog · Jing Chen</title>
-  <meta name="description" content="All blog posts by Jing Chen." />
+  <title>博客 · Jing Chen</title>
+  <meta name="description" content="Jing Chen 的全部博客文章。 / All blog posts by Jing Chen." />
   <link rel="icon" href="assets/img/avatar.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
@@ -16,8 +16,14 @@
       <div id="site-sidebar"></div>
 
       <main class="content">
-        <h1>Blog</h1>
-        <p class="page-meta"><span class="js-post-count">0</span> posts total</p>
+        <h1>
+          <span data-lang="zh">博客</span>
+          <span data-lang="en" hidden>Blog</span>
+        </h1>
+        <p class="page-meta">
+          <span data-lang="zh">共 <span class="js-post-count">0</span> 篇文章</span>
+          <span data-lang="en" hidden><span class="js-post-count">0</span> posts total</span>
+        </p>
         <ul class="post-list" id="js-all-posts"></ul>
       </main>
     </div>

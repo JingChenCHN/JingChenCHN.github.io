@@ -126,6 +126,13 @@ function fmtDate(iso) {
   return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
 
+/* Posts live in /blog/, so pages inside that folder need one level up. */
+function postsPath() {
+  return location.pathname.includes("/blog/")
+    ? "../assets/posts.json"
+    : "assets/posts.json";
+}
+
 function postCard(p) {
   const tags = (p.tags || [])
     .map((t) => `<a class="tag" href="blog.html">${t}</a>`)
@@ -144,7 +151,7 @@ function renderPosts() {
   const all = $("#js-all-posts");
   const max = list ? parseInt(list.dataset.max || "5", 10) : null;
 
-  fetch("assets/posts.json")
+  fetch(postsPath())
     .then((r) => r.json())
     .then((posts) => {
       const sorted = posts

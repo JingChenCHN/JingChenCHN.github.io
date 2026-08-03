@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:lilianweng.github.io)",
+      "Bash(git ls-remote *)",
+      "Bash(echo \"EXIT_CODE=$?\")",
+      "Bash(git init *)",
+      "Bash(git config *)",
+      "Bash(mkdir -p assets/css assets/js assets/img blog about projects)",
+      "Bash(node --check assets/js/main.js)",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('assets/posts.json','utf8'\\)\\); console.log\\('OK: posts.json'\\)\")",
+      "Bash(git branch *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(git remote *)",
+      "Bash(git commit -q -m ' *)"
+    ]
+  }
+}

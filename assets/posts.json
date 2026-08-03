@@ -9,5 +9,16 @@
     "excerpt": "A brief note to introduce myself and this website. It also doubles as a template for writing future posts.",
     "excerpt_zh": "一篇介绍本站和我的短文，同时作为以后写文章时的模板。",
     "file": "blog/welcome.html"
+  },
+  {
+    "title": "Some Principles for Making a Good Product",
+    "title_zh": "一些做好一个产品的principel",
+    "slug": "my-thought-of-making-a-good-product",
+    "date": "2026-08-03",
+    "tags": ["Product Thinking"],
+    "tags_zh": ["产品思考"],
+    "excerpt": "Some principles I follow when creating — put yourself in the user's shoes, approach as an outsider, care for every detail, improve step by step, and mind how the work presents itself.",
+    "excerpt_zh": "把创作时的几条心法记下来：把自己当作使用它的用户，以外部人员的视角来使用产品，关注每一个角落，逐步变好而不求一步到位，并留意作品面向谁、属于什么类型。",
+    "file": "blog/my-thought-of-making-a-good-product.html"
   }
 ]

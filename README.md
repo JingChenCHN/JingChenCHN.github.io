@@ -1,7 +1,8 @@
 # Jing Chen's Personal Website
 
-Personal website built in the style of [lilianweng.github.io](https://lilianweng.github.io/),
-hosted on **GitHub Pages**. Pure static HTML / CSS / JS — no build step required.
+Personal website designed in an **Engineering Spec Sheet** style (hairline rules,
+mono data labels, one ink-blue accent), hosted on **GitHub Pages**. Pure static
+HTML / CSS / JS — no build step required.
 
 The site is **bilingual (中文 / English)**, defaulting to Chinese. A toggle in the
 top header switches the whole site — the visitor's choice is remembered in
@@ -47,6 +48,15 @@ The **站点资料 / Settings** tab edits the site profile (avatar — including
 an image into `assets/img/`, name, role, location, bio, contacts, footer). Saved
 settings are written to `assets/js/site-config.js`, which `main.js` merges over its
 defaults, so pages don't need to change.
+
+### Publishing via the site relay server
+
+When the browser cannot reach `api.github.com` directly (e.g. a restrictive
+network), the admin can publish through the **server relay**: it runs a small
+server (`relay_server.py`, port 8090) that serves this site and commits + pushes
+files to GitHub. Open `http://60.205.211.224:8090/admin.html` and the "服务器中转"
+transport is selected automatically (or toggle it in the top bar). The same GitHub
+token is used for auth; the relay server itself holds the git/gh credentials.
 
 ## Add a new blog post
 

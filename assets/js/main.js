@@ -14,7 +14,14 @@
 /* -------------------------------------------------------------------------- */
 /*  Language                                                                  */
 /* -------------------------------------------------------------------------- */
-let lang = localStorage.getItem("site-lang") || "zh";
+let lang = "zh";
+try { lang = localStorage.getItem("site-lang") || "zh"; } catch (e) { /* storage unavailable */ }
+
+/* Escape user-config text before it goes into innerHTML. */
+const esc = (s) =>
+  String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+  );
 const t = (o) =>
   typeof o === "string" ? o : (o && (o[lang] || o.en || o.zh)) || "";
 
@@ -86,25 +93,56 @@ function currentPage() {
   return p.toLowerCase();
 }
 
+/* Posts live in /blog/, so pages inside that folder need one level up. */
+function siteRoot() {
+  return location.pathname.includes("/blog/") ? "../" : "";
+}
+/* Resolve a repo-relative path (config value, nav href) from the current page. */
+function sitePath(p) {
+  if (!p || p.startsWith("/") || /^[a-z][a-z0-9+.-]*:/i.test(p)) return p;
+  return siteRoot() + p;
+}
+
+/* Spec-sheet page id shown in the header margin, e.g. "S.01 — HOME". */
+function sheetId(page) {
+  const map = {
+    "index.html": "S.01 — HOME",
+    "blog.html": "S.02 — BLOG",
+    "projects.html": "S.03 — PROJECTS",
+    "timeline.html": "S.04 — TIMELINE",
+    "about.html": "S.05 — ABOUT",
+    "404.html": "ERR — 404",
+  };
+  if (map[page]) return map[page];
+  return "S.02 — " + page.replace(/\.html$/, "");
+}
+
 function renderHeader() {
   const host = $("#site-header");
   if (!host) return;
   const page = currentPage();
+  const inBlog = location.pathname.includes("/blog/");
   const nav = SITE.nav
     .map(
       (n) =>
-        `<a href="${n.href}" class="${page === n.href ? "active" : ""}">${t(n.label)}</a>`
+        `<a href="${sitePath(n.href)}" class="${page === n.href || (inBlog && n.href === "blog.html") ? "active" : ""}">${esc(t(n.label))}</a>`
     )
     .join("");
+  const now = new Date();
+  const rev = `REV ${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, "0")}`;
   host.innerHTML = `
     <header class="site-header">
       <div class="header-inner">
-        <a class="brand" href="index.html">${SITE.name}</a>
+        <a class="brand" href="${sitePath("index.html")}">${esc(SITE.name)}<span class="brand-spec">SPEC</span></a>
         <nav class="nav">${nav}</nav>
         <div class="lang-toggle" role="group" aria-label="Language / 语言">
-          <button type="button" data-lang-btn="zh" class="${lang === "zh" ? "active" : ""}">中文</button>
-          <button type="button" data-lang-btn="en" class="${lang === "en" ? "active" : ""}">EN</button>
+          <button type="button" data-lang-btn="zh" aria-pressed="${lang === "zh"}" class="${lang === "zh" ? "active" : ""}">中文</button>
+          <button type="button" data-lang-btn="en" aria-pressed="${lang === "en"}" class="${lang === "en" ? "active" : ""}">EN</button>
         </div>
+      </div>
+      <div class="header-spec" aria-hidden="true">
+        <span class="hs-left">${sheetId(page)}</span>
+        <span class="hs-right">${rev}</span>
       </div>
     </header>`;
 }
@@ -113,25 +151,30 @@ function renderSidebar() {
   const host = $("#site-sidebar");
   if (!host) return;
   const contacts = SITE.contacts
-    .map(
-      (c) =>
-        `<li><a href="${c.href}" title="${c.label}" target="${c.href.startsWith("http") ? "_blank" : ""}" rel="noopener">${iconHTML(c.icon)}<span>${c.label}</span></a></li>`
-    )
+    .map((c) => {
+      const key = (c.icon || "LINK").toUpperCase();
+      const target = c.href.startsWith("http") ? '_blank' : "";
+      return `<li><span class="k">${iconHTML(c.icon)}${key}</span><a class="v" href="${sitePath(c.href)}" target="${target}" rel="noopener">${esc(c.label)}</a></li>`;
+    })
     .join("");
+  const loc = SITE.location
+    ? `<li><span class="k">${iconHTML("location")}BASE</span><span class="v">${esc(t(SITE.location))}</span></li>`
+    : "";
   host.innerHTML = `
     <aside class="sidebar">
       <div class="profile">
-        <img class="avatar" src="${SITE.avatar}" alt="${SITE.name}" />
-        <p class="name">${SITE.name}</p>
-        <p class="role">${t(SITE.role)}</p>
-        <ul class="contact-list">
-          ${SITE.location ? `<li>${iconHTML("location")}<span>${t(SITE.location)}</span></li>` : ""}
+        <img class="avatar" src="${sitePath(SITE.avatar)}" alt="${esc(SITE.name)}" />
+        <span class="id-tag">ID · ${esc(SITE.name.toUpperCase())}</span>
+        <p class="name">${esc(SITE.name)}</p>
+        <p class="role">${esc(t(SITE.role))}</p>
+        <ul class="spec-rows">
+          ${loc}
           ${contacts}
         </ul>
       </div>
       <div class="sidebar-box">
-        <h4>${t({ en: "Profile", zh: "简介" })}</h4>
-        <p>${t(SITE.bio)}</p>
+        <h4>${esc(t({ en: "Profile", zh: "简介" }))}</h4>
+        <p>${esc(t(SITE.bio))}</p>
       </div>
     </aside>`;
 }
@@ -141,20 +184,22 @@ function renderFooter() {
   if (!host) return;
   host.innerHTML = `
     <footer class="site-footer">
-      ${SITE.footer.copyright} &nbsp;·&nbsp; ${t(SITE.footer.extra)}
+      <div class="footer-inner">
+        <span>${esc(SITE.footer.copyright)}</span>
+        <span>${t(SITE.footer.extra)}</span>
+      </div>
     </footer>`;
 }
 
 /* -------------------------------------------------------------------------- */
 /*  Posts (from assets/posts.json)                                            */
 /* -------------------------------------------------------------------------- */
+/* Spec dates render as ISO (YYYY-MM-DD) in mono. */
 function fmtDate(iso) {
-  const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString(lang === "zh" ? "zh-CN" : "en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-");
+  if (!y) return iso;
+  return `${y}-${m || "00"}-${d || "00"}`;
 }
 
 /* Posts live in /blog/, so pages inside that folder need one level up. */
@@ -164,19 +209,23 @@ function postsPath() {
     : "assets/posts.json";
 }
 
-function postCard(p) {
-  const title = t({ en: p.title, zh: p.title_zh || p.title });
-  const excerpt = t({ en: p.excerpt, zh: p.excerpt_zh || p.excerpt });
+function postCard(p, idx) {
+  const title = esc(t({ en: p.title, zh: p.title_zh || p.title }));
+  const excerpt = esc(t({ en: p.excerpt, zh: p.excerpt_zh || p.excerpt }));
   const tagArr = lang === "zh" ? p.tags_zh || p.tags : p.tags;
   const tags = (tagArr || [])
-    .map((tag) => `<a class="tag" href="blog.html">${tag}</a>`)
+    .map((tag) => `<a class="pm-tag" href="blog.html">${esc(tag)}</a>`)
     .join("");
+  const entry = String(idx + 1).padStart(2, "0");
   return `
     <li>
+      <div class="post-meta">
+        <span class="pm-entry">ENTRY ${entry}</span>
+        <span class="pm-date">${fmtDate(p.date)}</span>
+        ${tags ? `<span class="pm-tags">${tags}</span>` : ""}
+      </div>
       <h3 class="post-title"><a href="${p.file}">${title}</a></h3>
-      <span class="post-date">${fmtDate(p.date)}</span>
       <p class="post-excerpt">${excerpt}</p>
-      <div class="post-tags">${tags}</div>
     </li>`;
 }
 

@@ -1,0 +1,10 @@
+[
+  {
+    "title": "Welcome to my website",
+    "slug": "welcome",
+    "date": "2026-08-03",
+    "tags": ["Announcement"],
+    "excerpt": "A brief note to introduce myself and this website. It also doubles as a template for writing future posts.",
+    "file": "blog/welcome.html"
+  }
+]

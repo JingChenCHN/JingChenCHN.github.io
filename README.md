@@ -35,7 +35,15 @@ Bilingual fields (`role`, `location`, `bio`, nav `label`s, footer `extra`) are
 objects of the form `{ "en": "...", "zh": "..." }`. The `name` and `contacts`
 are the same in both languages.
 
-### Add a new blog post
+### Blog admin
+
+There is a browser-based admin page at **`/admin.html`** (not shown in the nav) for
+writing and publishing posts without touching git: enter a GitHub token once, write
+bilingual Markdown, and click **Publish** — the post is committed to `main` via the
+GitHub API and GitHub Pages deploys automatically. See the token hint on that page
+(fine-grained token, Contents: read/write, scoped to this repo only).
+
+## Add a new blog post
 
 1. Copy `blog/welcome.html` to `blog/your-post-name.html` and edit the content.
    Posts are bilingual: write the Chinese body inside `<div data-lang="zh">…</div>`

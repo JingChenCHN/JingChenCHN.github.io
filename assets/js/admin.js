@@ -219,6 +219,7 @@ function buildPostHtml(meta, bodyZhHtml, bodyEnHtml, mode) {
   </div>
 
   <div id="site-footer"></div>
+  <script src="../assets/js/site-config.js"></script>
   <script src="../assets/js/main.js"></script>
 </body>
 </html>
@@ -574,6 +575,188 @@ async function removePostAction(slug) {
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Site settings (avatar, profile, contacts, footer)                        */
+/* -------------------------------------------------------------------------- */
+const DEFAULT_SITE = {
+  avatar: "assets/img/avatar.svg",
+  name: "Jing Chen",
+  role: { en: "Product Manager", zh: "产品经理" },
+  location: { en: "China", zh: "中国" },
+  bio: {
+    en: "Product manager, passionate about building products that solve real problems. I write about product thinking and the technology behind it.",
+    zh: "产品经理，热衷于打造能解决真实问题的产品。我会在这里写一些关于产品思考以及背后技术的文章。",
+  },
+  contacts: [
+    { icon: "email", label: "hemo8212@outlook.com", href: "mailto:hemo8212@outlook.com" },
+    { icon: "github", label: "GitHub", href: "https://github.com/JingChenCHN" },
+    { icon: "rss", label: "RSS", href: "blog.html" },
+  ],
+  footer: {
+    copyright: "© 2026 Jing Chen",
+    extra: {
+      en: 'Built with <a href="https://pages.github.com/">GitHub Pages</a>',
+      zh: '基于 <a href="https://pages.github.com/">GitHub Pages</a> 构建',
+    },
+  },
+};
+
+const ICON_OPTIONS = ["email", "github", "twitter", "scholar", "linkedin", "rss", "location"];
+
+function normalizeSite(site) {
+  const s = site || {};
+  return {
+    avatar: s.avatar || DEFAULT_SITE.avatar,
+    name: s.name || DEFAULT_SITE.name,
+    role: Object.assign({}, DEFAULT_SITE.role, s.role),
+    location: Object.assign({}, DEFAULT_SITE.location, s.location),
+    bio: Object.assign({}, DEFAULT_SITE.bio, s.bio),
+    contacts: Array.isArray(s.contacts) ? s.contacts : DEFAULT_SITE.contacts,
+    footer: Object.assign({}, DEFAULT_SITE.footer, s.footer,
+      { extra: Object.assign({}, DEFAULT_SITE.footer.extra, (s.footer || {}).extra) }),
+  };
+}
+
+function loadSiteConfig() {
+  return apiGetFile("assets/js/site-config.js")
+    .then((f) => {
+      const src = b64ToUtf8(f.content);
+      const m = src.match(/window\.SITE_OVERRIDES\s*=\s*(\{[\s\S]*?\});/);
+      if (!m) throw new Error("site-config.js 格式异常 / unexpected format");
+      return new Function("return (" + m[1] + ");")();
+    })
+    .catch((e) => {
+      if (e.status === 404) return DEFAULT_SITE;
+      throw e;
+    });
+}
+
+function renderContacts(site) {
+  const rows = $("#contactRows");
+  rows.innerHTML = (site.contacts || []).map((c, i) => `
+    <div class="contact-row" data-idx="${i}">
+      <select data-c-icon>
+        ${ICON_OPTIONS.map((ic) => `<option value="${ic}" ${ic === c.icon ? "selected" : ""}>${ic}</option>`).join("")}
+      </select>
+      <input data-c-label value="${esc(c.label || "")}" placeholder="label" />
+      <input data-c-href value="${esc(c.href || "")}" placeholder="mailto:… / https://…" />
+      <button type="button" class="btn-ghost" data-c-del>✕</button>
+    </div>`).join("");
+}
+
+function populateSettingsForm(site) {
+  $("#avatarPath").value = site.avatar;
+  $("#avatarPreview").src = site.avatar;
+  $("#sName").value = site.name;
+  $("#sRoleZh").value = site.role.zh || "";
+  $("#sRoleEn").value = site.role.en || "";
+  $("#sLocZh").value = site.location.zh || "";
+  $("#sLocEn").value = site.location.en || "";
+  $("#sBioZh").value = site.bio.zh || "";
+  $("#sBioEn").value = site.bio.en || "";
+  $("#sCopyright").value = site.footer.copyright || "";
+  $("#sFooterZh").value = site.footer.extra.zh || "";
+  $("#sFooterEn").value = site.footer.extra.en || "";
+  renderContacts(site);
+}
+
+function collectSettings() {
+  const contacts = Array.from(document.querySelectorAll("#contactRows .contact-row")).map((row) => ({
+    icon: row.querySelector("[data-c-icon]").value,
+    label: row.querySelector("[data-c-label]").value.trim(),
+    href: row.querySelector("[data-c-href]").value.trim(),
+  })).filter((c) => c.href || c.label);
+  return {
+    avatar: $("#avatarPath").value.trim() || DEFAULT_SITE.avatar,
+    name: $("#sName").value.trim() || DEFAULT_SITE.name,
+    role: { en: $("#sRoleEn").value.trim(), zh: $("#sRoleZh").value.trim() },
+    location: { en: $("#sLocEn").value.trim(), zh: $("#sLocZh").value.trim() },
+    bio: { en: $("#sBioEn").value.trim(), zh: $("#sBioZh").value.trim() },
+    contacts,
+    footer: {
+      copyright: $("#sCopyright").value.trim() || "© " + new Date().getFullYear() + " Jing Chen",
+      extra: { en: $("#sFooterEn").value.trim(), zh: $("#sFooterZh").value.trim() },
+    },
+  };
+}
+
+function buildSiteConfigJs(site) {
+  return `/* ==========================================================================
+   Site profile overrides — edited via the admin page (admin.html).
+   --------------------------------------------------------------------------
+   Values here override the SITE defaults in assets/js/main.js (merged with
+   Object.assign). Loaded before main.js on every page. This file is written
+   programmatically by assets/js/admin.js — keep the window.SITE_OVERRIDES
+   object literal intact so it stays machine-parseable.
+   ========================================================================== */
+window.SITE_OVERRIDES = ${JSON.stringify(site, null, 2)};
+`;
+}
+
+function settingsLog(msg, isError) {
+  const el = $("#settingsStatus");
+  el.textContent = msg;
+  el.className = isError ? "status err" : "status";
+}
+
+async function publishSiteConfig() {
+  if (!state.token) { settingsLog("先保存 GitHub token。/ Save a token first.", true); return; }
+  const site = collectSettings();
+  settingsLog("Saving site settings… / 正在保存站点资料…", false);
+  try {
+    let sha = null;
+    try { sha = (await apiGetFile("assets/js/site-config.js")).sha; }
+    catch (e) { if (e.status !== 404) throw e; }
+    await apiWriteFile("assets/js/site-config.js", utf8ToB64(buildSiteConfigJs(site)),
+      "Update site settings", sha);
+    settingsLog("已保存 ✓ 约 1 分钟生效 / Saved ✓ live on GitHub Pages within ~1 min.", false);
+  } catch (e) {
+    handleError(e);
+  }
+}
+
+async function uploadAvatar() {
+  const input = $("#avatarFile");
+  const file = input.files && input.files[0];
+  if (!file) { $("#avatarHint").textContent = "请先选择图片文件。/ Pick an image file first."; $("#avatarHint").hidden = false; return; }
+  if (!state.token) { $("#avatarHint").textContent = "先保存 GitHub token。/ Save a token first."; $("#avatarHint").hidden = false; return; }
+  const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const path = "assets/img/avatar." + ext;
+  $("#avatarHint").textContent = "Uploading… / 正在上传 " + file.name;
+  $("#avatarHint").hidden = false;
+  try {
+    // Binary-safe base64 from FileReader.readAsArrayBuffer.
+    const buf = await new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(fr.result);
+      fr.onerror = reject;
+      fr.readAsArrayBuffer(file);
+    });
+    const b64 = bufToB64(buf);
+    let sha = null;
+    try { sha = (await apiGetFile(path)).sha; }
+    catch (e) { if (e.status !== 404) throw e; }
+    await apiWriteFile(path, b64, "Upload avatar", sha);
+    $("#avatarPath").value = path;
+    $("#avatarPreview").src = path + "?t=" + Date.now();
+    $("#avatarHint").textContent = "头像已上传 ✓ 记得点「保存并发布」让站点资料生效。/ Avatar uploaded — click Save settings to apply.";
+  } catch (e) {
+    $("#avatarHint").textContent = "上传失败 / Upload failed: " + (e.message || e);
+  }
+}
+
+/* Binary-safe base64 for image upload (ArrayBuffer -> base64, chunked to
+   avoid btoa stack limits on large files). */
+function bufToB64(buf) {
+  const bytes = new Uint8Array(buf);
+  let bin = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(bin);
+}
+
+/* -------------------------------------------------------------------------- */
 /*  Status / errors                                                           */
 /* -------------------------------------------------------------------------- */
 function log(msg, isError) {
@@ -629,4 +812,48 @@ document.addEventListener("DOMContentLoaded", () => {
   clearForm();
   switchTab("zh");
   loadPostsList();
+
+  // Main tabs: Posts / Settings.
+  let settingsLoaded = false;
+  function switchMainTab(which) {
+    const posts = which === "posts";
+    $("#tabPosts").classList.toggle("active", posts);
+    $("#tabSettings").classList.toggle("active", !posts);
+    $("#postsView").hidden = !posts;
+    $("#settingsView").hidden = posts;
+    if (!posts && !settingsLoaded) {
+      settingsLoaded = true;
+      loadSiteConfig()
+        .then((site) => populateSettingsForm(normalizeSite(site)))
+        .catch((e) => settingsLog("加载失败 / Load failed: " + (e.message || e), true));
+    }
+  }
+  $("#tabPosts").addEventListener("click", () => switchMainTab("posts"));
+  $("#tabSettings").addEventListener("click", () => switchMainTab("settings"));
+
+  // Settings actions.
+  $("#saveSettings").addEventListener("click", publishSiteConfig);
+  $("#avatarUpload").addEventListener("click", uploadAvatar);
+  $("#avatarFile").addEventListener("change", () => {
+    const f = $("#avatarFile").files && $("#avatarFile").files[0];
+    if (f) $("#avatarHint").textContent = "已选择 " + f.name + " — 点击「上传」/ Selected, click Upload.";
+    $("#avatarHint").hidden = false;
+  });
+  $("#addContact").addEventListener("click", () => {
+    const current = collectSettings();
+    current.contacts.push({ icon: "github", label: "", href: "" });
+    renderContacts(current);
+  });
+  $("#contactRows").addEventListener("click", (e) => {
+    const del = e.target.closest("[data-c-del]");
+    if (!del) return;
+    const current = collectSettings();
+    const idx = Number(del.closest(".contact-row").dataset.idx);
+    current.contacts.splice(idx, 1);
+    renderContacts(current);
+  });
+  $("#avatarPath").addEventListener("input", () => {
+    const v = $("#avatarPath").value.trim();
+    if (v) $("#avatarPreview").src = v;
+  });
 });

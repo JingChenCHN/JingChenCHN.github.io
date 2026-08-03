@@ -57,6 +57,10 @@ const SITE = {
   },
 };
 
+// Site profile overrides from assets/js/site-config.js (edited via admin.html).
+// Loaded before this script on every page; merged values take precedence.
+if (window.SITE_OVERRIDES) Object.assign(SITE, window.SITE_OVERRIDES);
+
 /* -------------------------------------------------------------------------- */
 /*  SVG icons                                                                 */
 /* -------------------------------------------------------------------------- */

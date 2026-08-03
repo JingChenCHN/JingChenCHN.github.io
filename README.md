@@ -43,6 +43,11 @@ bilingual Markdown, and click **Publish** — the post is committed to `main` vi
 GitHub API and GitHub Pages deploys automatically. See the token hint on that page
 (fine-grained token, Contents: read/write, scoped to this repo only).
 
+The **站点资料 / Settings** tab edits the site profile (avatar — including uploading
+an image into `assets/img/`, name, role, location, bio, contacts, footer). Saved
+settings are written to `assets/js/site-config.js`, which `main.js` merges over its
+defaults, so pages don't need to change.
+
 ## Add a new blog post
 
 1. Copy `blog/welcome.html` to `blog/your-post-name.html` and edit the content.

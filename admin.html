@@ -179,6 +179,52 @@
       font-size: 0.9rem;
     }
 
+    /* ---- Main tabs: Posts / Settings ---- */
+    .main-tabs { display: flex; gap: 4px; }
+    .main-tabs button {
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-muted);
+      padding: 8px 22px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .main-tabs button.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* ---- Settings ---- */
+    .contact-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 1fr auto;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+    .contact-row select, .contact-row input {
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    .contact-row .btn-ghost { padding: 6px 12px; }
+    .avatar-preview {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      background: var(--bg-soft);
+    }
+    .avatar-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
     @media (max-width: 900px) {
       .admin-grid { grid-template-columns: 1fr; }
       .editor-grid { grid-template-columns: 1fr; }
@@ -217,6 +263,12 @@
     </aside>
 
     <main class="admin-main">
+      <div class="main-tabs">
+        <button type="button" id="tabPosts" class="active">文章 Posts</button>
+        <button type="button" id="tabSettings">站点资料 Settings</button>
+      </div>
+
+      <div id="postsView">
       <div id="modeBanner" class="warn" hidden></div>
 
       <section class="card">
@@ -277,6 +329,89 @@
         <button id="retryIndex" class="btn-ghost" hidden>Retry index / 重试索引</button>
         <span id="status" class="status"></span>
       </section>
+      </div><!-- /#postsView -->
+
+      <div id="settingsView" hidden>
+        <section class="card">
+          <div class="form-grid">
+            <div class="field span2">
+              <label>头像 Avatar</label>
+              <div class="avatar-row">
+                <img id="avatarPreview" class="avatar-preview" src="assets/img/avatar.svg" alt="avatar" />
+                <div style="display:flex; flex-direction:column; gap:8px; flex:1;">
+                  <div>
+                    <input type="file" id="avatarFile" accept="image/png,image/jpeg,image/webp,image/svg+xml" />
+                    <button type="button" id="avatarUpload" class="btn">上传并保存到仓库 Upload</button>
+                  </div>
+                  <input id="avatarPath" placeholder="assets/img/avatar.svg 或 URL" />
+                </div>
+              </div>
+              <p class="hint" id="avatarHint" hidden></p>
+            </div>
+
+            <div class="field">
+              <label>姓名 Name</label>
+              <input id="sName" placeholder="Jing Chen" />
+            </div>
+            <div class="field">
+              <label>职位 Role（中文）</label>
+              <input id="sRoleZh" placeholder="产品经理" />
+            </div>
+            <div class="field">
+              <label>Role (EN)</label>
+              <input id="sRoleEn" placeholder="Product Manager" />
+            </div>
+            <div class="field">
+              <label>所在地 Location（中文，留空隐藏）</label>
+              <input id="sLocZh" placeholder="中国" />
+            </div>
+            <div class="field">
+              <label>Location (EN, empty to hide)</label>
+              <input id="sLocEn" placeholder="China" />
+            </div>
+
+            <div class="field span2">
+              <label>简介 Bio（中文）</label>
+              <textarea id="sBioZh" rows="3"></textarea>
+            </div>
+            <div class="field span2">
+              <label>Bio (EN)</label>
+              <textarea id="sBioEn" rows="3"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="row" style="justify-content:space-between; align-items:center; margin-top:0;">
+            <h2 style="margin:0;">联系方式 Contacts</h2>
+            <button type="button" id="addContact" class="btn-ghost">+ 添加 Add</button>
+          </div>
+          <div id="contactRows"></div>
+        </section>
+
+        <section class="card">
+          <h2>页脚 Footer</h2>
+          <div class="form-grid">
+            <div class="field">
+              <label>版权 Copyright</label>
+              <input id="sCopyright" placeholder="© 2026 Jing Chen" />
+            </div>
+            <div class="field">
+              <label>页脚说明（中文）</label>
+              <input id="sFooterZh" placeholder="基于 GitHub Pages 构建" />
+            </div>
+            <div class="field">
+              <label>Footer note (EN)</label>
+              <input id="sFooterEn" placeholder="Built with GitHub Pages" />
+            </div>
+          </div>
+        </section>
+
+        <section class="actions">
+          <button id="saveSettings" class="btn primary">保存并发布 Save settings</button>
+          <span id="settingsStatus" class="status"></span>
+        </section>
+      </div><!-- /#settingsView -->
     </main>
   </div>
 

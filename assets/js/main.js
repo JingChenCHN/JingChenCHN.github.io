@@ -93,9 +93,9 @@ function currentPage() {
   return p.toLowerCase();
 }
 
-/* Posts live in /blog/, so pages inside that folder need one level up. */
+/* Pages in a subfolder (/blog/, /projects/) need one level up to reach assets. */
 function siteRoot() {
-  return location.pathname.includes("/blog/") ? "../" : "";
+  return location.pathname.split("/").filter(Boolean).length > 1 ? "../" : "";
 }
 /* Resolve a repo-relative path (config value, nav href) from the current page. */
 function sitePath(p) {
@@ -204,17 +204,22 @@ function fmtDate(iso) {
 
 /* Posts live in /blog/, so pages inside that folder need one level up. */
 function postsPath() {
-  return location.pathname.includes("/blog/")
+  return location.pathname.split("/").filter(Boolean).length > 1
     ? "../assets/posts.json"
     : "assets/posts.json";
 }
+function projectsPath() {
+  return location.pathname.split("/").filter(Boolean).length > 1
+    ? "../assets/projects.json"
+    : "assets/projects.json";
+}
 
-function postCard(p, idx) {
+function postCard(p, idx, tagHref) {
   const title = esc(t({ en: p.title, zh: p.title_zh || p.title }));
   const excerpt = esc(t({ en: p.excerpt, zh: p.excerpt_zh || p.excerpt }));
   const tagArr = lang === "zh" ? p.tags_zh || p.tags : p.tags;
   const tags = (tagArr || [])
-    .map((tag) => `<a class="pm-tag" href="blog.html">${esc(tag)}</a>`)
+    .map((tag) => `<a class="pm-tag" href="${tagHref || "blog.html"}">${esc(tag)}</a>`)
     .join("");
   const entry = String(idx + 1).padStart(2, "0");
   return `
@@ -241,14 +246,32 @@ function renderPosts() {
         .slice()
         .sort((a, b) => (a.date < b.date ? 1 : -1));
 
-      if (list) list.innerHTML = sorted.slice(0, max).map(postCard).join("");
-      if (all) all.innerHTML = sorted.map(postCard).join("");
+      if (list) list.innerHTML = sorted.slice(0, max).map((p, i) => postCard(p, i)).join("");
+      if (all) all.innerHTML = sorted.map((p, i) => postCard(p, i)).join("");
 
       document.querySelectorAll(".js-post-count").forEach((el) => {
         el.textContent = posts.length;
       });
     })
     .catch((err) => console.error("Failed to load posts:", err));
+}
+
+function renderProjects() {
+  const list = $("#js-projects");
+  const all = $("#js-all-projects");
+  if (!list && !all) return;
+
+  fetch(projectsPath())
+    .then((r) => r.json())
+    .then((projects) => {
+      const cards = projects.map((p, i) => postCard(p, i, "projects.html")).join("");
+      if (list) list.innerHTML = cards;
+      if (all) all.innerHTML = cards;
+      document.querySelectorAll(".js-project-count").forEach((el) => {
+        el.textContent = projects.length;
+      });
+    })
+    .catch((err) => console.error("Failed to load projects:", err));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -269,6 +292,7 @@ function setLang(next) {
   renderSidebar();
   renderFooter();
   renderPosts();
+  renderProjects();
   applyLang();
 }
 
@@ -280,6 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderSidebar();
   renderFooter();
   renderPosts();
+  renderProjects();
   applyLang();
 });
 

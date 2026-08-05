@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>产品经理XAI · 如何最小化实现水电自由 · Jing Chen</title>
+  <meta name="description" content="在自己机器上本地运行大模型的成本最优化方案：一次采购、电费换 Token 费，用几百行标准库 Python 把 1B 模型跑成可流式对话、可当作 API 的本地引擎。 / A cost-optimization plan for running an LLM locally: pay once, trade electricity for token fees — a few hundred lines of stdlib Python turn a 1B model into a local engine that streams chat and serves as an API." />
+  <link rel="icon" href="../assets/img/avatar.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <div class="page-grid">
+      <div id="site-sidebar"></div>
+
+      <main class="content">
+        <h1>
+          <span data-lang="zh">产品经理XAI · 如何最小化实现水电自由</span>
+          <span data-lang="en" hidden>Product Manager XAI · How to Achieve "Electricity-Water Freedom" with Minimal Effort</span>
+        </h1>
+        <p class="page-meta">
+          <span data-lang="zh">2026年8月5日 · 本地大模型 · 成本优化</span>
+          <span data-lang="en" hidden>Aug 5, 2026 · Local LLM · Cost Optimization</span>
+        </p>
+
+        <div data-lang="zh">
+        <h2>一、项目定位：把「水电自由」变成可落地的工程方案</h2>
+        <p>「水电自由」是一个成本隐喻：如果 AI 是你的「电」——随用随取、用多少花多少，那么 API 调用费就是「电费」。水电自由，指的是让 AI 的边际成本趋近于零——在自己的机器上本地运行大模型，一次采购硬件与模型，此后每次使用只消耗一点点电费，而不是为每一次对话、每一个 Token 向云厂商付费。</p>
+        <p>《产品经理XAI 如何最小化实现水电自由》就是把这件事工程化的最小方案：一个 1B 级开源模型（MiniCPM5-1B），跑在一台普通的 x86_64 Linux 机器上，用 Python 标准库写一个几百行的壳，就能获得一个稳定、可流式对话、可当作 API 服务调用的本地大模型。</p>
+        <p>它不是要替代云端大模型，而是要回答产品经理最关心的问题：当「调用量焦虑」出现时，有没有一条低成本的退路？当需要原型演示、数据不出内网、成本核算时，本地方案能承担什么角色？</p>
+        <h2>二、痛点：产品经理为什么会在意 Token 账单</h2>
+        <ul>
+        <li><strong>调用量焦虑</strong>：Demo、联调、批量生成、多账号测试，Token 账单随调用量线性上涨；</li>
+        <li><strong>数据外流顾虑</strong>：敏感数据、企业内部文档，不适合发往云端模型；</li>
+        <li><strong>演示环境依赖</strong>：现场演示最怕断网与限流，本地模型不受外部影响；</li>
+        <li><strong>采购决策难</strong>：动辄几十万的私有化部署方案，难以在预算内试水；</li>
+        <li><strong>模型可控性</strong>：云端模型升级换版不可控，本地版本是钉死的、行为可复现。</li>
+        </ul>
+        <p>水电自由要解决的不是「性能天花板」，而是「成本地板」——让 AI 能力成为随时可用的基础设施，而不是按次收费的高价服务。</p>
+        <h2>三、方案拆解：最小可行的本地大模型</h2>
+        <p>整个方案只有三块积木：<strong>模型 + 推理引擎 + 一个壳</strong>。</p>
+        <h3>3.1 模型：MiniCPM5-1B 与 GGUF 量化</h3>
+        <ul>
+        <li>模型本体是开源的 MiniCPM5-1B，权重以 GGUF 格式分发；</li>
+        <li>Q4_K_M 量化后约 656MB，一张 U 盘都装得下；Q8_0 精度更高、体积略大；</li>
+        <li>量化的意义：把「跑不动的参数」压到「单机 CPU 就能跑」的档位，这是水电自由的第一个杠杆。</li>
+        </ul>
+        <h3>3.2 推理引擎：llama.cpp / llama-server</h3>
+        <ul>
+        <li>llama.cpp 是本地推理的事实标准，纯 CPU 即可运行；</li>
+        <li>llama-server 提供 OpenAI 兼容的 <code>/v1/chat/completions</code> 接口，支持 SSE 流式返回；</li>
+        <li>关键启动参数：<code>-m</code> 模型路径、<code>--host</code> / <code>--port</code> 监听地址、<code>-c</code> 上下文长度、<code>-t</code> 线程数、<code>-ngl</code> 显存层数（0 表示纯 CPU）、<code>--jinja</code> 使用模型的提示词模板、<code>--cont-batching</code> 连续批处理；</li>
+        <li>API 模式额外开启 <code>--cors-origins *</code>，让任意前端都能直接跨域调用。</li>
+        </ul>
+        <h3>3.3 壳：Python 标准库写一个几百行的 CLI</h3>
+        <ul>
+        <li>刻意不引入任何第三方依赖，Python 3.8+ 开箱即用；</li>
+        <li>用 <code>http.client</code> 实现 SSE 流式解析，逐段打印生成结果，保留打字机式体验；</li>
+        <li>用 <code>subprocess</code> 管理 llama-server 子进程：拉起、监听 <code>/health</code> 健康检查（最长等 600 秒）、异常时重启；</li>
+        <li>上下文、线程数、温度、top-p、max-tokens、端口全部可配，默认值针对单机调好：温度 0.6、top-p 0.8、上下文 4096、max-tokens 2048。</li>
+        </ul>
+        <h3>3.4 双模式：终端聊天 + API 服务</h3>
+        <ul>
+        <li><strong>CLI 模式</strong>：本地终端直接聊天，内置 <code>/clear</code>、<code>/history</code>、<code>/temp N</code>、<code>/reasoning on|off</code>、<code>/restart</code>、<code>/exit</code> 等命令；</li>
+        <li><strong>API 模式</strong>（<code>--serve</code>）：监听 0.0.0.0:8899，暴露 OpenAI 兼容接口，任意代码、任意页面都能接入；一次拉起、长期驻留，模型名固定为 <code>MiniCPM5-1B-Q8_0</code>。</li>
+        </ul>
+        <h3>3.5 推理可视化：思考链（reasoning_content）</h3>
+        <ul>
+        <li>MiniCPM5 具备推理能力，接口把「思考过程」与「最终答案」分开返回；</li>
+        <li>壳程序分别解析 <code>reasoning_content</code>（思考流）与 <code>content</code>（正式回答），既保留可解释性，又不打扰阅读；</li>
+        <li><code>/reasoning off</code> 可一键关闭思考显示，只看结论。</li>
+        </ul>
+        <h2>四、成本账与收益</h2>
+        <table>
+        <tr><th>对比项</th><th>云端 API</th><th>本地自建</th></tr>
+        <tr><td>单次调用</td><td>按 Token 计费</td><td>只耗电</td></tr>
+        <tr><td>硬件门槛</td><td>无</td><td>普通 x86_64 机器即可</td></tr>
+        <tr><td>数据边界</td><td>数据出网</td><td>全程本机</td></tr>
+        <tr><td>网络依赖</td><td>强</td><td>离线可用</td></tr>
+        <tr><td>首次成本</td><td>几乎为零</td><td>一次模型下载</td></tr>
+        <tr><td>规模效应</td><td>调用越多越贵</td><td>越用越划算</td></tr>
+        </table>
+        <p>实践数据：1B 模型在 CPU 上约 8–15 Token/秒，足以支撑原型验证、文本润色、批量改写等「非实时强交互」场景；部署门槛是「一条脚本」：解压即用、零依赖、glibc 2.31+ 即可。</p>
+        <h2>五、产品经理最佳实践要点</h2>
+        <ol>
+        <li><strong>用「成本地板」思维选型</strong>：不是所有场景都需要顶配模型；把高频、低敏感、重文本的任务下沉到本地，把稀缺、高难任务留给云端，是更健康的分层。</li>
+        <li><strong>把「可离线」当成产品能力</strong>：演示、培训、应急场景里，「不怕断网」本身就是卖点。</li>
+        <li><strong>可控性就是确定性</strong>：本地版本是钉死的，模型行为可复现，符合交付与验收的要求。</li>
+        <li><strong>安全默认内建</strong>：数据不出本机；LLM 接口无内置鉴权时用 Nginx 反向代理补上，这些应当是交付清单的一部分。</li>
+        <li><strong>最小化是产品美德</strong>：几百行、零依赖、一条脚本，让「自己跑一个模型」从工程师专利变成任何人可复现的能力。</li>
+        </ol>
+        <h2>六、结语</h2>
+        <p>水电自由的本质，是让 AI 从「计量的商品」变成「随取的基础设施」。这个最小方案的价值不在参数大小，而在它证明了：当你想给团队、给客户、给自己一个「不用看账单的 AI」时，成本与技术门槛都可以被压到极低。先拥有一个随时可用的本地模型，再去谈更大的 AI 战略——这是产品经理最容易上手的起点。</p>
+        </div>
+        </div>
+
+        <div data-lang="en" hidden>
+        <h2>1. Positioning: Turning "Electricity-Water Freedom" into a Shippable Engineering Solution</h2>
+        <p>"Electricity-water freedom" is a cost metaphor: if AI is your "electricity" — available on demand, priced by usage — then API fees are your "utility bill." Electricity-water freedom means driving the marginal cost of AI toward zero: run a large model locally on your own machine, pay once for the hardware and the model, and every subsequent use costs only a few cents of power — rather than paying the cloud provider for every conversation and every token.</p>
+        <p>"Product Manager XAI · How to Achieve Electricity-Water Freedom with Minimal Effort" is the minimal engineering plan for exactly that: a 1B-class open-source model (MiniCPM5-1B) running on an ordinary x86_64 Linux machine, wrapped in a few hundred lines of Python standard library, yielding a stable, streamable, API-servable local LLM.</p>
+        <p>It is not meant to replace cloud models. It answers the questions product managers actually care about: when "usage anxiety" hits, is there a low-cost fallback? When a prototype must be demoed, data must stay inside the intranet, or costs must be accounted, what role can a local deployment play?</p>
+        <h2>2. The Pain Points: Why a PM Cares About Token Bills</h2>
+        <ul>
+        <li><strong>Usage anxiety</strong>: demos, integration testing, batch generation, multi-account testing — token bills grow linearly with usage;</li>
+        <li><strong>Data-boundary concerns</strong>: sensitive data and internal documents should not be sent to cloud models;</li>
+        <li><strong>Demo dependency</strong>: live demos fear network outages and rate limiting; local models are immune to both;</li>
+        <li><strong>Procurement deadlock</strong>: enterprise private-deployment quotes often run into six figures, hard to pilot on a budget;</li>
+        <li><strong>Model controllability</strong>: cloud models upgrade and change beyond your control; a local version is pinned and reproducible.</li>
+        </ul>
+        <p>Electricity-water freedom is not about the "performance ceiling" — it is about the "cost floor": making AI capability infrastructure you can turn on anytime, rather than a premium metered service.</p>
+        <h2>3. Solution Breakdown: A Minimal Viable Local LLM</h2>
+        <p>The whole solution is three building blocks: <strong>model + inference engine + a shell</strong>.</p>
+        <h3>3.1 The Model: MiniCPM5-1B and GGUF Quantization</h3>
+        <ul>
+        <li>The model is the open-source MiniCPM5-1B, distributed as GGUF weights;</li>
+        <li>Q4_K_M quantization shrinks it to ~656 MB — it fits on a USB stick; Q8_0 is more precise but larger;</li>
+        <li>Why quantization matters: it squeezes "unrunnable parameters" down to a tier a single machine's CPU can handle. This is the first lever of electricity-water freedom.</li>
+        </ul>
+        <h3>3.2 The Engine: llama.cpp / llama-server</h3>
+        <ul>
+        <li>llama.cpp is the de-facto standard for local inference and runs on pure CPU;</li>
+        <li>llama-server exposes an OpenAI-compatible <code>/v1/chat/completions</code> endpoint with SSE streaming;</li>
+        <li>Key startup flags: <code>-m</code> model path, <code>--host</code>/<code>--port</code> bind address, <code>-c</code> context length, <code>-t</code> thread count, <code>-ngl</code> GPU layers (0 = pure CPU), <code>--jinja</code> to use the model's prompt template, <code>--cont-batching</code> for continuous batching;</li>
+        <li>API mode additionally enables <code>--cors-origins *</code> so any front end can call it cross-origin.</li>
+        </ul>
+        <h3>3.3 The Shell: A Few Hundred Lines of Python Standard Library</h3>
+        <ul>
+        <li>Deliberately zero third-party dependencies — works out of the box on Python 3.8+;</li>
+        <li><code>http.client</code> implements SSE stream parsing, printing tokens as they arrive to preserve the typewriter experience;</li>
+        <li><code>subprocess</code> manages the llama-server child process: launching, polling <code>/health</code> (up to 600 s), and restarting on failure;</li>
+        <li>Context length, thread count, temperature, top-p, max-tokens, and port are all configurable, with sane single-machine defaults: temperature 0.6, top-p 0.8, context 4096, max-tokens 2048.</li>
+        </ul>
+        <h3>3.4 Two Modes: Terminal Chat + API Service</h3>
+        <ul>
+        <li><strong>CLI mode</strong>: chat directly in the terminal, with built-in commands such as <code>/clear</code>, <code>/history</code>, <code>/temp N</code>, <code>/reasoning on|off</code>, <code>/restart</code>, and <code>/exit</code>;</li>
+        <li><strong>API mode</strong> (<code>--serve</code>): listens on 0.0.0.0:8899 and exposes an OpenAI-compatible endpoint that any code or page can call. Start once, keep it resident, model name fixed at <code>MiniCPM5-1B-Q8_0</code>.</li>
+        </ul>
+        <h3>3.5 Visible Reasoning: The Chain of Thought (reasoning_content)</h3>
+        <ul>
+        <li>MiniCPM5 has reasoning ability; the API returns the "thinking process" and the "final answer" separately;</li>
+        <li>The shell parses <code>reasoning_content</code> (the reasoning stream) and <code>content</code> (the actual answer) separately — explainable without being intrusive;</li>
+        <li><code>/reasoning off</code> hides the thinking and shows only the conclusion.</li>
+        </ul>
+        <h2>4. The Cost Ledger and the Payoff</h2>
+        <table>
+        <tr><th>Aspect</th><th>Cloud API</th><th>Local Self-Hosted</th></tr>
+        <tr><td>Per-call cost</td><td>Billed by token</td><td>Electricity only</td></tr>
+        <tr><td>Hardware barrier</td><td>None</td><td>Any ordinary x86_64 machine</td></tr>
+        <tr><td>Data boundary</td><td>Leaves your network</td><td>Stays on the machine</td></tr>
+        <tr><td>Network dependency</td><td>Strong</td><td>Works offline</td></tr>
+        <tr><td>Upfront cost</td><td>Nearly zero</td><td>One model download</td></tr>
+        <tr><td>Economies of scale</td><td>The more you call, the more you pay</td><td>The more you use, the better it gets</td></tr>
+        </table>
+        <p>Measured in practice: a 1B model on CPU runs at roughly 8–15 tokens/second — plenty for prototype validation, text polishing, and batch rewriting, the non-latency-critical tier. Deployment is literally one script: extract and run, zero dependencies, glibc 2.31+.</p>
+        <h2>5. PM Best Practices</h2>
+        <ol>
+        <li><strong>Choose with a "cost floor" mindset</strong>: not every scenario needs a top-tier model. Sink the high-frequency, low-sensitivity, text-heavy work to local; keep the scarce, hard tasks for the cloud. That is a healthier tiering.</li>
+        <li><strong>Treat "works offline" as a product feature</strong>: in demos, training, and emergency scenarios, "never afraid of losing the network" is itself a selling point.</li>
+        <li><strong>Controllability is certainty</strong>: a local version is pinned, behavior is reproducible, and it satisfies delivery and acceptance requirements.</li>
+        <li><strong>Make security the default</strong>: data never leaves the machine; when the LLM endpoint has no built-in auth, add an Nginx reverse proxy — these belong on the delivery checklist.</li>
+        <li><strong>Minimalism is a product virtue</strong>: a few hundred lines, zero dependencies, one script — "run your own model" stops being an engineer's specialty and becomes something anyone can reproduce.</li>
+        </ol>
+        <h2>6. Closing</h2>
+        <p>The essence of electricity-water freedom is turning AI from a "metered commodity" into "infrastructure you can just turn on." The value of this minimal solution is not in the parameter count; it is in proving that when you want to hand a team, a client, or yourself an "AI that doesn't come with a bill," both the cost and the technical threshold can be driven very low. First get a local model that's always available — then talk about the bigger AI strategy. That is the easiest on-ramp for a product manager.</p>
+        </div>
+
+        <nav class="post-nav">
+          <div>
+            <a href="../projects.html">
+              <span data-lang="zh">← 返回项目</span>
+              <span data-lang="en" hidden>← Back to projects</span>
+            </a>
+          </div>
+        </nav>
+      </main>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+  <script src="../assets/js/site-config.js"></script>
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

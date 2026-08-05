@@ -1,0 +1,35 @@
+[
+  {
+    "title": "MapXAI — Map Designer Agent",
+    "title_zh": "地图XAI · 地图设计师智能体",
+    "slug": "map-style-agent",
+    "date": "2026-08-05",
+    "tags": ["Map", "AI Agent", "Product Practice"],
+    "tags_zh": ["地图", "AI智能体", "产品实践"],
+    "excerpt": "Describe a map style in one sentence, and the AI generates the map style operations (ops) and drives the map engine to render it; sessions, history, and finished styles are kept as reusable product assets.",
+    "excerpt_zh": "用一句话描述想要的地图样式，AI 即生成地图样式操作（ops）并驱动地图引擎渲染出成品；会话、对话历史与成品风格沉淀为可复用的产品资产。",
+    "file": "projects/map-style-agent.html"
+  },
+  {
+    "title": "MapXAI · Future Map Solutions Collection",
+    "title_zh": "地图XAI · 未来地图解决方案收录",
+    "slug": "future-map-solutions",
+    "date": "2026-08-05",
+    "tags": ["Map", "AI", "Industry Atlas"],
+    "tags_zh": ["地图", "AI", "行业图谱"],
+    "excerpt": "A Map × AI industry solution atlas that systematically collects, showcases, and evaluates frontier solutions in the future-map space, turning them into understandable, comparable, decision-ready assets.",
+    "excerpt_zh": "一个「地图 × AI 行业解决方案图谱」平台，系统化搜集、展示与评测未来地图方向的前沿方案，沉淀为可理解、可对比、可决策的信息资产。",
+    "file": "projects/future-map-solutions.html"
+  },
+  {
+    "title": "Product Manager XAI · How to Achieve \"Electricity-Water Freedom\" with Minimal Effort",
+    "title_zh": "产品经理XAI · 如何最小化实现水电自由",
+    "slug": "electricity-water-freedom",
+    "date": "2026-08-05",
+    "tags": ["Local LLM", "Cost Optimization"],
+    "tags_zh": ["本地大模型", "成本优化"],
+    "excerpt": "Run an LLM locally on your own machine — pay once, trade electricity for token fees, and drive AI's marginal cost toward zero: a few hundred lines of stdlib Python turn a 1B model into a local engine that streams chat and serves as an API.",
+    "excerpt_zh": "在自己机器上本地运行大模型，一次采购、电费换 Token 费，把 AI 的边际成本趋近于零——几百行标准库 Python 把 1B 模型跑成可流式对话、可当作 API 的本地引擎。",
+    "file": "projects/electricity-water-freedom.html"
+  }
+]

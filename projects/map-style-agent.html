@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>地图XAI · 地图设计师智能体 · Jing Chen</title>
+  <meta name="description" content="自然语言驱动的地图个性化制图智能体：一句话描述想要的样式，AI 生成地图样式操作并驱动引擎渲染，沉淀可复用的会话、历史与风格库。 / A natural-language-driven map styling agent: describe a style in one sentence, and the AI generates map style operations and drives the engine to render it, accumulating reusable sessions, history, and a style library." />
+  <link rel="icon" href="../assets/img/avatar.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <div class="page-grid">
+      <div id="site-sidebar"></div>
+
+      <main class="content">
+        <h1>
+          <span data-lang="zh">地图XAI · 地图设计师智能体</span>
+          <span data-lang="en" hidden>MapXAI · Map Designer Agent</span>
+        </h1>
+        <p class="page-meta">
+          <span data-lang="zh">2026年8月5日 · 地图 · AI智能体 · 产品实践</span>
+          <span data-lang="en" hidden>Aug 5, 2026 · Map · AI Agent · Product Practice</span>
+        </p>
+
+        <div data-lang="zh">
+        <h2>一、项目定位</h2>
+        <p>《地图XAI 地图设计师智能体》（design-map-ai / Map Style Agent）是一个「用自然语言驱动的地图个性化制图智能体」。用户无需掌握专业制图或前端技术，用一句话描述想要的地图样式，AI 即生成地图样式操作（ops）并驱动地图引擎渲染出成品；会话、对话历史与成品风格会被沉淀为可复用的产品资产。</p>
+        <h2>二、目标用户与核心场景</h2>
+        <p>目标用户是产品经理、业务分析师、运营等需要快速产出「接近生产级」地图样式、但没有设计或开发背景的伙伴。</p>
+        <ul>
+        <li><strong>快速出图</strong>：口头描述样式 → 秒级生成可演示地图，用于评审、汇报、Demo；</li>
+        <li><strong>风格沉淀</strong>：把满意的成果保存为风格，一键复用到后续页面，形成团队样式资产；</li>
+        <li><strong>过程回溯</strong>：会话与对话历史完整还原，AI 的制图思路与推理过程可随时查看、继续、返工；</li>
+        <li><strong>多角色协作</strong>：多用户账号 + 数据隔离，每人拥有独立的会话与风格库。</li>
+        </ul>
+        <h2>三、核心能力</h2>
+        <ol>
+        <li>自然语言 → 地图样式：LLM 生成 ops 操作序列，驱动地图引擎渲染；</li>
+        <li>会话管理：新建 / 列表 / 删除会话，归属当前用户；</li>
+        <li>对话历史还原：按时间正序恢复完整对话，含 ops 与推理卡片；</li>
+        <li>风格库：保存 / 更新 / 删除风格（含截图），支持多张风格图片；</li>
+        <li>系统设置：地图参数、LLM 模型、外观随账号持久化；</li>
+        <li>账号体系：注册 / 登录 / 登出，Token 鉴权，bcrypt 密码哈希。</li>
+        </ol>
+        <h2>四、关键架构与产品化设计</h2>
+        <p>整体为「轻前端 + 最小后端」：前端是地图渲染 SPA，后端为 FastAPI + 文件式 SQLite，大模型推理走 DeepSeek 等 OpenAI 兼容接口。工程细节全部服务产品目标：</p>
+        <ul>
+        <li><strong>LLM 流式透传代理</strong>：平台 Key 只在服务端持有，前端拿不到 Key，规避泄露与安全扫描；模型参数由后端权威值覆盖，防止前端篡改；SSE 流式透传保证打字机式体验。</li>
+        <li><strong>密钥掩码机制</strong>：读接口对 apiKey 一律掩码为 ********；写接口区分「掩码回传（未改）/ 空串（主动清除）/ 新值（覆盖）」，从机制上保证真 Key 永不外流。</li>
+        <li><strong>最小后端 + 文件式 SQLite</strong>：单文件数据库、零额外依赖、启动即自动建表迁移，部署门槛降到「一条脚本」。</li>
+        <li><strong>数据所有权与隔离</strong>：所有会话 / 风格查询都带 user_id 归属校验，多用户互不可见。</li>
+        <li><strong>单一真相源</strong>：新用户默认设置统一种子，老用户不受影响，调整默认值只改一处。</li>
+        <li><strong>兼容与演进</strong>：自动补旧库字段、启动领养历史无主数据，让迭代不破坏存量。</li>
+        </ul>
+        <h2>五、产品经理最佳实践要点</h2>
+        <ol>
+        <li><strong>把专业门槛翻译成产品能力</strong>：地图制图过去是设计师的专属工作，这里把专业能力封装为「自然语言 → 成品」的一步，用户只关心表达，不关心实现。</li>
+        <li><strong>安全合规内建为默认行为</strong>：Key 不出服务端、读接口掩码、鉴权与数据隔离，都是产品默认能力，而非上线前的补丁。</li>
+        <li><strong>过程资产化</strong>：会话历史 + 推理过程 + 风格库，让 AI 的每一次产出都能被复用、被复盘，而不是一次性消耗品。</li>
+        <li><strong>以落地成本为交付标准</strong>：轻量化部署（单文件 DB、脚本启动、版本化发布）让产品真正可上线、可演示、可交付。</li>
+        <li><strong>小步快跑、兼容演进</strong>：版本迭代坚持向后兼容与自动迁移，让产品在真实使用中持续打磨。</li>
+        </ol>
+        <h2>六、结语</h2>
+        <p>地图XAI 是「AI 重塑专业工具」的一次产品化实践：产品经理用自然语言定义样式，AI 负责专业实现，系统负责沉淀资产。它验证了一个判断——当专业能力被封装得足够简单时，非专业人士也能做出接近专业水准的作品。</p>
+        </div>
+
+        <div data-lang="en" hidden>
+        <h2>1. Positioning</h2>
+        <p>MapXAI — the Map Designer Agent (design-map-ai / Map Style Agent) — is an agent for personalized map styling driven by natural language. You do not need professional map-making or front-end skills: describe the map style you want in one sentence, and the AI generates the map style operations (ops) and drives the map engine to render the result. Conversations, history, and finished styles are persisted as reusable product assets.</p>
+        <h2>2. Target Users &amp; Core Scenarios</h2>
+        <p>Target users are product managers, business analysts, and operations people who need to produce near-production-grade map styles quickly but have no design or engineering background.</p>
+        <ul>
+        <li><strong>Instant map generation</strong>: describe a style verbally → a demo-ready map in seconds, for reviews, reporting, and demos;</li>
+        <li><strong>Style reuse</strong>: save a good result as a style and apply it to later pages with one click, building up a team style library;</li>
+        <li><strong>Process replay</strong>: sessions and conversation history are fully restored, so the AI's design intent and reasoning can be revisited, continued, and reworked;</li>
+        <li><strong>Multi-role collaboration</strong>: per-user accounts with data isolation — each person has their own sessions and style library.</li>
+        </ul>
+        <h2>3. Core Capabilities</h2>
+        <ol>
+        <li>Natural language → map styles: the LLM produces an ops sequence that drives the map renderer;</li>
+        <li>Session management: create / list / delete sessions, scoped to the current user;</li>
+        <li>History restore: full conversation replay in chronological order, including ops and reasoning cards;</li>
+        <li>Style library: save / update / delete styles (with screenshots) and multiple style images;</li>
+        <li>System settings: map parameters, LLM model, and appearance persisted per account;</li>
+        <li>Account system: register / login / logout, token-based auth, bcrypt password hashing.</li>
+        </ol>
+        <h2>4. Key Architecture &amp; Productization</h2>
+        <p>The architecture is a light front-end plus a minimal backend: the front end is a map-rendering SPA, the backend is FastAPI with a file-based SQLite database, and LLM inference goes through OpenAI-compatible endpoints such as DeepSeek. Every engineering detail serves a product goal:</p>
+        <ul>
+        <li><strong>LLM streaming relay</strong>: the platform key lives only on the server — the browser never sees it, avoiding leaks and security scanning. Model parameters are overridden with backend-authoritative values to prevent tampering, and SSE streaming keeps the typewriter feel.</li>
+        <li><strong>Key masking</strong>: read APIs always return the apiKey masked as ********; write APIs distinguish between mask round-trip (unchanged), empty string (explicitly cleared), and new value (overridden) — so the real key never leaves the server by design.</li>
+        <li><strong>Minimal backend + file-based SQLite</strong>: a single-file database, zero extra dependencies, and automatic schema creation/migration on startup bring deployment down to one script.</li>
+        <li><strong>Data ownership &amp; isolation</strong>: every session/style query is scoped by user_id, so users cannot see each other's data.</li>
+        <li><strong>Single source of truth</strong>: defaults are seeded uniformly for new users, existing users are unaffected, and changing a default touches one place.</li>
+        <li><strong>Compatibility &amp; evolution</strong>: missing columns are added automatically and orphaned legacy data is adopted on startup, so iteration never breaks existing users.</li>
+        </ul>
+        <h2>5. PM Best Practices</h2>
+        <ol>
+        <li><strong>Turn expertise into a product feature</strong>: map-making used to be a designer's job; here it is packaged as one "natural language → result" step — users focus on what they want, not how it is built.</li>
+        <li><strong>Make security &amp; compliance the default</strong>: keys never leave the server, reads are masked, and auth/data isolation are product defaults rather than late patches.</li>
+        <li><strong>Treat process as an asset</strong>: history + reasoning + a style library mean every AI output can be reused and reviewed, not consumed once and lost.</li>
+        <li><strong>Judge success by time-to-value</strong>: lightweight deployment (single-file DB, scripted startup, versioned releases) makes the product truly shippable, demoable, and deliverable.</li>
+        <li><strong>Iterate fast, evolve compatibly</strong>: releases stay backward-compatible with automatic migration, so the product keeps improving in real use.</li>
+        </ol>
+        <h2>6. Closing</h2>
+        <p>MapXAI is a productization of "AI reshaping professional tools": the product manager defines the style in natural language, the AI handles the professional implementation, and the system accumulates the assets. It validates a simple belief — when expertise is packaged simply enough, non-experts can produce near-professional work.</p>
+        </div>
+
+        <nav class="post-nav">
+          <div>
+            <a href="../projects.html">
+              <span data-lang="zh">← 返回项目</span>
+              <span data-lang="en" hidden>← Back to projects</span>
+            </a>
+          </div>
+        </nav>
+      </main>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+  <script src="../assets/js/site-config.js"></script>
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

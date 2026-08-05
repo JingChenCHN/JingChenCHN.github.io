@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vibecoding · 2天速成智驾采集业务系统 · Jing Chen</title>
+  <meta name="description" content="用 Vibecoding 在约 2 天内跑通一套能上线的智驾数据采集车队管理系统：10,340 行单文件 FastAPI 后端、240 个接口、53 张表、双端 React SPA，并在此后持续迭代到 V1.9。 / Vibecoding produced a working, deployable business system for an autonomous-driving data collection fleet in about two days: a 10,340-line single-file FastAPI backend, 240 APIs, 53 tables, dual-end React SPAs — then shipped through V1.9." />
+  <link rel="icon" href="../assets/img/avatar.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <style>
+    /* ---- article diagrams (blueprint palette, scoped to this page) ---- */
+    .dgm { margin: 22px 0 30px; overflow-x: auto; }
+    .dgm-cap { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 10px; }
+    .dgm-cap b { color: var(--accent); font-weight: 600; }
+    .dgm-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+    .dgm-box { border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 12px; background: var(--bg); min-width: 0; }
+    .dgm-box.sub { background: var(--bg-soft); border-color: var(--border); }
+    .dgm-box.solo { background: var(--accent-soft); border-color: var(--accent-line); }
+    .dgm-box.grow { flex: 1 1 0; }
+    .dgm-title { font-size: .86rem; font-weight: 600; margin: 0 0 4px; color: var(--text); }
+    .dgm-sub { font-size: .74rem; color: var(--text-muted); margin: 0; line-height: 1.6; }
+    .dgm-arrow { text-align: center; color: var(--accent); font-size: .95rem; line-height: 1; padding: 6px 0; }
+    .dgm-arrow span { font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-faint); }
+    .flow { display: flex; flex-direction: column; }
+    .flow-step { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 6px; background: var(--bg-soft); padding: 10px 12px; }
+    .flow-n { font-family: var(--font-mono); font-size: .7rem; color: var(--link); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 4px; padding: 2px 6px; flex: none; margin-top: 1px; }
+    .dgm-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .dgm-tag { font-family: var(--font-mono); font-size: .66rem; color: var(--link); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 999px; padding: 2px 9px; }
+    .stat-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .stat { flex: 1 1 0; min-width: 120px; border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 12px; background: var(--bg); }
+    .stat b { display: block; font-family: var(--font-mono); font-size: 1.25rem; color: var(--accent); line-height: 1.2; }
+    .stat span { font-size: .7rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <div class="page-grid">
+      <div id="site-sidebar"></div>
+
+      <main class="content">
+        <h1>
+          <span data-lang="zh">Vibecoding · 2天速成智驾采集业务系统</span>
+          <span data-lang="en" hidden>Vibecoding: A Smart-Driving Collection Business System in 2 Days</span>
+        </h1>
+        <p class="page-meta">
+          <span data-lang="zh">2026年8月5日 · Vibecoding · 智驾采集 · 产品实践</span>
+          <span data-lang="en" hidden>Aug 5, 2026 · Vibecoding · ADAS Collection · Product Practice</span>
+        </p>
+
+        <div data-lang="zh">
+        <h2>〇、电梯陈述：2 天，一个人，一套能上线的业务系统</h2>
+        <p>这套「智驾采集管理系统」用 Vibecoding 的方式跑通：约 2 天内，PC 端运营管理 + 手机端采集的核心链路就能用了。它不是玩具 Demo，而是一套真实车队一直在用的系统——10,340 行的单文件 FastAPI 后端、240 个接口、53 张表、双端 React SPA，而且系统里自带一张"迭代路线图"页面，如实记录着从 V1.0 到 V1.9 的十几次迭代。</p>
+        <p>一句话：<strong>当"把想法变成能用软件"的边际成本趋近于零时，产品经理可以独自完成"需求 → 原型 → 系统 → 运营"的全过程。</strong></p>
+        <div class="dgm">
+          <p class="dgm-cap"><b>At a glance</b> · 数字速览</p>
+          <div class="stat-row">
+            <div class="stat"><b>10,340</b><span>单文件后端行数 main.py</span></div>
+            <div class="stat"><b>240</b><span>REST 接口（含 mobile 39 个）</span></div>
+            <div class="stat"><b>53</b><span>SQLite 数据表（WAL）</span></div>
+            <div class="stat"><b>2</b><span>双端 SPA：管理端 + 采集端</span></div>
+            <div class="stat"><b>V1.0→V1.9</b><span>3 个月迭代 + 多次 SP 补丁</span></div>
+          </div>
+        </div>
+
+        <h2>一、业务背景：智驾采集车队在管什么</h2>
+        <p>自动驾驶模型的训练离不开真实路采数据：车队开着装有激光雷达、摄像头、毫米波雷达的采集车，在城市道路、高速、乡村公路上按标准跑，然后把采集硬盘寄回公司。这套系统服务的，就是这样一个车队。</p>
+        <p>过去这类车队靠"表格 + 群聊"管理，痛点很集中：</p>
+        <ul>
+        <li><strong>任务靠人肉排</strong>：谁、开哪辆车、跑哪条路线、今天要跑多少公里，全靠口口相传；</li>
+        <li><strong>合规靠自觉</strong>：测绘作业证、备案登记通知书、营业执照等资质要定期点检，漏一项就可能停线；</li>
+        <li><strong>资产靠电话</strong>：硬盘发出去了没有、寄回来没有、数据量对不对，基本靠催；</li>
+        <li><strong>过程是盲区</strong>：采集员现在在哪、是否偏航、轨迹是否异常，管理侧一无所知。</li>
+        </ul>
+        <p>系统的目标，就是把车队运营数字化、流程化、可回溯。</p>
+
+        <h2>二、产品全景：双端 + 单文件后端</h2>
+        <p>整体是"轻运营端 + 采集端 + 最小后端"：管理端管人车任务，采集端跑一线，后端一个文件全包。</p>
+        <div class="dgm">
+          <p class="dgm-cap"><b>Architecture</b> · 产品架构图</p>
+          <div class="dgm-box solo">
+            <p class="dgm-title">用户层 · Users</p>
+            <div class="dgm-row">
+              <div class="dgm-box sub grow"><p class="dgm-title">Web 管理端</p><p class="dgm-sub">index.html · 任务 / 车辆 / 人员 / 路线 / 围栏 / 标注 / 设置 / 看板</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title">移动采集端</p><p class="dgm-sub">mobile.html · 认领 / 执行 / 标注 / 点检 / 打卡 / 费用</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title">迭代路线图</p><p class="dgm-sub">roadmap.html · 内置开发史 V1.0→V1.9</p></div>
+            </div>
+          </div>
+          <div class="dgm-arrow">↓ <span>HTTPS · 同源 /api</span></div>
+          <div class="dgm-box solo">
+            <p class="dgm-title">接入层 · Edge</p>
+            <p class="dgm-sub">nginx · 静态托管 dist/ + /api 反向代理 127.0.0.1:8001 + /uploads 静态（50M）+ gzip</p>
+          </div>
+          <div class="dgm-arrow">↓ <span>proxy_pass</span></div>
+          <div class="dgm-box solo">
+            <p class="dgm-title">应用层 · 单文件 FastAPI 后端 main.py（10,340 行 · 240 API）</p>
+            <div class="dgm-row">
+              <div class="dgm-box sub grow"><p class="dgm-title">业务路由</p><p class="dgm-sub">auth · tasks · projects · vehicles · personnel · hard-disks · inspections · efficiency …</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title">工具链</p><p class="dgm-sub">分块流式上传 · Pillow 水印 · RapidOCR 面单/证照</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title">外部集成</p><p class="dgm-sub">顺丰快递 · 高德/丰图 · DeepSeek</p></div>
+            </div>
+          </div>
+          <div class="dgm-arrow">↓</div>
+          <div class="dgm-row">
+            <div class="dgm-box solo grow"><p class="dgm-title">存储层 · SQLite</p><p class="dgm-sub">data.db · 53 表 · WAL 模式</p></div>
+            <div class="dgm-box solo grow"><p class="dgm-title">文件 · uploads/</p><p class="dgm-sub">照片 · 面单 · 采集附件</p></div>
+          </div>
+        </div>
+        <p>一个值得注意的产品决策是<strong>多项目隔离</strong>：几乎每张表都带 project_id，前端用 <code>X-Project-Id</code> 请求头区分项目上下文——一套系统并行支撑多个采集项目，互不串扰。</p>
+
+        <h2>三、核心机制：端到端业务闭环</h2>
+        <p>从建任务到看板，是一条完整的业务链路，每一个环节都有对应接口兜底：</p>
+        <div class="dgm">
+          <p class="dgm-cap"><b>End-to-End Flow</b> · 端到端业务流程</p>
+          <div class="flow">
+            <div class="flow-step"><span class="flow-n">01</span><div><p class="dgm-title">创建任务</p><p class="dgm-sub">POST /api/tasks · 生成 task_no（时间戳+3 位序号），自动带出路线 / 采集标准 / 默认标注模板</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">02</span><div><p class="dgm-title">分配下发</p><p class="dgm-sub">单席位 assign / 多席位 dispatch · 硬要素校验（人 active、车 normal、路线绑定），任务置 assigned</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">03</span><div><p class="dgm-title">采集员认领</p><p class="dgm-sub">POST /api/mobile/tasks/{id}/claim · 认领自己的席位，assignment 状态 pending→accepted</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">04</span><div><p class="dgm-title">执行采集</p><p class="dgm-sub">start / pause / resume / stop · 写执行日志，stop 时自动算里程 / 时长 / 进度</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">05</span><div><p class="dgm-title">过程产出</p><p class="dgm-sub">GPS 轨迹上传 · 实时标注 · 异常上报（severity 分级）</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">06</span><div><p class="dgm-title">点检与考勤</p><p class="dgm-sub">车辆/设备/资质三类点检 · 上下班 GPS+照片+地址打卡</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">07</span><div><p class="dgm-title">硬盘寄回</p><p class="dgm-sub">顺丰运单登记 · 面单 OCR 自动提号 · 路由跟踪</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">08</span><div><p class="dgm-title">审核闭环</p><p class="dgm-sub">工作日志 / 用车费用 · 待审核 → 已通过 / 已退回</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">09</span><div><p class="dgm-title">统计看板</p><p class="dgm-sub">总览 / 7 日里程趋势 / 效率多维统计（时间 · 对象 · 道路类型）</p></div></div>
+          </div>
+        </div>
+        <p>举两个"算得准"的细节：里程按各席位 <code>max(里程after) − min(里程before)</code> 求和；进度 = 实际里程 ÷ 日目标里程。里程、时长都不是前端拍的，而是后端 stop 时算好的。</p>
+
+        <h2>四、任务状态机：让流程"不会乱"</h2>
+        <p>任务的每个状态变更都写入 <code>task_status_log</code>：谁、何时、从哪到哪，全程可审计。这个状态机是整套系统的脊梁——页面、看板、权限都围绕它展开。</p>
+        <div class="dgm">
+          <p class="dgm-cap"><b>State Machine</b> · 任务状态机</p>
+          <div class="dgm-row">
+            <div class="dgm-box solo"><p class="dgm-title">pending</p><p class="dgm-sub">待分配</p></div>
+            <div class="dgm-arrow h">→</div>
+            <div class="dgm-box solo"><p class="dgm-title">assigned</p><p class="dgm-sub">已分配 / 已下发</p></div>
+            <div class="dgm-arrow h">→</div>
+            <div class="dgm-box solo"><p class="dgm-title">claimed</p><p class="dgm-sub">采集员已认领</p></div>
+            <div class="dgm-arrow h">→</div>
+            <div class="dgm-box solo"><p class="dgm-title">in_progress</p><p class="dgm-sub">执行中</p></div>
+            <div class="dgm-arrow h">→</div>
+            <div class="dgm-box solo"><p class="dgm-title">completed</p><p class="dgm-sub">已完成</p></div>
+          </div>
+          <div class="dgm-row" style="margin-top:10px;">
+            <div class="dgm-box sub grow"><p class="dgm-title">paused ↔ in_progress</p><p class="dgm-sub">执行中可暂停，暂停可继续</p></div>
+            <div class="dgm-box sub grow"><p class="dgm-title">cancelled · archived</p><p class="dgm-sub">活动状态可取消；完成可归档</p></div>
+            <div class="dgm-box sub grow"><p class="dgm-title">task_status_log</p><p class="dgm-sub">每次流转写审计日志</p></div>
+          </div>
+        </div>
+        <p>Vibecoding 的第一天，最先定下的就是这张状态机——它是所有后续模块的坐标轴。</p>
+
+        <h2>五、关键模块拆解</h2>
+        <div class="dgm" style="overflow-x:auto;">
+          <p class="dgm-cap"><b>Modules</b> · 模块与设计</p>
+          <table>
+            <thead>
+              <tr><th>模块</th><th>做什么</th><th>值得注意的设计</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>任务 / 多席位</td><td>一条任务可拆成多个席位（车辆+采集员），分别执行</td><td>V1.8 引入；下发时校验硬要素，设备缺失只告警不阻断</td></tr>
+              <tr><td>采集标准</td><td>城市道路 / 高速 / 乡村 / 区域覆盖</td><td>真实行业参数入库：城市限速 60/20、GPS 精度 5m、激光雷达 10Hz；高速 120/60、精度 3m</td></tr>
+              <tr><td>硬盘流转</td><td>采集硬盘全生命周期 + 寄送运单</td><td>SN 唯一；状态 in_use→transit→shipped→signed/damaged/scrap</td></tr>
+              <tr><td>点检</td><td>车辆日常（10 项）/ 采集设备（9 项）/ 资质证明（6 项）</td><td>测绘作业证、备案登记通知书、营业执照等合规要素产品化</td></tr>
+              <tr><td>标注</td><td>采集过程实时标注 + 模板</td><td>模板列快照（改模板不影响历史）；知识库 31 条标准标签</td></tr>
+              <tr><td>电子围栏</td><td>城市围栏 CRUD + 越界预警</td><td>预警分级别，待处理 / 已处理</td></tr>
+              <tr><td>考勤</td><td>上下班 GPS 打卡 + 照片 + 地址</td><td>固定时间补卡；每日多次打卡记录</td></tr>
+              <tr><td>审核</td><td>工作日志 / 用车费用审核</td><td>待审核 → 已通过 / 已退回</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>标注知识库是给一线用的"共同语言"，覆盖最常见场景：</p>
+        <div class="dgm">
+          <p class="dgm-cap"><b>Annotation vocabulary</b> · 标注知识库（部分）</p>
+          <div class="dgm-tags">
+            <span class="dgm-tag">park 园区</span><span class="dgm-tag">intersection 路口</span><span class="dgm-tag">traffic_light 交通灯</span><span class="dgm-tag">barrier_gate 道闸</span><span class="dgm-tag">park_in 泊入</span><span class="dgm-tag">park_out 泊出</span><span class="dgm-tag">ramp 匝道</span><span class="dgm-tag">tunnel 隧道</span><span class="dgm-tag">bridge 桥梁</span><span class="dgm-tag">crosswalk 斑马线</span><span class="dgm-tag">speed_bump 减速带</span><span class="dgm-tag">construction 施工</span><span class="dgm-tag">rainy 雨天</span><span class="dgm-tag">sunny 晴天</span><span class="dgm-tag">night 夜间</span><span class="dgm-tag">foggy 雾天</span><span class="dgm-tag">snow 积雪</span>
+          </div>
+        </div>
+
+        <h2>六、工程上的几个亮点</h2>
+        <ol>
+        <li><strong>单文件后端 + 内联迁移</strong>：没有迁移工具，靠 <code>PRAGMA table_info</code> 检查列、缺失则 <code>ALTER TABLE ADD COLUMN</code>——快速迭代也能安全演进；</li>
+        <li><strong>流式上传</strong>：1MB 分块写盘，大文件不 OOM，上传与落盘并发；</li>
+        <li><strong>水印 + OCR 一条链</strong>：上传照片自动加"智驾采集"角标 + 人员/时间/坐标/地址面板；面单照片 OCR 自动提取顺丰单号（<code>SF</code> 开头 12 位），再调顺丰接口查路由（MD5 数字签名）；</li>
+        <li><strong>看板与效率</strong>：总览卡 + 7 日里程趋势 + 异常数；效率按时间 / 对象 / 道路类型三维统计；</li>
+        <li><strong>部署朴素到极致</strong>：requirements.txt 只写 2 个依赖、venv 实际 40 个；uvicorn 2 workers + nginx 一条命令上线。</li>
+        </ol>
+
+        <h2>七、诚实复盘：Vibecoding 的代价</h2>
+        <p>速成不是魔法，这套系统也把 Vibecoding 的另一面暴露得淋漓尽致：</p>
+        <ul>
+        <li><strong>单文件的代价</strong>：10,340 行的 main.py，函数多了之后，阅读、协同、单测都变难；</li>
+        <li><strong>密钥管理裸奔</strong>：顺丰 / 高德 / 丰图 / DeepSeek 的密钥明文种在代码或配置里，默认密码是统一常量——MVP 阶段够用，生产必须重构；</li>
+        <li><strong>依赖与声明脱节</strong>：requirements 声明 2 个、实装 40 个，靠 <code>try/except ImportError</code> 逐层降级；</li>
+        <li><strong>开发痕迹进产物</strong>：AI 工具的权限配置被打进构建目录、Vim 交换文件与源码并列——快，但没时间收拾。</li>
+        </ul>
+        <p>这些"脏"是速成系统的常态。重要的不是假装它不存在，而是知道它在哪里、什么时候必须还债。</p>
+
+        <h2>八、从 2 天 MVP 到 V1.9：内置路线图</h2>
+        <p>系统里有个彩蛋：<code>roadmap.html</code> 路线图页面，把每次迭代都记成了资产——"产品即文档、迭代即资产"。节奏是典型的"边用边补"：</p>
+        <div class="dgm" style="overflow-x:auto;">
+          <p class="dgm-cap"><b>Roadmap</b> · 版本迭代（节选）</p>
+          <table>
+            <thead>
+              <tr><th>版本</th><th>时间</th><th>重点</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>V1.0</td><td>05-19 ~ 05-30</td><td>MVP：走通 PC 与 APP 核心任务流程</td></tr>
+              <tr><td>V1.1</td><td>06-01 ~ 06-05</td><td>城市路线管理 + 任务运单管理</td></tr>
+              <tr><td>V1.2</td><td>06-08 ~ 06-10</td><td>APP 端运行即时标注</td></tr>
+              <tr><td>V1.3 / V1.4</td><td>06-11 ~ 06-24</td><td>路线管理及规划；城市电子围栏（+SP1 定位修复）</td></tr>
+              <tr><td>V1.5 / V1.6</td><td>06-24 ~ 07-03</td><td>路线偏离预警；内网作业版（+SP 临时标注变更）</td></tr>
+              <tr><td>V1.7</td><td>07-06 ~ 07-13</td><td>OCR 增强 &amp; 打卡水印</td></tr>
+              <tr><td>V1.8</td><td>07-13 ~ 07-17</td><td>任务多席位支持（+SP1/SP2 修复）</td></tr>
+              <tr><td>V1.9</td><td>07-20 ~</td><td>标注管理及登录安全性</td></tr>
+              <tr><td>Next</td><td>排期中</td><td>采集报告 · 系统健壮性 · PC mobile view · 需求池</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>九、产品经理复盘：五条值得抄的判断</h2>
+        <ol>
+        <li><strong>先跑通纵向切片，再铺功能面</strong>：第一版只做"建任务 → 执行 → 看板"，能演示就能谈需求；</li>
+        <li><strong>把合规做成点检项，而不是文档</strong>：测绘作业证、备案通知书是行业硬门槛，产品化后变成每天可执行的清单；</li>
+        <li><strong>状态机是流程系统的脊梁</strong>：先定状态与流转，页面和看板只是它的投影；</li>
+        <li><strong>过程资产化</strong>：轨迹、标注、审计日志、版本路线图，让每次运营都可回溯、可复盘；</li>
+        <li><strong>知道什么时候还技术债</strong>：2 天速成解决"能用"，生产化解决"扛得住"——把"脏"记录在案，按节奏还。</li>
+        </ol>
+
+        <h2>结语</h2>
+        <p>2 天能速成一个能上线的业务系统吗？能。但真正的价值不在那 2 天，而在之后 3 个月里，这个系统一直跟着真实车队跑、被使用、被迭代。Vibecoding 改变的不是"写代码的速度"，而是<strong>从想法到可用产品的距离</strong>——这才是产品经理最该抓住的东西。</p>
+        </div>
+
+        <div data-lang="en" hidden>
+        <h2>0. Elevator Pitch: Two Days, One Person, a Shippable Business System</h2>
+        <p>This "Smart-Driving Collection Management System" was built the Vibecoding way: in about two days, the core loop — PC-side operations plus phone-side collection — was working. It is not a toy demo but a system a real fleet has been using: a single-file FastAPI backend of 10,340 lines, 240 APIs, 53 tables, dual-end React SPAs — and the product even ships its own "iteration roadmap" page that honestly records a dozen releases from V1.0 to V1.9.</p>
+        <p>One sentence: <strong>when the marginal cost of turning an idea into working software approaches zero, a product manager can take a product from requirements → prototype → system → operations entirely on their own.</strong></p>
+        <div class="dgm">
+          <p class="dgm-cap"><b>At a glance</b> · Key numbers</p>
+          <div class="stat-row">
+            <div class="stat"><b>10,340</b><span>lines in single-file backend main.py</span></div>
+            <div class="stat"><b>240</b><span>REST endpoints (39 mobile)</span></div>
+            <div class="stat"><b>53</b><span>SQLite tables (WAL)</span></div>
+            <div class="stat"><b>2</b><span>SPAs: admin + collection</span></div>
+            <div class="stat"><b>V1.0→V1.9</b><span>3 months of iteration + SP patches</span></div>
+          </div>
+        </div>
+
+        <h2>1. Business Context: What an ADAS Collection Fleet Manages</h2>
+        <p>Autonomous-driving models need real road-collection data: fleets run instrumented vehicles (LiDAR, cameras, mmWave radar) across urban roads, highways, and rural roads following collection standards, then ship the hard disks back. This system serves exactly such a fleet.</p>
+        <p>Before, the fleet was managed with spreadsheets and chat groups. The pain was concentrated:</p>
+        <ul>
+        <li><strong>Tasks scheduled by hand</strong>: who drives which vehicle, on which route, how many kilometers today — all passed by word of mouth;</li>
+        <li><strong>Compliance by memory</strong>: surveying work permits, filing notices, business licenses need periodic inspection — one miss can stop a line;</li>
+        <li><strong>Assets tracked by phone</strong>: were the hard disks sent out, returned, is the data volume right — mostly by chasing people;</li>
+        <li><strong>Process is a blind spot</strong>: where is a collector now, are they off-route, is the track anomalous — management had no visibility.</li>
+        </ul>
+        <p>The system's goal: make fleet operations digital, process-driven, and auditable.</p>
+
+        <h2>2. Product Panorama: Two Ends + a Single-File Backend</h2>
+        <p>It is a "light admin end + collection end + minimal backend": the admin side manages people, vehicles, and tasks; the collection side works in the field; the backend is one file.</p>
+        <div class="dgm">
+          <p class="dgm-cap"><b>Architecture</b> · Product architecture</p>
+          <div class="dgm-box solo">
+            <p class="dgm-title">Users · 用户层</p>
+            <div class="dgm-row">
+              <div class="dgm-box sub grow"><p class="dgm-title">Web Admin</p><p class="dgm-sub">index.html · tasks / vehicles / personnel / routes / fences / annotations / settings / dashboards</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title">Mobile Collection</p><p class="dgm-sub">mobile.html · claim / execute / annotate / inspect / check-in / costs</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title">Iteration Roadmap</p><p class="dgm-sub">roadmap.html · built-in dev history V1.0→V1.9</p></div>
+            </div>
+          </div>
+          <div class="dgm-arrow">↓ <span>HTTPS · same-origin /api</span></div>
+          <div class="dgm-box solo">
+            <p class="dgm-title">Edge · 接入层</p>
+            <p class="dgm-sub">nginx · serves dist/ + proxies /api to 127.0.0.1:8001 + /uploads static (50M) + gzip</p>
+          </div>
+          <div class="dgm-arrow">↓ <span>proxy_pass</span></div>
+          <div class="dgm-box solo">
+            <p class="dgm-title">Application · single-file FastAPI backend main.py (10,340 lines · 240 APIs)</p>
+            <div class="dgm-row">
+              <div class="dgm-box sub grow"><p class="dgm-title">Business routes</p><p class="dgm-sub">auth · tasks · projects · vehicles · personnel · hard-disks · inspections · efficiency …</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title">Toolchain</p><p class="dgm-sub">chunked upload · Pillow watermark · RapidOCR waybill/license</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title">External integrations</p><p class="dgm-sub">SF Express · AMap/Fengtu · DeepSeek</p></div>
+            </div>
+          </div>
+          <div class="dgm-arrow">↓</div>
+          <div class="dgm-row">
+            <div class="dgm-box solo grow"><p class="dgm-title">Storage · SQLite</p><p class="dgm-sub">data.db · 53 tables · WAL</p></div>
+            <div class="dgm-box solo grow"><p class="dgm-title">Files · uploads/</p><p class="dgm-sub">photos · waybills · attachments</p></div>
+          </div>
+        </div>
+        <p>One notable product decision is <strong>multi-project isolation</strong>: nearly every table carries project_id, and the front end passes the context through an <code>X-Project-Id</code> header — one system runs several collection projects in parallel without interference.</p>
+
+        <h2>3. Core Mechanism: The End-to-End Business Loop</h2>
+        <p>From creating a task to the dashboard, it is one closed loop, with a dedicated API backing every step:</p>
+        <div class="dgm">
+          <p class="dgm-cap"><b>End-to-End Flow</b> · Business flow</p>
+          <div class="flow">
+            <div class="flow-step"><span class="flow-n">01</span><div><p class="dgm-title">Create task</p><p class="dgm-sub">POST /api/tasks · task_no (timestamp + 3-digit seq), auto-attach route / standards / default annotation template</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">02</span><div><p class="dgm-title">Assign &amp; dispatch</p><p class="dgm-sub">single-seat assign / multi-seat dispatch · hard checks (person active, vehicle normal, route bound), task → assigned</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">03</span><div><p class="dgm-title">Collector claims</p><p class="dgm-sub">POST /api/mobile/tasks/{id}/claim · takes own seat, assignment pending→accepted</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">04</span><div><p class="dgm-title">Execute collection</p><p class="dgm-sub">start / pause / resume / stop · execution logs; mileage / duration / progress computed on stop</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">05</span><div><p class="dgm-title">Produce</p><p class="dgm-sub">GPS track upload · live annotations · exception reports (severity levels)</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">06</span><div><p class="dgm-title">Inspect &amp; attend</p><p class="dgm-sub">vehicle/device/certificate inspections · GPS+photo+address check-in/out</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">07</span><div><p class="dgm-title">Ship hard disks</p><p class="dgm-sub">SF waybill registration · OCR extracts tracking number · route tracking</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">08</span><div><p class="dgm-title">Review</p><p class="dgm-sub">work logs / vehicle costs · pending → approved / rejected</p></div></div>
+            <div class="dgm-arrow">↓</div>
+            <div class="flow-step"><span class="flow-n">09</span><div><p class="dgm-title">Dashboards</p><p class="dgm-sub">overview / 7-day mileage trend / multi-dimensional efficiency (time · object · road type)</p></div></div>
+          </div>
+        </div>
+        <p>Two "it computes it right" details: mileage is summed per seat as <code>max(mileage after) − min(mileage before)</code>; progress = actual mileage ÷ daily target. Neither is invented by the front end — the backend computes them on stop.</p>
+
+        <h2>4. The Task State Machine: The Flow Can't Fall Apart</h2>
+        <p>Every task transition is written to <code>task_status_log</code>: who, when, from where to where — fully auditable. This state machine is the backbone of the whole system; pages, dashboards, and permissions are projections of it.</p>
+        <div class="dgm">
+          <p class="dgm-cap"><b>State Machine</b> · Task states</p>
+          <div class="dgm-row">
+            <div class="dgm-box solo"><p class="dgm-title">pending</p><p class="dgm-sub">unassigned</p></div>
+            <div class="dgm-arrow h">→</div>
+            <div class="dgm-box solo"><p class="dgm-title">assigned</p><p class="dgm-sub">assigned / dispatched</p></div>
+            <div class="dgm-arrow h">→</div>
+            <div class="dgm-box solo"><p class="dgm-title">claimed</p><p class="dgm-sub">claimed by collector</p></div>
+            <div class="dgm-arrow h">→</div>
+            <div class="dgm-box solo"><p class="dgm-title">in_progress</p><p class="dgm-sub">executing</p></div>
+            <div class="dgm-arrow h">→</div>
+            <div class="dgm-box solo"><p class="dgm-title">completed</p><p class="dgm-sub">done</p></div>
+          </div>
+          <div class="dgm-row" style="margin-top:10px;">
+            <div class="dgm-box sub grow"><p class="dgm-title">paused ↔ in_progress</p><p class="dgm-sub">an active task can pause and resume</p></div>
+            <div class="dgm-box sub grow"><p class="dgm-title">cancelled · archived</p><p class="dgm-sub">active states can cancel; completed can archive</p></div>
+            <div class="dgm-box sub grow"><p class="dgm-title">task_status_log</p><p class="dgm-sub">every transition writes an audit record</p></div>
+          </div>
+        </div>
+        <p>On day one of vibecoding, this state machine was settled first — it is the coordinate axis for every later module.</p>
+
+        <h2>5. Key Modules, Broken Down</h2>
+        <div class="dgm" style="overflow-x:auto;">
+          <p class="dgm-cap"><b>Modules</b> · Module &amp; design notes</p>
+          <table>
+            <thead>
+              <tr><th>Module</th><th>What it does</th><th>Notable design</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Tasks / multi-seat</td><td>one task splits into seats (vehicle + collector), executed separately</td><td>introduced in V1.8; dispatch checks hard constraints, missing device warns but does not block</td></tr>
+              <tr><td>Collection standards</td><td>urban / highway / rural / area coverage</td><td>real industry params in DB: urban 60/20 km/h, GPS 5m, LiDAR 10Hz; highway 120/60, 3m</td></tr>
+              <tr><td>Hard-disk flow</td><td>full lifecycle + shipping waybills</td><td>unique SN; states in_use→transit→shipped→signed/damaged/scrap</td></tr>
+              <tr><td>Inspections</td><td>vehicle (10) / device (9) / certificate (6)</td><td>compliance like surveying work permits and filing notices productized</td></tr>
+              <tr><td>Annotations</td><td>live annotation during collection + templates</td><td>column snapshot (editing a template never breaks history); 31-tag knowledge base</td></tr>
+              <tr><td>Geo-fences</td><td>city fence CRUD + crossing warnings</td><td>severity levels; pending / handled</td></tr>
+              <tr><td>Attendance</td><td>GPS check-in/out + photo + address</td><td>fixed-time makeup; multiple daily records</td></tr>
+              <tr><td>Review</td><td>work logs / vehicle costs</td><td>pending → approved / rejected</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The annotation knowledge base gives the field a common vocabulary covering the most frequent scenarios:</p>
+        <div class="dgm">
+          <p class="dgm-cap"><b>Annotation vocabulary</b> · Knowledge base (sample)</p>
+          <div class="dgm-tags">
+            <span class="dgm-tag">park 园区</span><span class="dgm-tag">intersection 路口</span><span class="dgm-tag">traffic_light 交通灯</span><span class="dgm-tag">barrier_gate 道闸</span><span class="dgm-tag">park_in 泊入</span><span class="dgm-tag">park_out 泊出</span><span class="dgm-tag">ramp 匝道</span><span class="dgm-tag">tunnel 隧道</span><span class="dgm-tag">bridge 桥梁</span><span class="dgm-tag">crosswalk 斑马线</span><span class="dgm-tag">speed_bump 减速带</span><span class="dgm-tag">construction 施工</span><span class="dgm-tag">rainy 雨天</span><span class="dgm-tag">sunny 晴天</span><span class="dgm-tag">night 夜间</span><span class="dgm-tag">foggy 雾天</span><span class="dgm-tag">snow 积雪</span>
+          </div>
+        </div>
+
+        <h2>6. Engineering Highlights</h2>
+        <ol>
+        <li><strong>Single-file backend with inline migrations</strong>: no migration tool — <code>PRAGMA table_info</code> detects columns, missing ones get <code>ALTER TABLE ADD COLUMN</code>, so fast iteration still evolves safely;</li>
+        <li><strong>Chunked upload</strong>: 1MB blocks streamed to disk — big files never OOM, upload and persist overlap;</li>
+        <li><strong>Watermark + OCR in one chain</strong>: uploaded photos get a "Smart-Driving Collection" badge plus person/time/coords/address; waybill photos go through OCR to extract the SF tracking number (<code>SF</code> + 12 digits), then the SF API traces the route (MD5 signature);</li>
+        <li><strong>Dashboards &amp; efficiency</strong>: overview cards + 7-day mileage trend + exceptions; efficiency stats by time / object / road type;</li>
+        <li><strong>Deployment so minimal it is art</strong>: requirements.txt lists 2 dependencies, the venv actually has ~40; uvicorn with 2 workers behind nginx — one command to go live.</li>
+        </ol>
+
+        <h2>7. Honest Retrospective: The Cost of Vibecoding</h2>
+        <p>Speed is not magic, and this system shows the other side of Vibecoding plainly:</p>
+        <ul>
+        <li><strong>The cost of a single file</strong>: at 10,340 lines, reading, collaborating on, and unit-testing main.py all get harder;</li>
+        <li><strong>Plaintext secrets</strong>: SF Express / AMap / Fengtu / DeepSeek keys sit in code or config as literals, and the default password is a shared constant — fine for an MVP, needs a rework before production;</li>
+        <li><strong>Declared vs installed dependencies drift</strong>: 2 declared, ~40 installed, with <code>try/except ImportError</code> degrading gracefully at each layer;</li>
+        <li><strong>Dev artifacts shipped</strong>: an AI-tool permission config made it into the build output, and a Vim swap file sits next to the source — fast, but no time to tidy up.</li>
+        </ul>
+        <p>This mess is the norm for rapid systems. What matters is not pretending it away, but knowing where it lives and when the debt must be repaid.</p>
+
+        <h2>8. From a 2-Day MVP to V1.9: The Built-In Roadmap</h2>
+        <p>Here is an easter egg: the <code>roadmap.html</code> page turns every iteration into an asset — "product as documentation, iteration as capital." The rhythm is classic ship-then-patch:</p>
+        <div class="dgm" style="overflow-x:auto;">
+          <p class="dgm-cap"><b>Roadmap</b> · Release timeline (excerpt)</p>
+          <table>
+            <thead>
+              <tr><th>Version</th><th>Dates</th><th>Focus</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>V1.0</td><td>05-19 ~ 05-30</td><td>MVP: core task loop on PC and APP</td></tr>
+              <tr><td>V1.1</td><td>06-01 ~ 06-05</td><td>city route management + task shipping</td></tr>
+              <tr><td>V1.2</td><td>06-08 ~ 06-10</td><td>live annotations on the APP</td></tr>
+              <tr><td>V1.3 / V1.4</td><td>06-11 ~ 06-24</td><td>route planning; city geo-fences (+SP1 fix)</td></tr>
+              <tr><td>V1.5 / V1.6</td><td>06-24 ~ 07-03</td><td>off-route warnings; intranet build (+SP annotation hotfix)</td></tr>
+              <tr><td>V1.7</td><td>07-06 ~ 07-13</td><td>OCR enhancement &amp; check-in watermark</td></tr>
+              <tr><td>V1.8</td><td>07-13 ~ 07-17</td><td>multi-seat tasks (+SP1/SP2 fixes)</td></tr>
+              <tr><td>V1.9</td><td>07-20 ~</td><td>annotation management &amp; login security</td></tr>
+              <tr><td>Next</td><td>planned</td><td>collection report · robustness · PC mobile view · requirement pool</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>9. PM Retrospective: Five Judgments Worth Stealing</h2>
+        <ol>
+        <li><strong>Build the vertical slice first, then spread the feature surface</strong>: v1 was only "create task → execute → dashboard" — if it can demo, it can be discussed;</li>
+        <li><strong>Make compliance an inspection checklist, not a document</strong>: surveying permits and filing notices are hard industry gates; productized, they become a daily executable list;</li>
+        <li><strong>The state machine is the backbone of any process system</strong>: settle states and transitions first; pages and dashboards are just its projections;</li>
+        <li><strong>Capitalize the process</strong>: tracks, annotations, audit logs, and a version roadmap make every operation replayable and reviewable;</li>
+        <li><strong>Know when to repay technical debt</strong>: two days solves "it works"; productionization solves "it holds up" — document the mess and repay it on a schedule.</li>
+        </ol>
+
+        <h2>Closing</h2>
+        <p>Can a shippable business system be vibecoded in two days? Yes. But the real value is not those two days — it is the three months after, when this system kept running with a real fleet, being used and iterated. Vibecoding does not change "how fast you write code"; it changes <strong>the distance from an idea to a usable product</strong> — and that is what a product manager should care about most.</p>
+        </div>
+
+        <nav class="post-nav">
+          <div>
+            <a href="../projects.html">
+              <span data-lang="zh">← 返回项目</span>
+              <span data-lang="en" hidden>← Back to projects</span>
+            </a>
+          </div>
+        </nav>
+      </main>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+  <script src="../assets/js/site-config.js"></script>
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,5 +1,16 @@
 [
   {
+    "title": "Vibecoding: A Smart-Driving Collection Business System in 2 Days",
+    "title_zh": "Vibecoding · 2天速成智驾采集业务系统",
+    "slug": "sf-collection",
+    "date": "2026-08-05",
+    "tags": ["Vibecoding", "ADAS Collection", "Fast Delivery"],
+    "tags_zh": ["Vibecoding", "智驾采集", "快速交付"],
+    "excerpt": "Build a working, deployable business system for an autonomous-driving data collection fleet in about two days: a 10,340-line single-file FastAPI backend, 240 APIs, 53 tables, and dual-end React SPAs — then keep shipping through V1.9.",
+    "excerpt_zh": "用 Vibecoding 在约 2 天内跑通一套能上线的智驾数据采集车队管理系统：10,340 行单文件 FastAPI 后端、240 个接口、53 张表、双端 React SPA，并在此后持续迭代到 V1.9。",
+    "file": "projects/sf-collection.html"
+  },
+  {
     "title": "MapXAI — Map Designer Agent",
     "title_zh": "地图XAI · 地图设计师智能体",
     "slug": "map-style-agent",

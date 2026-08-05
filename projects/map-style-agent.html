@@ -26,90 +26,262 @@
         </p>
 
         <div data-lang="zh">
-        <h2>一、项目定位</h2>
-        <p>《地图XAI 地图设计师智能体》（design-map-ai / Map Style Agent）是一个「用自然语言驱动的地图个性化制图智能体」。用户无需掌握专业制图或前端技术，用一句话描述想要的地图样式，AI 即生成地图样式操作（ops）并驱动地图引擎渲染出成品；会话、对话历史与成品风格会被沉淀为可复用的产品资产。</p>
-        <h2>二、目标用户与核心场景</h2>
-        <p>目标用户是产品经理、业务分析师、运营等需要快速产出「接近生产级」地图样式、但没有设计或开发背景的伙伴。</p>
-        <ul>
-        <li><strong>快速出图</strong>：口头描述样式 → 秒级生成可演示地图，用于评审、汇报、Demo；</li>
-        <li><strong>风格沉淀</strong>：把满意的成果保存为风格，一键复用到后续页面，形成团队样式资产；</li>
-        <li><strong>过程回溯</strong>：会话与对话历史完整还原，AI 的制图思路与推理过程可随时查看、继续、返工；</li>
-        <li><strong>多角色协作</strong>：多用户账号 + 数据隔离，每人拥有独立的会话与风格库。</li>
-        </ul>
-        <h2>三、核心能力</h2>
+        <h2>〇、电梯陈述：一句话读懂它</h2>
+        <p>地图制图曾是设计师的专属工作：要懂配色、懂图层、懂数据源，才能把一张「能看的地图」调成「好看的地图」。地图XAI 地图设计师智能体（design-map-ai / Map Style Agent，下称 MSA）把这套专业能力封装成一步：用户用自然语言说「把水系改成浅蓝色、道路描成白色细线、隐藏所有标注」，AI 就把它翻译成一批地图引擎能执行的样式操作（ops），驱动地图引擎实时渲染出成品；整个过程、每一步的推理、以及满意的成品，都被沉淀为可复用的产品资产（会话、历史、风格库）。</p>
+        <p>它不替代专业制图工具，而是把「专业能力」的门槛翻译成「一句话」——这是产品经理最容易上手、也最该关心的 AI 产品形态。</p>
+
+        <h2>一、它解决什么问题：三类真实痛点</h2>
         <ol>
-        <li>自然语言 → 地图样式：LLM 生成 ops 操作序列，驱动地图引擎渲染；</li>
-        <li>会话管理：新建 / 列表 / 删除会话，归属当前用户；</li>
-        <li>对话历史还原：按时间正序恢复完整对话，含 ops 与推理卡片；</li>
-        <li>风格库：保存 / 更新 / 删除风格（含截图），支持多张风格图片；</li>
-        <li>系统设置：地图参数、LLM 模型、外观随账号持久化；</li>
-        <li>账号体系：注册 / 登录 / 登出，Token 鉴权，bcrypt 密码哈希。</li>
+        <li><strong>专业门槛高</strong>：制图工具（Mapbox GL / 各类地图 SDK）上手成本高，配色、图层、渲染属性对非设计师极不友好；</li>
+        <li><strong>研发依赖重</strong>：产品经理想快速出一张「接近生产级」的演示地图，通常要排队等前端或设计，沟通成本高、迭代慢；</li>
+        <li><strong>资产难沉淀</strong>：样式做完就散落在代码里，无法复用、无法复盘、无法交给下一个人。</li>
         </ol>
-        <h2>四、关键架构与产品化设计</h2>
-        <p>整体为「轻前端 + 最小后端」：前端是地图渲染 SPA，后端为 FastAPI + 文件式 SQLite，大模型推理走 DeepSeek 等 OpenAI 兼容接口。工程细节全部服务产品目标：</p>
+        <p>MSA 的目标用户是产品经理、业务分析师、运营等「没有设计或开发背景、但要频繁产出可演示地图」的伙伴。核心场景：</p>
         <ul>
-        <li><strong>LLM 流式透传代理</strong>：平台 Key 只在服务端持有，前端拿不到 Key，规避泄露与安全扫描；模型参数由后端权威值覆盖，防止前端篡改；SSE 流式透传保证打字机式体验。</li>
-        <li><strong>密钥掩码机制</strong>：读接口对 apiKey 一律掩码为 ********；写接口区分「掩码回传（未改）/ 空串（主动清除）/ 新值（覆盖）」，从机制上保证真 Key 永不外流。</li>
-        <li><strong>最小后端 + 文件式 SQLite</strong>：单文件数据库、零额外依赖、启动即自动建表迁移，部署门槛降到「一条脚本」。</li>
-        <li><strong>数据所有权与隔离</strong>：所有会话 / 风格查询都带 user_id 归属校验，多用户互不可见。</li>
-        <li><strong>单一真相源</strong>：新用户默认设置统一种子，老用户不受影响，调整默认值只改一处。</li>
-        <li><strong>兼容与演进</strong>：自动补旧库字段、启动领养历史无主数据，让迭代不破坏存量。</li>
+        <li><strong>快速出图</strong>：口头描述 → 秒级可演示地图，用于评审、汇报、Demo；</li>
+        <li><strong>风格沉淀</strong>：满意成果一键保存为风格，复用到后续页面，形成团队样式资产；</li>
+        <li><strong>过程回溯</strong>：会话与历史完整还原，AI 的制图思路（推理过程）随时可查看、继续、返工；</li>
+        <li><strong>多角色协作</strong>：多账号 + 数据隔离，每人拥有独立的会话与风格库。</li>
         </ul>
-        <h2>五、产品经理最佳实践要点</h2>
+
+        <h2>二、系统全景：轻前端 + 最小后端 + LLM 流式代理</h2>
+        <p>整个产品只有三块积木：</p>
+        <ul>
+        <li><strong>前端</strong>：React 单页应用（dist/），地图引擎为 SFMap 3.1.6（Mapbox GL 兼容），负责交互、渲染，并把 LLM 返回的 ops 逐条应用到图层；</li>
+        <li><strong>后端</strong>：最小 FastAPI（server/app/，约 1000 行），负责鉴权、会话 / 消息 / 风格 / 设置持久化，以及 LLM 流式透传代理；数据落在单文件 SQLite（server/data/app.db），零额外依赖；</li>
+        <li><strong>大模型</strong>：DeepSeek（deepseek-v4-flash）等 OpenAI 兼容接口；平台 Key 只存在于服务端，经 <code>/llm/chat/completions</code> 流式透传，浏览器永远接触不到。</li>
+        </ul>
+        <p>一次「出图」的完整生命周期：</p>
         <ol>
-        <li><strong>把专业门槛翻译成产品能力</strong>：地图制图过去是设计师的专属工作，这里把专业能力封装为「自然语言 → 成品」的一步，用户只关心表达，不关心实现。</li>
-        <li><strong>安全合规内建为默认行为</strong>：Key 不出服务端、读接口掩码、鉴权与数据隔离，都是产品默认能力，而非上线前的补丁。</li>
-        <li><strong>过程资产化</strong>：会话历史 + 推理过程 + 风格库，让 AI 的每一次产出都能被复用、被复盘，而不是一次性消耗品。</li>
-        <li><strong>以落地成本为交付标准</strong>：轻量化部署（单文件 DB、脚本启动、版本化发布）让产品真正可上线、可演示、可交付。</li>
-        <li><strong>小步快跑、兼容演进</strong>：版本迭代坚持向后兼容与自动迁移，让产品在真实使用中持续打磨。</li>
+        <li>用户在会话里用一句话描述想要的地图样式；</li>
+        <li>前端把对话上下文 + 当前地图状态交给 LLM，提示词里注入 <code>apply_map_operations</code> 工具（tool calling）；</li>
+        <li>LLM 思考后返回结构化工具调用：一个 operations 数组（增量样式操作，含目标与属性）；</li>
+        <li>前端用 Zod 校验这份 ops（类型、字段、值），把不合法的操作跳过并记录原因；</li>
+        <li>校验通过的操作逐个应用到 SFMap 引擎（改颜色 / 透明度、显示隐藏、移动相机、切换标注语言…）；</li>
+        <li>地图实时重绘；这轮对话的文本、ops、推理过程一起写入会话；</li>
+        <li>满意就把这组 ops 存成风格；下次打开会话，按历史顺序重放 ops 即可还原当时的画面。</li>
         </ol>
-        <h2>六、结语</h2>
-        <p>地图XAI 是「AI 重塑专业工具」的一次产品化实践：产品经理用自然语言定义样式，AI 负责专业实现，系统负责沉淀资产。它验证了一个判断——当专业能力被封装得足够简单时，非专业人士也能做出接近专业水准的作品。</p>
+
+        <h2>三、核心机制一：自然语言 → 结构化操作（ops）</h2>
+        <p>这是整个产品的心脏。为什么让 LLM 输出「增量操作」而不是「一整份完整样式 JSON」？</p>
+        <ul>
+        <li>增量操作只描述「这次要改什么」：输出短、稳定、易校验；</li>
+        <li>即使某条操作不合法，也可以只跳过这一条，而不至于整份样式报废（部分失败容错）；</li>
+        <li>增量操作天然可保存、可重放、可复用——这正是风格库与历史还原能成立的地基。</li>
+        </ul>
+        <p>ops 的完整类型（Zod discriminated union，按 type 区分）：</p>
+        <table>
+        <tr><th>type</th><th>作用</th><th>关键字段</th></tr>
+        <tr><td>paint</td><td>改图层绘制属性（颜色、透明度等）</td><td>matcher, property, value</td></tr>
+        <tr><td>layout</td><td>改图层布局属性（如文字大小）</td><td>matcher, property, value</td></tr>
+        <tr><td>visibility</td><td>显示 / 隐藏图层</td><td>matcher, value: visible / none</td></tr>
+        <tr><td>camera</td><td>移动相机（中心、缩放、方位、俯仰）</td><td>center?, zoom?, bearing?, pitch?</td></tr>
+        <tr><td>labelLang</td><td>切换标注语言（中 / 英 / 本地）</td><td>lang: zh / en / local</td></tr>
+        </table>
+        <p>「改哪里」用 matcher 表达，两种方式：</p>
+        <ul>
+        <li><code>{ kind: &quot;group&quot;, group: &quot;…&quot; }</code>：按语义分组，比如「全部水系」「所有道路」。系统为样式预置分组配置（组名、成员图层、允许的 paint 属性），LLM 不用记具体图层 id；</li>
+        <li><code>{ kind: &quot;ids&quot;, ids: [&quot;…&quot;] }</code>：精确指定图层 id 列表，适合微调某几个图层。</li>
+        </ul>
+        <p>系统还会做语义识别：按图层 id 里的关键词（学校、医院、地铁站、公交、餐厅、公园…）自动归类 POI 图层，让「把餐厅标成橙色」这类意图能命中正确的组。</p>
+        <p>LLM 的产出用 OpenAI 函数调用（tool calling）承载：工具名 <code>apply_map_operations</code>，描述为「对地图样式应用一批增量操作」，参数就是 operations 数组。Zod 负责运行时校验：某组不支持某 paint 属性、图层组不匹配、值不合法等，都会在应用阶段被拦截，错误原因随结果回传，不影响其余操作继续执行。</p>
+
+        <h2>四、核心机制二：会话与对话历史还原</h2>
+        <p>会话（sessions）是工作的容器；消息（messages）按时间正序存储，每条消息除了 role / content，还带两个关键字段：</p>
+        <ul>
+        <li><strong>ops</strong>：这一轮 AI 产出的样式操作序列（JSON），是「画面」的可执行化身；</li>
+        <li><strong>reasoning</strong>：AI 的推理过程（思考链），用于还原「推理卡片」，让用户看得进制图思路。</li>
+        </ul>
+        <p>还原原理简单而可靠：打开一个会话 → 按 id 升序拉取全部消息 → 逐条把 assistant 消息里的 ops 重新应用到地图引擎 → 画面就回到当初的样子。因为「状态」从未被直接保存，而是由「操作序列」重建的，所以回放永远与原始操作一致，任何一步都可在 UI 上继续追加、返工。删除会话时，messages 通过外键 <code>ON DELETE CASCADE</code> 自动级联清理。</p>
+
+        <h2>五、核心机制三：风格库 —— 把过程变成资产</h2>
+        <p>风格库解决「好样式是一次性的」的问题：</p>
+        <ul>
+        <li><strong>保存</strong>：把一组满意的 ops 存为风格（标题 + ops + 截图 dataURL）；</li>
+        <li><strong>列表</strong>：只返回元信息（标题、时间、是否有截图），不拉大字段，列表轻快；</li>
+        <li><strong>更新 / 删除</strong>：部分更新（只改传入字段），删除校验归属；</li>
+        <li><strong>多图</strong>：每张风格可挂多张图片（style_images 表），取回时校验归属。</li>
+        </ul>
+        <p>「风格」的本质是一份可执行的 ops + 一张截图——把「AI 这一次的判断」沉淀为团队可复用的样式资产。</p>
+
+        <h2>六、核心机制四：系统设置与单一真相源</h2>
+        <p>每个用户的设置存在 users.settings（JSON 列），分三层：</p>
+        <ul>
+        <li><strong>map</strong>：地图参数（密钥 ak、样式地址 styleUrl、默认中心 / 缩放、最小 / 最大缩放）；</li>
+        <li><strong>llm</strong>：大模型参数（baseUrl、apiKey、model、temperature、topP、supportsToolCall、thinkingBudget）；</li>
+        <li><strong>appearance</strong>：外观（亮 / 暗 / 跟随系统，减弱透明度 / 对比度 / 动效，均可跟随系统）。</li>
+        </ul>
+        <p>新用户注册时，settings 直接用 DEFAULT_SETTINGS 作为种子（单一真相源）：想改「新用户默认值」只改 default_settings.py 一处；已注册用户的设置存在自己行里，不受影响。</p>
+
+        <h2>七、安全与合规：密钥不出服务端</h2>
+        <p>这是产品默认能力，而非上线补丁：</p>
+        <ul>
+        <li><strong>平台 Key 只在服务端</strong>（config.PLATFORM_LLM_API_KEY / 环境变量），浏览器永远拿不到，规避泄露与安全扫描；用户未填自己的 Key 时自动回落平台默认；</li>
+        <li><strong>密钥掩码</strong>：读接口对 apiKey 一律回 ********；写接口严格区分三种语义——回传掩码（没改，保留原值）/ 空串或缺失（主动清除，回落平台 Key）/ 新值（覆盖）。真 Key 从机制上不会外流；</li>
+        <li><strong>模型参数权威覆盖</strong>：model / temperature / topP / thinkingBudget 由后端权威值覆盖请求体，前端传什么都会被纠正，防止篡改；</li>
+        <li><strong>工具调用开关</strong>：supportsToolCall=false 时后端强制剥离 tools，让模型走纯文本 JSON 模式，适配不同模型能力。</li>
+        </ul>
+
+        <h2>八、工程上的「小而美」：一条脚本就能上线</h2>
+        <ul>
+        <li><strong>最小后端</strong>：FastAPI + 文件式 SQLite，整份后端约 1000 行，仅依赖 fastapi / uvicorn / httpx / bcrypt；</li>
+        <li><strong>启动即迁移</strong>：启动时自动补旧库缺失列（messages.reasoning、sessions / styles.user_id）、建表建索引；</li>
+        <li><strong>数据领养</strong>：历史无主的会话 / 风格启动时自动归属 admin，不丢存量；</li>
+        <li><strong>密钥清洗</strong>：历史曾种进用户行的平台 Key 一次性空串化，平台 Key 只留在环境变量；</li>
+        <li><strong>密码安全</strong>：bcrypt（72 字节截断防超限），未装 bcrypt 时 sha256 + 盐 兜底；</li>
+        <li><strong>部署</strong>：一条 start.sh，uvicorn 起在 8000 端口即可。</li>
+        </ul>
+
+        <h2>九、产品经理复盘：五个最值得学的判断</h2>
+        <ol>
+        <li><strong>把「专业门槛」翻译成「一句话」</strong>：复杂地图制图封装成自然语言一步，用户只表达、不实现——专业能力的产品化，价值在封装而非参数。</li>
+        <li><strong>用「结构化操作」而非「成品文件」作为 AI 的输出契约</strong>：更稳、可部分失败、可保存、可重放，这是风格库与历史还原能成立的根本。</li>
+        <li><strong>过程即资产</strong>：会话 + 推理 + 风格库，让每次产出都可复用、可复盘，而不是一次性消耗品。</li>
+        <li><strong>安全与合规是默认行为</strong>：Key 不出服务端、读接口掩码、鉴权与数据隔离，从第一天就是产品能力。</li>
+        <li><strong>以「能落地」为交付标准</strong>：约 1000 行后端、单文件 DB、一条脚本启动、自动迁移——真正可上线、可演示、可交付。</li>
+        </ol>
+
+        <h2>十、未来演进方向</h2>
+        <ul>
+        <li><strong>更多 op 类型</strong>：文字排布、图标生成、数据源切换，让 LLM 能「改数据」而不只「改样式」；</li>
+        <li><strong>风格模板市场</strong>：把风格库做成可分享、可订阅的模板资产；</li>
+        <li><strong>批处理与导出</strong>：一键批量出图、导出生产级样式文件；</li>
+        <li><strong>多引擎适配</strong>：把 ops 翻译层做成 SDK，兼容更多地图引擎。</li>
+        </ul>
+
+        <h2>结语</h2>
+        <p>地图XAI 验证了一个判断：当专业能力被封装得足够简单，非专业人士也能做出接近专业水准的作品。而真正让它可持续的，是「过程资产化」——每一次 AI 的判断都被记录、被重放、被复用，产品也在真实使用中越滚越厚。</p>
         </div>
 
         <div data-lang="en" hidden>
-        <h2>1. Positioning</h2>
-        <p>MapXAI — the Map Designer Agent (design-map-ai / Map Style Agent) — is an agent for personalized map styling driven by natural language. You do not need professional map-making or front-end skills: describe the map style you want in one sentence, and the AI generates the map style operations (ops) and drives the map engine to render the result. Conversations, history, and finished styles are persisted as reusable product assets.</p>
-        <h2>2. Target Users &amp; Core Scenarios</h2>
-        <p>Target users are product managers, business analysts, and operations people who need to produce near-production-grade map styles quickly but have no design or engineering background.</p>
+        <h2>0. Elevator Pitch: What It Is in One Sentence</h2>
+        <p>Map-making used to be a designer's job: you had to understand color, layers, and data sources to turn a "readable" map into a "beautiful" one. MapXAI · Map Designer Agent (design-map-ai / Map Style Agent, "MSA") wraps that entire professional capability into a single step: the user says, in natural language, "make the water light blue, stroke the roads with thin white lines, and hide all labels," and the AI translates that into a batch of map-engine-executable style operations (ops), driving the renderer in real time. The whole process, the reasoning behind each step, and the finished result are all persisted as reusable product assets — sessions, history, and a style library.</p>
+        <p>It does not replace professional map tools; it translates the "professional capability" barrier into "one sentence" — the most approachable, and most product-manager-relevant, shape an AI product can take.</p>
+
+        <h2>1. The Problem It Solves: Three Real Pain Points</h2>
+        <ol>
+        <li><strong>High expertise barrier</strong>: map tools (Mapbox GL and similar SDKs) have steep learning curves; color, layers, and render properties are unfriendly to non-designers;</li>
+        <li><strong>Heavy engineering dependency</strong>: a product manager who wants a "near-production-grade" demo map quickly usually has to queue behind front-end or design work — slow iteration, high communication cost;</li>
+        <li><strong>No asset accumulation</strong>: finished styles are scattered across code — not reusable, not reviewable, not hand-off-able.</li>
+        </ol>
+        <p>MSA targets product managers, business analysts, and operations people who have no design or engineering background but frequently need demo-ready maps. Core scenarios:</p>
         <ul>
         <li><strong>Instant map generation</strong>: describe a style verbally → a demo-ready map in seconds, for reviews, reporting, and demos;</li>
-        <li><strong>Style reuse</strong>: save a good result as a style and apply it to later pages with one click, building up a team style library;</li>
-        <li><strong>Process replay</strong>: sessions and conversation history are fully restored, so the AI's design intent and reasoning can be revisited, continued, and reworked;</li>
+        <li><strong>Style reuse</strong>: save a good result as a style and apply it to later pages with one click, building a team style library;</li>
+        <li><strong>Process replay</strong>: sessions and history are fully restored, so the AI's map-making reasoning can be revisited, continued, and reworked;</li>
         <li><strong>Multi-role collaboration</strong>: per-user accounts with data isolation — each person has their own sessions and style library.</li>
         </ul>
-        <h2>3. Core Capabilities</h2>
-        <ol>
-        <li>Natural language → map styles: the LLM produces an ops sequence that drives the map renderer;</li>
-        <li>Session management: create / list / delete sessions, scoped to the current user;</li>
-        <li>History restore: full conversation replay in chronological order, including ops and reasoning cards;</li>
-        <li>Style library: save / update / delete styles (with screenshots) and multiple style images;</li>
-        <li>System settings: map parameters, LLM model, and appearance persisted per account;</li>
-        <li>Account system: register / login / logout, token-based auth, bcrypt password hashing.</li>
-        </ol>
-        <h2>4. Key Architecture &amp; Productization</h2>
-        <p>The architecture is a light front-end plus a minimal backend: the front end is a map-rendering SPA, the backend is FastAPI with a file-based SQLite database, and LLM inference goes through OpenAI-compatible endpoints such as DeepSeek. Every engineering detail serves a product goal:</p>
+
+        <h2>2. System Overview: Light Front End + Minimal Backend + LLM Streaming Proxy</h2>
+        <p>The whole product is three building blocks:</p>
         <ul>
-        <li><strong>LLM streaming relay</strong>: the platform key lives only on the server — the browser never sees it, avoiding leaks and security scanning. Model parameters are overridden with backend-authoritative values to prevent tampering, and SSE streaming keeps the typewriter feel.</li>
-        <li><strong>Key masking</strong>: read APIs always return the apiKey masked as ********; write APIs distinguish between mask round-trip (unchanged), empty string (explicitly cleared), and new value (overridden) — so the real key never leaves the server by design.</li>
-        <li><strong>Minimal backend + file-based SQLite</strong>: a single-file database, zero extra dependencies, and automatic schema creation/migration on startup bring deployment down to one script.</li>
-        <li><strong>Data ownership &amp; isolation</strong>: every session/style query is scoped by user_id, so users cannot see each other's data.</li>
-        <li><strong>Single source of truth</strong>: defaults are seeded uniformly for new users, existing users are unaffected, and changing a default touches one place.</li>
-        <li><strong>Compatibility &amp; evolution</strong>: missing columns are added automatically and orphaned legacy data is adopted on startup, so iteration never breaks existing users.</li>
+        <li><strong>Front end</strong>: a React SPA (dist/); the map engine is SFMap 3.1.6 (Mapbox GL-compatible), handling interaction and rendering, and applying the LLM-returned ops to layers one by one;</li>
+        <li><strong>Backend</strong>: a minimal FastAPI service (server/app/, ~1,000 lines) handling auth, session/message/style/settings persistence, and the LLM streaming proxy; data lives in a single SQLite file (server/data/app.db), zero extra dependencies;</li>
+        <li><strong>LLM</strong>: OpenAI-compatible endpoints such as DeepSeek (deepseek-v4-flash); the platform key exists only on the server and is relayed through <code>/llm/chat/completions</code> — the browser never touches it.</li>
         </ul>
-        <h2>5. PM Best Practices</h2>
+        <p>The full lifecycle of one "render" request:</p>
         <ol>
-        <li><strong>Turn expertise into a product feature</strong>: map-making used to be a designer's job; here it is packaged as one "natural language → result" step — users focus on what they want, not how it is built.</li>
-        <li><strong>Make security &amp; compliance the default</strong>: keys never leave the server, reads are masked, and auth/data isolation are product defaults rather than late patches.</li>
-        <li><strong>Treat process as an asset</strong>: history + reasoning + a style library mean every AI output can be reused and reviewed, not consumed once and lost.</li>
-        <li><strong>Judge success by time-to-value</strong>: lightweight deployment (single-file DB, scripted startup, versioned releases) makes the product truly shippable, demoable, and deliverable.</li>
-        <li><strong>Iterate fast, evolve compatibly</strong>: releases stay backward-compatible with automatic migration, so the product keeps improving in real use.</li>
+        <li>The user describes a map style in one sentence inside a session;</li>
+        <li>The front end hands the conversation context plus current map state to the LLM, injecting the <code>apply_map_operations</code> tool (tool calling) into the prompt;</li>
+        <li>The LLM returns a structured tool call: an operations array (incremental style ops with targets and properties);</li>
+        <li>The front end Zod-validates the ops (types, fields, values), skipping invalid ones while recording the reason;</li>
+        <li>Valid ops are applied one by one to the SFMap engine (color/opacity changes, show/hide, camera moves, label-language switches…);</li>
+        <li>The map re-renders in real time; this turn's text, ops, and reasoning are written back to the session;</li>
+        <li>If satisfied, the ops set is saved as a style; next time the session opens, replaying the ops in order restores the exact picture.</li>
         </ol>
-        <h2>6. Closing</h2>
-        <p>MapXAI is a productization of "AI reshaping professional tools": the product manager defines the style in natural language, the AI handles the professional implementation, and the system accumulates the assets. It validates a simple belief — when expertise is packaged simply enough, non-experts can produce near-professional work.</p>
+
+        <h2>3. Core Mechanism 1: Natural Language → Structured Operations (ops)</h2>
+        <p>This is the heart of the product. Why have the LLM emit "incremental operations" instead of "one complete style JSON"?</p>
+        <ul>
+        <li>An incremental op only says "what to change this time": short, stable, and easy to validate;</li>
+        <li>If one op is invalid, it can be skipped without scrapping the whole style (partial-failure tolerance);</li>
+        <li>Incremental ops are naturally saveable, replayable, and reusable — the very foundation of the style library and history restore.</li>
+        </ul>
+        <p>The complete op types (Zod discriminated union, keyed by type):</p>
+        <table>
+        <tr><th>type</th><th>Effect</th><th>Key fields</th></tr>
+        <tr><td>paint</td><td>Change layer paint properties (color, opacity, …)</td><td>matcher, property, value</td></tr>
+        <tr><td>layout</td><td>Change layer layout properties (e.g. text size)</td><td>matcher, property, value</td></tr>
+        <tr><td>visibility</td><td>Show / hide layers</td><td>matcher, value: visible / none</td></tr>
+        <tr><td>camera</td><td>Move the camera (center, zoom, bearing, pitch)</td><td>center?, zoom?, bearing?, pitch?</td></tr>
+        <tr><td>labelLang</td><td>Switch label language (Chinese / English / local)</td><td>lang: zh / en / local</td></tr>
+        </table>
+        <p>"Where to change" is expressed with a matcher, in two ways:</p>
+        <ul>
+        <li><code>{ kind: &quot;group&quot;, group: &quot;…&quot; }</code>: target a semantic group, e.g. "all water" or "all roads". The system predefines group configs (group name, member layers, allowed paint properties), so the LLM never needs to know concrete layer ids;</li>
+        <li><code>{ kind: &quot;ids&quot;, ids: [&quot;…&quot;] }</code>: target an explicit list of layer ids, for fine-tuning specific layers.</li>
+        </ul>
+        <p>The system also does semantic recognition: it auto-classifies POI layers by keywords in layer ids (schools, hospitals, metro stations, bus stops, restaurants, parks…), so an intent like "turn restaurants orange" hits the right group.</p>
+        <p>The LLM output is carried via OpenAI function/tool calling: a tool named <code>apply_map_operations</code>, described as "apply a batch of incremental operations to the map style," whose parameter is the operations array. Zod handles runtime validation: unsupported paint properties for a group, unmatched layer groups, invalid values, etc., are all intercepted at apply time, with the reason returned in the result without blocking the remaining ops.</p>
+
+        <h2>4. Core Mechanism 2: Sessions &amp; Conversation History Restore</h2>
+        <p>Sessions are the containers of work; messages are stored in chronological order, and each message carries, besides role/content, two key fields:</p>
+        <ul>
+        <li><strong>ops</strong>: the style operation sequence the AI produced this turn (JSON) — the executable incarnation of the "picture";</li>
+        <li><strong>reasoning</strong>: the AI's chain of thought, used to restore "reasoning cards" so users can see the design intent.</li>
+        </ul>
+        <p>The restore principle is simple but reliable: open a session → pull all messages in ascending id order → re-apply the assistant ops to the map engine one by one → the picture returns to what it was. Because "state" is never saved directly but rebuilt from "operation sequences," replay is always consistent with the original actions, and any step can be continued or reworked in the UI. Deleting a session cascades to messages via the foreign key <code>ON DELETE CASCADE</code>.</p>
+
+        <h2>5. Core Mechanism 3: The Style Library — Turning Process into Assets</h2>
+        <p>The style library solves "good styles are one-time-only":</p>
+        <ul>
+        <li><strong>Save</strong>: persist a satisfying ops set as a style (title + ops + screenshot dataURL);</li>
+        <li><strong>List</strong>: returns only metadata (title, time, whether it has a screenshot), no large payloads — light lists;</li>
+        <li><strong>Update / delete</strong>: partial updates (only passed fields), deletion is ownership-checked;</li>
+        <li><strong>Multiple images</strong>: each style can hold several images (style_images table), ownership-checked on fetch.</li>
+        </ul>
+        <p>At its core, a "style" is an executable ops set plus a screenshot — turning "this one judgment of the AI" into a team-reusable style asset.</p>
+
+        <h2>6. Core Mechanism 4: System Settings &amp; Single Source of Truth</h2>
+        <p>Each user's settings live in users.settings (a JSON column), in three tiers:</p>
+        <ul>
+        <li><strong>map</strong>: map parameters (ak, styleUrl, default center/zoom, min/max zoom);</li>
+        <li><strong>llm</strong>: LLM parameters (baseUrl, apiKey, model, temperature, topP, supportsToolCall, thinkingBudget);</li>
+        <li><strong>appearance</strong>: appearance (light/dark/auto, reduced transparency/contrast/motion, each can follow the system).</li>
+        </ul>
+        <p>On registration, settings are seeded from DEFAULT_SETTINGS (the single source of truth): to change "new-user defaults," edit default_settings.py in one place; existing users' settings already live in their own rows and are unaffected.</p>
+
+        <h2>7. Security &amp; Compliance: Keys Never Leave the Server</h2>
+        <p>This is a default product capability, not a pre-launch patch:</p>
+        <ul>
+        <li><strong>The platform key lives only on the server</strong> (config.PLATFORM_LLM_API_KEY / environment variable); the browser never sees it, avoiding leaks and security scans. If a user hasn't set their own key, it falls back to the platform default automatically;</li>
+        <li><strong>Key masking</strong>: read APIs always return the apiKey as ********; write APIs strictly distinguish three semantics — mask round-trip (unchanged, keep the original), empty or missing (explicit clear, fall back to the platform key), or a new value (override). The real key structurally never leaves the server;</li>
+        <li><strong>Authoritative model parameters</strong>: model / temperature / topP / thinkingBudget are overridden with backend-authoritative values, so whatever the front end sends gets corrected — preventing tampering;</li>
+        <li><strong>Tool-call switch</strong>: when supportsToolCall=false, the backend forcibly strips tools, forcing the model into plain-text JSON mode for models of different capabilities.</li>
+        </ul>
+
+        <h2>8. "Small and Beautiful" Engineering: Shippable with One Script</h2>
+        <ul>
+        <li><strong>Minimal backend</strong>: FastAPI + file-based SQLite, ~1,000 lines total, depending only on fastapi / uvicorn / httpx / bcrypt;</li>
+        <li><strong>Migrate on startup</strong>: missing columns (messages.reasoning, sessions / styles.user_id) and tables/indexes are added automatically at startup;</li>
+        <li><strong>Data adoption</strong>: orphaned legacy sessions/styles are auto-adopted to admin on startup — no existing data lost;</li>
+        <li><strong>Key scrubbing</strong>: platform keys once seeded into user rows are blanked in one pass; the platform key stays in the environment only;</li>
+        <li><strong>Password security</strong>: bcrypt (72-byte truncation guards the limit), with a sha256 + salt fallback if bcrypt is unavailable;</li>
+        <li><strong>Deployment</strong>: one start.sh; uvicorn on port 8000 and you're live.</li>
+        </ul>
+
+        <h2>9. PM Retrospective: Five Judgments Worth Stealing</h2>
+        <ol>
+        <li><strong>Turn the "expertise barrier" into "one sentence"</strong>: complex map styling is wrapped into a single natural-language step — the user expresses, the system implements. The value of productizing expertise is the packaging, not the parameters.</li>
+        <li><strong>Make "structured operations," not "finished files," the AI's output contract</strong>: more stable, partial-failure-tolerant, saveable, and replayable — the very reason the style library and history restore can exist.</li>
+        <li><strong>Process is an asset</strong>: sessions + reasoning + a style library make every output reusable and reviewable, not a one-time consumable.</li>
+        <li><strong>Security &amp; compliance are default behavior</strong>: keys never leave the server, reads are masked, and auth/data isolation are product capabilities from day one.</li>
+        <li><strong>Judge success by "shippability"</strong>: ~1,000 lines of backend, a single-file DB, one-script startup, automatic migration — genuinely deployable, demoable, and deliverable.</li>
+        </ol>
+
+        <h2>10. Future Directions</h2>
+        <ul>
+        <li><strong>More op types</strong>: text layout, icon generation, data-source switching — letting the LLM "change data," not just "change style";</li>
+        <li><strong>Style template marketplace</strong>: turning the style library into shareable, subscribable template assets;</li>
+        <li><strong>Batch &amp; export</strong>: one-click batch map generation and export of production-grade style files;</li>
+        <li><strong>Multi-engine adaptation</strong>: turning the ops translation layer into an SDK compatible with more map engines.</li>
+        </ul>
+
+        <h2>Closing</h2>
+        <p>MapXAI validates a belief: when professional capability is packaged simply enough, non-professionals can produce near-professional work. And what makes it sustainable is "process-as-asset" — every judgment the AI makes is recorded, replayed, and reused, so the product grows richer with real use.</p>
         </div>
 
-        <nav class="post-nav">
+<nav class="post-nav">
           <div>
             <a href="../projects.html">
               <span data-lang="zh">← 返回项目</span>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>项目 · Jing Chen</title>
-  <meta name="description" content="Jing Chen 的项目：地图XAI 地图设计师智能体等。 / Projects by Jing Chen: the MapXAI Map Designer Agent and more." />
+  <meta name="description" content="Jing Chen 的项目：地图XAI 地图设计师智能体、未来地图解决方案收录等。 / Projects by Jing Chen: the MapXAI Map Designer Agent, the Future Map Solutions Collection, and more." />
   <link rel="icon" href="assets/img/avatar.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
@@ -73,6 +73,46 @@
 
           <h3>六、结语</h3>
           <p>地图XAI 是「AI 重塑专业工具」的一次产品化实践：产品经理用自然语言定义样式，AI 负责专业实现，系统负责沉淀资产。它验证了一个判断——当专业能力被封装得足够简单时，非专业人士也能做出接近专业水准的作品。</p>
+
+          <hr />
+
+          <h2>地图XAI · 未来地图解决方案收录</h2>
+          <p class="page-meta">产品经理最佳实践方案 · 2026年8月</p>
+
+          <h3>一、项目定位</h3>
+          <p>《地图XAI 未来地图解决方案收录》是一个「地图 × AI 行业解决方案图谱」平台：系统化搜集、展示与评测「未来地图」方向的前沿方案，把分散在行业中的地图与 AI 结合案例，整理成可理解、可对比、可决策的信息资产，帮助产品经理与从业者判断趋势、借鉴落地。</p>
+          <p>平台本身为 React 前端 + Node 服务端：服务端提供方案管理、用户与鉴权、图片上传、综合评分与排行、站点统计等能力，支持后台持续录入与更新收录内容。</p>
+
+          <h3>二、收录方案概览（七篇）</h3>
+          <ol>
+            <li><strong>MapPoster：输入地名，一键生成专属地图海报</strong>——零设计门槛的地理艺术海报工具，支持多配色、多尺寸与超清导出；</li>
+            <li><strong>Google AI Studio：卫星地图 / 街景一键变设计图纸</strong>——用 Nano Banana（Gemini 2.5 Flash Image）结合 Google Earth 地理数据，自动识别建筑、提取立面、生成平面图；</li>
+            <li><strong>GKG 地理空间知识图谱</strong>——把 GIS / BIM / IoT 数据变成可推理的空间知识网络，为 Physical AI 补齐空间认知能力；</li>
+            <li><strong>面向 BEV 感知的 4D 标注方案</strong>——多模标注（LiDAR+IMU+GNSS）与纯视觉标注（改进 SFM）两套路径，已在量产中应用；</li>
+            <li><strong>SentinelLabel：光谱原生的遥感样本 AI 标注</strong>——开源、本地优先，流式读取 Sentinel-2，按生物物理属性自动分割，几分钟生成 GeoPackage 数据集；</li>
+            <li><strong>AI + 地图可视化：Nano Banana 生成手绘地图</strong>——AI 生图 + 风格迁移 + 局部编辑 + 地图配准，构建景区手绘地图的低成本工作流；</li>
+            <li><strong>慧思开物：人形机器人全局场景感知与动态空间记忆</strong>——动态语义地图实现持久记忆，长程任务准确率 100%，具备用户记忆系统。</li>
+          </ol>
+
+          <h3>三、从收录中看到的四个方向</h3>
+          <ul>
+            <li><strong>空间认知化</strong>（GKG、慧思开物）：地图从「看得见」走向「想得通」，知识图谱与具身智能让空间可被推理；</li>
+            <li><strong>数据生产自动化</strong>（BEV 4D、SentinelLabel）：用 AI 突破标注与真值生产瓶颈，支撑规模化训练数据；</li>
+            <li><strong>创作零门槛化</strong>（MapPoster、Nano Banana 手绘、AI Studio 设计）：把专业制图能力封装成「一句话 / 一个地名」的创作体验；</li>
+            <li><strong>场景智能化</strong>（慧思开物、GKG）：地图成为机器人、数字孪生的「空间记忆」与「认知底座」。</li>
+          </ul>
+
+          <h3>四、产品经理最佳实践要点</h3>
+          <ol>
+            <li><strong>用「评测」把专业内容变成可决策信息</strong>：为每篇方案提供综合评分（0-100）、排行、标签与技术栈，让非专家也能快速对比、判断优先级；</li>
+            <li><strong>结构化收录，让信息可复用</strong>：每个方案按「概述—流程—技术要点—案例」沉淀，便于检索、复述与内部借鉴；</li>
+            <li><strong>沉淀的是判断，而不只是资料</strong>：收录平台的真正价值，是把行业经验转译成团队可复用的趋势判断与落地参考；</li>
+            <li><strong>技术底座为内容服务</strong>：Node 单文件服务、SQLite、JWT 鉴权、图片上传、服务端持有 AI Key，保证平台轻量、安全、可维护；</li>
+            <li><strong>持续运营，保持新鲜</strong>：后台可随时录入新方案，让图谱随行业演进不断更新。</li>
+          </ol>
+
+          <h3>五、结语</h3>
+          <p>未来地图不是一张更精细的图，而是一套能理解、能推理、能决策的空间能力。这份收录的价值在于：让这些前沿方案不再散落各处，而是成为产品经理判断「地图 × AI」趋势时随手可取的方法论底稿。</p>
         </div>
 
         <div data-lang="en" hidden>
@@ -123,6 +163,46 @@
 
           <h3>6. Closing</h3>
           <p>MapXAI is a productization of "AI reshaping professional tools": the product manager defines the style in natural language, the AI handles the professional implementation, and the system accumulates the assets. It validates a simple belief — when expertise is packaged simply enough, non-experts can produce near-professional work.</p>
+
+          <hr />
+
+          <h2>MapXAI · Future Map Solutions Collection</h2>
+          <p class="page-meta">Product Manager Best-Practice Notes · Aug 2026</p>
+
+          <h3>1. Positioning</h3>
+          <p>MapXAI · Future Map Solutions Collection is a "Map × AI Industry Solution Atlas" platform: it systematically collects, displays, and evaluates frontier solutions in the "future map" space, turning scattered map + AI cases across the industry into understandable, comparable, decision-ready information assets — helping product managers and practitioners spot trends and borrow proven approaches.</p>
+          <p>The platform itself is a React front-end with a Node.js back end: the server provides solution management, user auth, image upload, overall scoring &amp; rankings, and site stats, so the content can be continuously entered and updated from an admin console.</p>
+
+          <h3>2. Solutions Collected (Seven)</h3>
+          <ol>
+            <li><strong>MapPoster: type a place name, generate a unique map poster</strong> — a zero-design-threshold geographic art poster tool with multiple color themes, sizes, and HD export;</li>
+            <li><strong>Google AI Studio: turn satellite / street view into design drawings with one click</strong> — uses Nano Banana (Gemini 2.5 Flash Image) with Google Earth geodata to recognize buildings, extract façades, and generate floor plans;</li>
+            <li><strong>GKG Geospatial Knowledge Graph</strong> — turns GIS / BIM / IoT data into a reason-able spatial knowledge network, filling the spatial-cognition gap for Physical AI;</li>
+            <li><strong>A 4D labeling approach for BEV perception</strong> — two paths, multimodal (LiDAR+IMU+GNSS) and pure-vision (improved SFM), already applied in production;</li>
+            <li><strong>SentinelLabel: spectral-native AI labeling for remote sensing samples</strong> — open-source, local-first, streams Sentinel-2 imagery and segments by biophysical properties, producing GeoPackage datasets in minutes;</li>
+            <li><strong>AI + map visualization: hand-drawn maps with Nano Banana</strong> — AI image generation + style transfer + local editing + map registration, a low-cost workflow for scenic-area hand-drawn maps;</li>
+            <li><strong>Huisikaowu: humanoid-robot global scene perception &amp; dynamic spatial memory</strong> — a dynamic semantic map provides persistent memory, 100% accuracy on long-horizon tasks, plus a user memory system.</li>
+          </ol>
+
+          <h3>3. Four Directions Visible in the Collection</h3>
+          <ul>
+            <li><strong>Spatial cognition</strong> (GKG, Huisikaowu): maps move from "visible" to "understandable" — knowledge graphs and embodied AI make space reason-able;</li>
+            <li><strong>Automated data production</strong> (BEV 4D, SentinelLabel): AI breaks through labeling and ground-truth bottlenecks to feed large-scale training data;</li>
+            <li><strong>Zero-barrier creation</strong> (MapPoster, Nano Banana hand-drawn, AI Studio design): professional map-making is packaged into a "one place name / one sentence" experience;</li>
+            <li><strong>Scenario intelligence</strong> (Huisikaowu, GKG): maps become the spatial memory and cognitive foundation for robots and digital twins.</li>
+          </ul>
+
+          <h3>4. PM Best Practices</h3>
+          <ol>
+            <li><strong>Turn professional content into decisions with evaluation</strong>: each solution gets an overall score (0–100), rankings, tags, and tech stack so non-experts can compare and prioritize quickly;</li>
+            <li><strong>Structure the collection so it can be reused</strong>: every solution is captured as overview → workflow → tech points → cases, easy to search, paraphrase, and borrow internally;</li>
+            <li><strong>Collect judgment, not just material</strong>: the real value of an atlas is translating industry experience into trend judgments and implementation references a team can reuse;</li>
+            <li><strong>Let the tech base serve the content</strong>: single-file Node server, SQLite, JWT auth, image upload, and server-side-held AI keys keep the platform light, secure, and maintainable;</li>
+            <li><strong>Keep operating, stay fresh</strong>: new solutions can be entered from the admin console at any time, so the atlas keeps evolving with the industry.</li>
+          </ol>
+
+          <h3>5. Closing</h3>
+          <p>The future map is not a more detailed image — it is a set of spatial capabilities that can understand, reason, and decide. The value of this collection is to stop letting frontier solutions live in scattered places, and instead give product managers a ready methodology whenever they need to judge a "Map × AI" trend.</p>
         </div>
       </main>
     </div>

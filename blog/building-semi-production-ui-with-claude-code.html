@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>产品经理使用ClaudeCode心得：如何构建一个半生产级界面产品 · Jing Chen</title>
+  <meta name="description" content="把搭建Claude Code运行环境的实操心得整理成文，适配Windows/Linux、本地/云环境，为产品经理自主搭建半生产级界面筑牢基础环境。 / A hands-on guide to setting up the Claude Code environment on Windows/Linux and local/cloud, laying the foundation for product managers to independently build semi-production-grade interfaces." />
+  <link rel="icon" href="../assets/img/avatar.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <script type="application/json" id="md-source">{"md_zh": "作为产品经理，过往搭建产品界面原型、落地半生产级可演示界面，往往需要依赖研发协助，沟通成本高、落地周期长，且迭代调试不够灵活。近期我通过实操搭建ClaudeCode运行环境，自主完成半生产级产品界面的基础搭建，摆脱了对研发的基础依赖，大幅提升了产品落地效率。本文将完整分享ClaudeCode环境从零搭建的实操心得，适配Windows、Linux双系统，适配本地、云环境，为产品自主搭建半生产级界面筑牢基础环境。\n\n## 一、ClaudeCode二进制版本下载安装（本地/云环境通用）\n\n搭建环境的第一步是完成ClaudeCode二进制版本的安装，该安装方式适配本地电脑、云端服务器等各类运行环境，操作统一且轻量化，无需复杂编译配置，非常适合无深厚开发基础的产品经理操作。\n\n首先，前往ClaudeCode官方GitHub Releases页面，查看并获取最新稳定版本，优先选择适配当前运行系统的二进制安装包，保障后续运行稳定性。确定版本后，打开终端工具，Linux环境可直接使用系统自带命令行，Windows环境推荐打开Git Bash工具，兼容性更强。\n\n在终端中输入以下命令执行下载，其中 `-c` 参数的核心作用是断点续传：\n\n```bash\nwget -c \u003c最新版本下载链接>\n```\n\n若网络波动导致下载中断，无需重新下载完整安装包，可接续原有进度继续下载，大幅提升下载容错率，尤其适合云端服务器、网络不稳定的使用场景。等待命令执行完成，即可得到完整的ClaudeCode二进制安装文件。\n\n## 二、跨系统安装指令适配（Windows/Linux）\n\n单纯通过GitHub下载安装包后，需根据自身运行系统执行对应安装指令，我通过适配调试，整理出Windows、Linux两大主流系统的标准化安装指令，规避系统适配报错，确保安装一次性成功。\n\n### 1、Linux系统安装指令\n\nLinux（含云端Linux服务器、本地Ubuntu/CentOS等发行版）安装流程简洁，下载完成后，先赋予安装文件执行权限，再完成全局安装，具体指令如下：\n\n首先赋予二进制文件执行权限：\n\n```bash\nchmod +x claudecode\n```\n\n其次移动文件至系统全局目录，实现任意终端调用：\n\n```bash\nmv claudecode /usr/local/bin/\n```\n\n最后验证安装是否成功，输入版本查询指令：\n\n```bash\nclaudecode --version\n```\n\n若终端返回对应版本号，即代表Linux环境安装完成。\n\n### 2、Windows系统安装指令\n\nWindows系统需依托Git Bash终端操作，不支持CMD原生终端，下载完成后执行以下指令完成配置安装：\n\n1. 第一步，将下载的claudecode.exe文件移动至Git Bash的usr/bin目录，或自定义系统环境变量目录；\n2. 第二步，在Git Bash终端中输入验证指令：`claudecode --version`；\n3. 第三步，若提示无权限或未识别命令，重启Git Bash后再次执行验证，显示版本号即为安装成功。\n\n## 三、大模型能力开通：获取平台有效Token\n\nClaudeCode仅为代码生成、界面搭建的工具载体，想要实现智能生成界面代码、优化半生产级界面逻辑、调试页面交互效果，必须依托大模型算力支持。安装完成工具本体后，需提前开通大模型平台Token，为后续模型配置、智能搭建功能赋能。\n\n目前适配性最优的两大开放平台为Cherryin、Deepseek开放平台，二者均支持个人开发者免费开通基础算力，完全满足产品经理搭建半生产级界面的需求，无需高额付费。\n\n操作流程统一且简单：登录对应平台官网，完成个人账号注册与实名认证，进入开发者中心，创建个人应用，申请API访问权限，最终生成专属有效Token。需要注意的是，Token为核心密钥，需妥善保存，禁止公开泄露，同时留意平台Token有效期与调用额度，避免搭建过程中算力中断。\n\n## 四、跨系统模型配置方法（Windows/Linux）\n\n获取大模型Token后，核心步骤即为ClaudeCode的模型绑定配置，不同系统配置逻辑一致，仅终端操作细节略有差异，标准化配置流程如下，适配Windows、Linux全场景：\n\n### 1、Linux系统模型配置\n\n通过终端全局配置环境变量，将大模型Token与ClaudeCode绑定，永久生效无需重复配置：\n\n1. 第一步，编辑系统环境变量配置文件：`vim ~/.bashrc`；\n2. 第二步，在文件末尾添加对应平台的模型配置参数，以Deepseek为例：`export CLAUDECODE_API_KEY=你的平台Token`，同时配置模型接口地址；\n3. 第三步，保存退出文件，执行生效指令：`source ~/.bashrc`；\n4. 第四步，验证配置是否生效，输入指令调用模型，测试连通性，无报错即配置成功。\n\n### 2、Windows系统模型配置\n\nWindows系统分为临时配置与永久配置两种方式，推荐永久配置，适配长期使用：\n\n临时配置（单次终端生效，重启失效）：打开Git Bash，直接输入 `export CLAUDECODE_API_KEY=你的平台Token`，适用于临时调试场景；\n\n永久配置：右键此电脑-高级系统设置-环境变量，新建系统变量，变量名填写 `CLAUDECODE_API_KEY`，变量值粘贴获取的平台Token，保存后重启Git Bash，即可永久生效。\n\n## 五、基础环境搭建完成总结\n\n完成以上五步操作后，ClaudeCode完整运行环境正式搭建完毕，包含工具本体安装、跨系统适配调试、大模型算力开通、模型权限配置全流程。此时的环境已具备基础的代码生成、界面搭建、交互调试能力，可支撑产品经理自主开展半生产级界面产品的搭建工作。\n\n对于产品经理而言，这套环境的核心价值在于降低了技术落地门槛。无需深入钻研前端代码、环境配置原理，通过标准化的实操流程，即可拥有自主搭建可演示、可迭代、接近生产标准的产品界面的能力，能够快速将产品原型落地为半生产级版本，用于内部评审、需求验证、演示汇报，极大提升产品从需求到落地的流转效率。后续可基于该基础环境，结合产品需求，迭代界面功能、优化交互逻辑、完善适配细节，完成完整的半生产级界面产品构建。\n", "md_en": "As a product manager, building UI prototypes and delivering semi-production-grade, demo-ready interfaces used to depend on engineering support — high communication overhead, long delivery cycles, and inflexible iteration. Recently I set up a Claude Code environment hands-on and completed the basic scaffolding of a semi-production-grade product interface on my own, shedding that baseline dependency on engineering and dramatically improving how quickly product ideas turn into shipped products. This article walks through the full hands-on process of setting up a Claude Code environment from zero, covering both Windows and Linux, and both local and cloud environments — laying a solid foundation for independently building semi-production-grade interfaces as a product manager.\n\n## 1. Downloading and Installing the Claude Code Binary (Works Locally and in the Cloud)\n\nThe first step is installing the Claude Code binary. This approach fits local machines, cloud servers, and just about any runtime environment: the process is uniform and lightweight, needs no complex compilation or configuration, and suits a product manager without a deep development background.\n\nFirst, open the official Claude Code GitHub Releases page and check the latest stable version. Prefer the binary package that matches your current operating system to keep runtime behavior stable. Once you have picked a version, open a terminal — on Linux you can use the system command line directly; on Windows, Git Bash is the better choice for compatibility.\n\nIn the terminal, run `wget -c` followed by the download link for the latest version (the `-c` flag is what enables resumable downloads):\n\n```bash\nwget -c \u003cdownload-url>\n```\n\nIf the network hiccups and the download is interrupted, the `-c` flag lets the download resume where it left off instead of starting the whole package over — much more fault-tolerant, and especially useful on cloud servers and unstable networks. Once the command finishes, you will have the complete Claude Code binary.\n\n## 2. Cross-System Install Commands (Windows / Linux)\n\nDownloading the package from GitHub is only half the story — you then run the matching install command for your OS. After adapting and testing, I have standardized the commands for the two major systems, Windows and Linux, so you can avoid OS-specific errors and install successfully in one shot.\n\n### 2.1 Linux\n\nLinux (including cloud Linux servers and local distros such as Ubuntu/CentOS) has a simple flow: after downloading, grant the binary execute permission, then install it globally. The commands:\n\nFirst, make the binary executable:\n\n```bash\nchmod +x claudecode\n```\n\nNext, move it into a global directory so it can be called from any terminal:\n\n```bash\nmv claudecode /usr/local/bin/\n```\n\nFinally, verify the install by checking the version:\n\n```bash\nclaudecode --version\n```\n\nIf the terminal prints a version number, the Linux install is done.\n\n### 2.2 Windows\n\nWindows relies on Git Bash — the native CMD terminal will not work. After downloading, run the following steps to finish the install:\n\n1. Move the downloaded claudecode.exe into Git Bash's `usr/bin` directory, or into a directory on your system's PATH.\n2. In Git Bash, verify with the command: `claudecode --version`.\n3. If you get a permission error or \"command not recognized\", restart Git Bash and check again — once a version number shows, the install succeeded.\n\n## 3. Enabling LLM Capabilities: Get a Valid Token from the Platform\n\nClaude Code is only the vehicle — the tool that generates code and builds interfaces. To actually generate interface code, refine the logic of a semi-production-grade interface, and debug page interactions, you need LLM compute underneath. So after installing the tool itself, set up an LLM platform Token in advance, to power the model configuration and intelligent building that come next.\n\nThe two most compatible open platforms today are Cherryin and Deepseek. Both let individual developers enable a free basic tier of compute, which fully covers a product manager's needs for building semi-production-grade interfaces — no need for expensive paid plans.\n\nThe flow is uniform and simple: log in to the platform's website, register a personal account and complete real-name verification, enter the developer center, create a personal application, apply for API access, and finally generate your own valid Token. A few caveats: the Token is a core secret, so keep it safe and never expose it publicly. Also watch the Token's validity period and call quota, so compute does not cut out mid-build.\n\n## 4. Cross-System Model Configuration (Windows / Linux)\n\nWith your LLM Token in hand, the core step is binding the model to Claude Code. The configuration logic is the same across systems; only the terminal details differ slightly. The standardized flow below covers all Windows/Linux scenarios:\n\n### 4.1 Linux\n\nConfigure global environment variables in the terminal to bind your model Token to Claude Code permanently, with no need to repeat the setup:\n\n1. Edit the environment configuration file: `vim ~/.bashrc`.\n2. Append your platform's model configuration at the end of the file. Using Deepseek as an example: `export CLAUDECODE_API_KEY=your-platform-token`, together with the model's API endpoint.\n3. Save, exit, and apply the changes: `source ~/.bashrc`.\n4. Verify the config took effect by invoking the model and testing connectivity — no errors means success.\n\n### 4.2 Windows\n\nWindows offers both temporary and permanent configuration; the permanent one is recommended for long-term use.\n\nTemporary (applies only to the current terminal, resets on restart): open Git Bash and enter `export CLAUDECODE_API_KEY=your-platform-token` — handy for one-off debugging.\n\nPermanent: right-click This PC → Advanced system settings → Environment Variables, create a new system variable named `CLAUDECODE_API_KEY`, paste your platform Token as the value, save, restart Git Bash, and the setting is permanent.\n\n## 5. Summary: The Environment Is Ready\n\nAfter the five steps above, the full Claude Code environment is up: tool installation, cross-system adaptation, LLM compute access, and model permission configuration — the complete flow. At this point the environment has basic code generation, interface building, and interaction debugging capabilities, enough to support a product manager in independently building semi-production-grade interface products.\n\nFor a product manager, the core value of this setup is lowering the technical barrier to shipping. Without digging deep into front-end code or environment internals, a standardized hands-on process gives you the ability to independently build interfaces that are demo-able, iterable, and close to production standard. You can turn a prototype into a semi-production-grade version quickly, for internal reviews, requirements validation, and demo presentations, greatly accelerating the flow from requirement to launch. From this foundation, you can keep iterating on interface features, optimizing interaction logic, and polishing adaptation details as product needs evolve, and complete the full semi-production-grade interface product.\n"}</script>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <div class="page-grid">
+      <div id="site-sidebar"></div>
+
+      <main class="content">
+        <h1>
+          <span data-lang="zh">产品经理使用ClaudeCode心得：如何构建一个半生产级界面产品</span>
+          <span data-lang="en" hidden>A Product Manager's Experience with Claude Code: How to Build a Semi-Production-Grade Interface Product</span>
+        </h1>
+        <p class="page-meta">
+          <span data-lang="zh">2026年8月5日 · Claude Code · 产品实践</span>
+          <span data-lang="en" hidden>Aug 5, 2026 · Claude Code · Product Practice</span>
+        </p>
+
+        <div data-lang="zh">
+          <p>作为产品经理，过往搭建产品界面原型、落地半生产级可演示界面，往往需要依赖研发协助，沟通成本高、落地周期长，且迭代调试不够灵活。近期我通过实操搭建ClaudeCode运行环境，自主完成半生产级产品界面的基础搭建，摆脱了对研发的基础依赖，大幅提升了产品落地效率。本文将完整分享ClaudeCode环境从零搭建的实操心得，适配Windows、Linux双系统，适配本地、云环境，为产品自主搭建半生产级界面筑牢基础环境。</p>
+
+          <h2>一、ClaudeCode二进制版本下载安装（本地/云环境通用）</h2>
+          <p>搭建环境的第一步是完成ClaudeCode二进制版本的安装，该安装方式适配本地电脑、云端服务器等各类运行环境，操作统一且轻量化，无需复杂编译配置，非常适合无深厚开发基础的产品经理操作。</p>
+          <p>首先，前往ClaudeCode官方GitHub Releases页面，查看并获取最新稳定版本，优先选择适配当前运行系统的二进制安装包，保障后续运行稳定性。确定版本后，打开终端工具，Linux环境可直接使用系统自带命令行，Windows环境推荐打开Git Bash工具，兼容性更强。</p>
+          <p>在终端中输入以下命令执行下载，其中 <code>-c</code> 参数的核心作用是断点续传：</p>
+          <pre><code class="language-bash">wget -c &lt;最新版本下载链接&gt;</code></pre>
+          <p>若网络波动导致下载中断，无需重新下载完整安装包，可接续原有进度继续下载，大幅提升下载容错率，尤其适合云端服务器、网络不稳定的使用场景。等待命令执行完成，即可得到完整的ClaudeCode二进制安装文件。</p>
+
+          <h2>二、跨系统安装指令适配（Windows/Linux）</h2>
+          <p>单纯通过GitHub下载安装包后，需根据自身运行系统执行对应安装指令，我通过适配调试，整理出Windows、Linux两大主流系统的标准化安装指令，规避系统适配报错，确保安装一次性成功。</p>
+
+          <h3>1、Linux系统安装指令</h3>
+          <p>Linux（含云端Linux服务器、本地Ubuntu/CentOS等发行版）安装流程简洁，下载完成后，先赋予安装文件执行权限，再完成全局安装，具体指令如下：</p>
+          <p>首先赋予二进制文件执行权限：</p>
+          <pre><code class="language-bash">chmod +x claudecode</code></pre>
+          <p>其次移动文件至系统全局目录，实现任意终端调用：</p>
+          <pre><code class="language-bash">mv claudecode /usr/local/bin/</code></pre>
+          <p>最后验证安装是否成功，输入版本查询指令：</p>
+          <pre><code class="language-bash">claudecode --version</code></pre>
+          <p>若终端返回对应版本号，即代表Linux环境安装完成。</p>
+
+          <h3>2、Windows系统安装指令</h3>
+          <p>Windows系统需依托Git Bash终端操作，不支持CMD原生终端，下载完成后执行以下指令完成配置安装：</p>
+          <ol>
+            <li>第一步，将下载的claudecode.exe文件移动至Git Bash的usr/bin目录，或自定义系统环境变量目录；</li>
+            <li>第二步，在Git Bash终端中输入验证指令：<code>claudecode --version</code>；</li>
+            <li>第三步，若提示无权限或未识别命令，重启Git Bash后再次执行验证，显示版本号即为安装成功。</li>
+          </ol>
+
+          <h2>三、大模型能力开通：获取平台有效Token</h2>
+          <p>ClaudeCode仅为代码生成、界面搭建的工具载体，想要实现智能生成界面代码、优化半生产级界面逻辑、调试页面交互效果，必须依托大模型算力支持。安装完成工具本体后，需提前开通大模型平台Token，为后续模型配置、智能搭建功能赋能。</p>
+          <p>目前适配性最优的两大开放平台为Cherryin、Deepseek开放平台，二者均支持个人开发者免费开通基础算力，完全满足产品经理搭建半生产级界面的需求，无需高额付费。</p>
+          <p>操作流程统一且简单：登录对应平台官网，完成个人账号注册与实名认证，进入开发者中心，创建个人应用，申请API访问权限，最终生成专属有效Token。需要注意的是，Token为核心密钥，需妥善保存，禁止公开泄露，同时留意平台Token有效期与调用额度，避免搭建过程中算力中断。</p>
+
+          <h2>四、跨系统模型配置方法（Windows/Linux）</h2>
+          <p>获取大模型Token后，核心步骤即为ClaudeCode的模型绑定配置，不同系统配置逻辑一致，仅终端操作细节略有差异，标准化配置流程如下，适配Windows、Linux全场景：</p>
+
+          <h3>1、Linux系统模型配置</h3>
+          <p>通过终端全局配置环境变量，将大模型Token与ClaudeCode绑定，永久生效无需重复配置：</p>
+          <ol>
+            <li>第一步，编辑系统环境变量配置文件：<code>vim ~/.bashrc</code>；</li>
+            <li>第二步，在文件末尾添加对应平台的模型配置参数，以Deepseek为例：<code>export CLAUDECODE_API_KEY=你的平台Token</code>，同时配置模型接口地址；</li>
+            <li>第三步，保存退出文件，执行生效指令：<code>source ~/.bashrc</code>；</li>
+            <li>第四步，验证配置是否生效，输入指令调用模型，测试连通性，无报错即配置成功。</li>
+          </ol>
+
+          <h3>2、Windows系统模型配置</h3>
+          <p>Windows系统分为临时配置与永久配置两种方式，推荐永久配置，适配长期使用：</p>
+          <p>临时配置（单次终端生效，重启失效）：打开Git Bash，直接输入 <code>export CLAUDECODE_API_KEY=你的平台Token</code>，适用于临时调试场景；</p>
+          <p>永久配置：右键此电脑-高级系统设置-环境变量，新建系统变量，变量名填写 <code>CLAUDECODE_API_KEY</code>，变量值粘贴获取的平台Token，保存后重启Git Bash，即可永久生效。</p>
+
+          <h2>五、基础环境搭建完成总结</h2>
+          <p>完成以上五步操作后，ClaudeCode完整运行环境正式搭建完毕，包含工具本体安装、跨系统适配调试、大模型算力开通、模型权限配置全流程。此时的环境已具备基础的代码生成、界面搭建、交互调试能力，可支撑产品经理自主开展半生产级界面产品的搭建工作。</p>
+          <p>对于产品经理而言，这套环境的核心价值在于降低了技术落地门槛。无需深入钻研前端代码、环境配置原理，通过标准化的实操流程，即可拥有自主搭建可演示、可迭代、接近生产标准的产品界面的能力，能够快速将产品原型落地为半生产级版本，用于内部评审、需求验证、演示汇报，极大提升产品从需求到落地的流转效率。后续可基于该基础环境，结合产品需求，迭代界面功能、优化交互逻辑、完善适配细节，完成完整的半生产级界面产品构建。</p>
+        </div>
+        <div data-lang="en" hidden>
+          <p>As a product manager, building UI prototypes and delivering semi-production-grade, demo-ready interfaces used to depend on engineering support — high communication overhead, long delivery cycles, and inflexible iteration. Recently I set up a Claude Code environment hands-on and completed the basic scaffolding of a semi-production-grade product interface on my own, shedding that baseline dependency on engineering and dramatically improving how quickly product ideas turn into shipped products. This article walks through the full hands-on process of setting up a Claude Code environment from zero, covering both Windows and Linux, and both local and cloud environments — laying a solid foundation for independently building semi-production-grade interfaces as a product manager.</p>
+
+          <h2>1. Downloading and Installing the Claude Code Binary (Works Locally and in the Cloud)</h2>
+          <p>The first step is installing the Claude Code binary. This approach fits local machines, cloud servers, and just about any runtime environment: the process is uniform and lightweight, needs no complex compilation or configuration, and suits a product manager without a deep development background.</p>
+          <p>First, open the official Claude Code GitHub Releases page and check the latest stable version. Prefer the binary package that matches your current operating system to keep runtime behavior stable. Once you have picked a version, open a terminal — on Linux you can use the system command line directly; on Windows, Git Bash is the better choice for compatibility.</p>
+          <p>In the terminal, run <code>wget -c</code> followed by the download link for the latest version (the <code>-c</code> flag is what enables resumable downloads):</p>
+          <pre><code class="language-bash">wget -c &lt;download-url&gt;</code></pre>
+          <p>If the network hiccups and the download is interrupted, the <code>-c</code> flag lets the download resume where it left off instead of starting the whole package over — much more fault-tolerant, and especially useful on cloud servers and unstable networks. Once the command finishes, you will have the complete Claude Code binary.</p>
+
+          <h2>2. Cross-System Install Commands (Windows / Linux)</h2>
+          <p>Downloading the package from GitHub is only half the story — you then run the matching install command for your OS. After adapting and testing, I have standardized the commands for the two major systems, Windows and Linux, so you can avoid OS-specific errors and install successfully in one shot.</p>
+
+          <h3>2.1 Linux</h3>
+          <p>Linux (including cloud Linux servers and local distros such as Ubuntu/CentOS) has a simple flow: after downloading, grant the binary execute permission, then install it globally. The commands:</p>
+          <p>First, make the binary executable:</p>
+          <pre><code class="language-bash">chmod +x claudecode</code></pre>
+          <p>Next, move it into a global directory so it can be called from any terminal:</p>
+          <pre><code class="language-bash">mv claudecode /usr/local/bin/</code></pre>
+          <p>Finally, verify the install by checking the version:</p>
+          <pre><code class="language-bash">claudecode --version</code></pre>
+          <p>If the terminal prints a version number, the Linux install is done.</p>
+
+          <h3>2.2 Windows</h3>
+          <p>Windows relies on Git Bash — the native CMD terminal will not work. After downloading, run the following steps to finish the install:</p>
+          <ol>
+            <li>Move the downloaded claudecode.exe into Git Bash's <code>usr/bin</code> directory, or into a directory on your system's PATH.</li>
+            <li>In Git Bash, verify with the command: <code>claudecode --version</code>.</li>
+            <li>If you get a permission error or "command not recognized", restart Git Bash and check again — once a version number shows, the install succeeded.</li>
+          </ol>
+
+          <h2>3. Enabling LLM Capabilities: Get a Valid Token from the Platform</h2>
+          <p>Claude Code is only the vehicle — the tool that generates code and builds interfaces. To actually generate interface code, refine the logic of a semi-production-grade interface, and debug page interactions, you need LLM compute underneath. So after installing the tool itself, set up an LLM platform Token in advance, to power the model configuration and intelligent building that come next.</p>
+          <p>The two most compatible open platforms today are Cherryin and Deepseek. Both let individual developers enable a free basic tier of compute, which fully covers a product manager's needs for building semi-production-grade interfaces — no need for expensive paid plans.</p>
+          <p>The flow is uniform and simple: log in to the platform's website, register a personal account and complete real-name verification, enter the developer center, create a personal application, apply for API access, and finally generate your own valid Token. A few caveats: the Token is a core secret, so keep it safe and never expose it publicly. Also watch the Token's validity period and call quota, so compute does not cut out mid-build.</p>
+
+          <h2>4. Cross-System Model Configuration (Windows / Linux)</h2>
+          <p>With your LLM Token in hand, the core step is binding the model to Claude Code. The configuration logic is the same across systems; only the terminal details differ slightly. The standardized flow below covers all Windows/Linux scenarios:</p>
+
+          <h3>4.1 Linux</h3>
+          <p>Configure global environment variables in the terminal to bind your model Token to Claude Code permanently, with no need to repeat the setup:</p>
+          <ol>
+            <li>Edit the environment configuration file: <code>vim ~/.bashrc</code>.</li>
+            <li>Append your platform's model configuration at the end of the file. Using Deepseek as an example: <code>export CLAUDECODE_API_KEY=your-platform-token</code>, together with the model's API endpoint.</li>
+            <li>Save, exit, and apply the changes: <code>source ~/.bashrc</code>.</li>
+            <li>Verify the config took effect by invoking the model and testing connectivity — no errors means success.</li>
+          </ol>
+
+          <h3>4.2 Windows</h3>
+          <p>Windows offers both temporary and permanent configuration; the permanent one is recommended for long-term use.</p>
+          <p>Temporary (applies only to the current terminal, resets on restart): open Git Bash and enter <code>export CLAUDECODE_API_KEY=your-platform-token</code> — handy for one-off debugging.</p>
+          <p>Permanent: right-click This PC → Advanced system settings → Environment Variables, create a new system variable named <code>CLAUDECODE_API_KEY</code>, paste your platform Token as the value, save, restart Git Bash, and the setting is permanent.</p>
+
+          <h2>5. Summary: The Environment Is Ready</h2>
+          <p>After the five steps above, the full Claude Code environment is up: tool installation, cross-system adaptation, LLM compute access, and model permission configuration — the complete flow. At this point the environment has basic code generation, interface building, and interaction debugging capabilities, enough to support a product manager in independently building semi-production-grade interface products.</p>
+          <p>For a product manager, the core value of this setup is lowering the technical barrier to shipping. Without digging deep into front-end code or environment internals, a standardized hands-on process gives you the ability to independently build interfaces that are demo-able, iterable, and close to production standard. You can turn a prototype into a semi-production-grade version quickly, for internal reviews, requirements validation, and demo presentations, greatly accelerating the flow from requirement to launch. From this foundation, you can keep iterating on interface features, optimizing interaction logic, and polishing adaptation details as product needs evolve, and complete the full semi-production-grade interface product.</p>
+        </div>
+
+        <nav class="post-nav">
+          <div>
+            <a href="../blog.html">
+              <span data-lang="zh">← 返回博客</span>
+              <span data-lang="en" hidden>← Back to blog</span>
+            </a>
+          </div>
+        </nav>
+      </main>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+  <script src="../assets/js/site-config.js"></script>
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

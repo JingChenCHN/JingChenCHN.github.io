@@ -13,5 +13,22 @@
     "excerpt": "Some principles I follow when creating — put yourself in the user's shoes, approach as an outsider, care for every detail, improve step by step, and mind how the work presents itself.",
     "excerpt_zh": "把创作时的几条心法记下来：把自己当作使用它的用户，以外部人员的视角来使用产品，关注每一个角落，逐步变好而不求一步到位，并留意作品面向谁、属于什么类型。",
     "file": "blog/my-thought-of-making-a-good-product.html"
+  },
+  {
+    "title": "A Product Manager's Experience with Claude Code: How to Build a Semi-Production-Grade Interface Product",
+    "title_zh": "产品经理使用ClaudeCode心得：如何构建一个半生产级界面产品",
+    "slug": "building-semi-production-ui-with-claude-code",
+    "date": "2026-08-05",
+    "tags": [
+      "Claude Code",
+      "Product Practice"
+    ],
+    "tags_zh": [
+      "Claude Code",
+      "产品实践"
+    ],
+    "excerpt": "How a product manager set up the Claude Code environment from scratch — Windows & Linux, local & cloud — to independently build semi-production-grade, demo-ready UI products.",
+    "excerpt_zh": "产品经理如何从零搭建 Claude Code 运行环境，适配 Windows/Linux、本地/云环境，摆脱对研发的基础依赖，自主搭建可演示、可迭代的半生产级界面产品。",
+    "file": "blog/building-semi-production-ui-with-claude-code.html"
   }
 ]

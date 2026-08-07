@@ -51,6 +51,7 @@ const SITE = {
     { label: { en: "Blog",     zh: "博客" },   href: "blog.html" },
     { label: { en: "Projects", zh: "项目" },   href: "projects.html" },
     { label: { en: "Timeline", zh: "时间线" }, href: "timeline.html" },
+    { label: { en: "Open Source", zh: "我的开源" }, href: "opensource.html" },
     { label: { en: "About",    zh: "关于" },   href: "about.html" },
   ],
 
@@ -110,7 +111,8 @@ function sheetId(page) {
     "blog.html": "S.02 — BLOG",
     "projects.html": "S.03 — PROJECTS",
     "timeline.html": "S.04 — TIMELINE",
-    "about.html": "S.05 — ABOUT",
+    "opensource.html": "S.05 — OPEN SOURCE",
+    "about.html": "S.06 — ABOUT",
     "404.html": "ERR — 404",
   };
   if (map[page]) return map[page];

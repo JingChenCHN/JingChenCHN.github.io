@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>我的开源 · Jing Chen</title>
+  <meta name="description" content="Jing Chen 的开源项目：Hypora — content-first WYSIWYG Markdown 编辑器(Tauri 2 + Vue 3,双引擎 AI 助手);pmtool — PMT 需求管理 Roadmap,轻量级迭代路线图工具(FastAPI + SQLite,零构建)。 / Open-source projects by Jing Chen: Hypora, a content-first WYSIWYG Markdown editor; pmtool, a lightweight product roadmap tool." />
+  <link rel="icon" href="assets/img/avatar.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    /* ---- project cards (blueprint palette, scoped to this page) ---- */
+    .proj { margin: 22px 0 30px; }
+    .proj-card { border: 1px solid var(--border-strong); border-top: 3px solid var(--accent); border-radius: 6px; background: var(--bg); padding: 18px 20px; }
+    .proj-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 0 0 6px; }
+    .proj-name { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: var(--text); margin: 0; }
+    .proj-name a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--accent-line); }
+    .proj-name a:hover { color: var(--link); border-bottom-color: var(--link); }
+    .proj-tag { font-family: var(--font-mono); font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 4px; padding: 2px 7px; }
+    .proj-sub { font-size: .82rem; color: var(--text-muted); margin: 0 0 12px; }
+    .proj-desc { font-size: .92rem; line-height: 1.75; margin: 0 0 14px; }
+    .proj-meta { display: flex; flex-wrap: wrap; gap: 8px; }
+    .proj-chip { font-family: var(--font-mono); font-size: .7rem; color: var(--text-muted); background: var(--bg-soft); border: 1px solid var(--border); border-radius: 4px; padding: 3px 9px; }
+    .proj-chip b { color: var(--link); font-weight: 600; }
+    .proj-link { font-family: var(--font-mono); font-size: .74rem; word-break: break-all; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border-strong); }
+    .proj-link a { color: var(--link); text-decoration: none; }
+    .proj-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <div class="page-grid">
+      <div id="site-sidebar"></div>
+
+      <main class="content">
+        <h1>
+          <span data-lang="zh">我的开源</span>
+          <span data-lang="en" hidden>Open Source</span>
+        </h1>
+        <p class="page-meta">
+          <span data-lang="zh">把我做过的、正在维护的产品源码公开出来 · GitHub · MIT License</span>
+          <span data-lang="en" hidden>Source code of products I build and maintain · GitHub · MIT License</span>
+        </p>
+
+        <!-- ===== Hypora ===== -->
+        <section class="proj">
+          <div class="proj-card">
+            <div class="proj-head">
+              <h2 class="proj-name"><a href="https://github.com/JingChenCHN/Hypora" target="_blank" rel="noopener">Hypora</a></h2>
+              <span class="proj-tag">Editor · Tauri 2</span>
+            </div>
+            <p class="proj-sub" data-lang="zh">Content-first WYSIWYG Markdown 编辑器,双引擎 AI 助手。</p>
+            <p class="proj-sub" data-lang="en" hidden>Content-first WYSIWYG Markdown editor with a dual-engine AI assistant.</p>
+            <p class="proj-desc" data-lang="zh">一款「内容优先」的所见即所得 Markdown 编辑器,基于 Tauri 2 + Vue 3 构建。把书写体验放在第一位,同时内置双引擎 AI 助手,在写作过程中提供智能补全与改写建议。</p>
+            <p class="proj-desc" data-lang="en" hidden>A content-first WYSIWYG Markdown editor built on Tauri 2 + Vue 3. Writing experience comes first, with a dual-engine AI assistant that offers intelligent completion and rewrite suggestions while you write.</p>
+            <div class="proj-meta">
+              <span class="proj-chip"><b>Stack</b>&nbsp; Tauri 2 · Vue 3</span>
+              <span class="proj-chip"><b>Lang</b>&nbsp; Vue</span>
+              <span class="proj-chip"><b>Status</b>&nbsp; Active</span>
+              <span class="proj-chip"><b>License</b>&nbsp; MIT</span>
+            </div>
+            <div class="proj-link">
+              <span data-lang="zh">地址 /</span><span data-lang="en" hidden>Repo /</span>
+              <a href="https://github.com/JingChenCHN/Hypora" target="_blank" rel="noopener">https://github.com/JingChenCHN/Hypora</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== pmtool ===== -->
+        <section class="proj">
+          <div class="proj-card">
+            <div class="proj-head">
+              <h2 class="proj-name"><a href="https://github.com/JingChenCHN/pmtool" target="_blank" rel="noopener">pmtool</a></h2>
+              <span class="proj-tag">Roadmap · FastAPI</span>
+            </div>
+            <p class="proj-sub" data-lang="zh">PMT 需求管理 Roadmap — 轻量级产品需求管理 / 迭代路线图工具。</p>
+            <p class="proj-sub" data-lang="en" hidden>PMT — a lightweight product requirements &amp; iteration roadmap tool.</p>
+            <p class="proj-desc" data-lang="zh">从「智驾采集管理系统」中拆解出的独立 roadmap 模块,零构建、一条命令即可部署。支持需求看板、迭代 / 分类管理、卡片拖拽、多端编辑冲突检测,以及内置 OpenAI 兼容接口的 AI 辅助 PRD 撰写。</p>
+            <p class="proj-desc" data-lang="en" hidden>An independent roadmap module extracted from a smart-driving collection management system. Zero build steps, deployable with one command. Includes a requirement board, iteration / category management, drag-and-drop cards, multi-editor conflict detection, and AI-assisted PRD writing via an OpenAI-compatible API.</p>
+            <div class="proj-meta">
+              <span class="proj-chip"><b>Stack</b>&nbsp; FastAPI · SQLite · HTML</span>
+              <span class="proj-chip"><b>Lang</b>&nbsp; Python</span>
+              <span class="proj-chip"><b>Status</b>&nbsp; Active</span>
+              <span class="proj-chip"><b>License</b>&nbsp; MIT</span>
+            </div>
+            <div class="proj-link">
+              <span data-lang="zh">地址 /</span><span data-lang="en" hidden>Repo /</span>
+              <a href="https://github.com/JingChenCHN/pmtool" target="_blank" rel="noopener">https://github.com/JingChenCHN/pmtool</a>
+            </div>
+          </div>
+        </section>
+
+        <p class="page-meta">
+          <span data-lang="zh">更多项目正在路上,持续开源中。</span>
+          <span data-lang="en" hidden>More projects coming — stay tuned.</span>
+        </p>
+      </main>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+  <script src="assets/js/site-config.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>产品经理如何用好 Taste Skill（AI 前端审美技能包）</title>
+  <meta name="description" content="Taste Skill 是给 Cursor/Claude Code/Codex 等 AI 编码工具的开源审美规则包（SKILL.md），把抽象的「产品品味」变成 AI 可执行的设计规则。本文从 PM 视角讲透它的核心价值、四步落地流程、实战用法与避坑指南。 / Taste Skill is an open-source aesthetic rule pack (SKILL.md) for AI coding tools like Cursor/Claude Code/Codex — it turns abstract \"product taste\" into executable design rules for AI. This article covers its core value for PMs, a 4-step rollout, practical use cases, and pitfalls to avoid." />
+  <link rel="icon" href="../assets/img/avatar.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <style>
+    /* ---- article diagrams (blueprint palette, scoped to this page) ---- */
+    .dgm { margin: 22px 0 30px; overflow-x: auto; }
+    .dgm-cap { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 10px; }
+    .dgm-cap b { color: var(--accent); font-weight: 600; }
+    .dgm-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+    .dgm-col { display: flex; flex-direction: column; gap: 10px; flex: 1 1 0; min-width: 220px; }
+    .dgm-box { border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 12px; background: var(--bg); min-width: 0; }
+    .dgm-box.sub { background: var(--bg-soft); border-color: var(--border); }
+    .dgm-box.solo { background: var(--accent-soft); border-color: var(--accent-line); }
+    .dgm-box.grow { flex: 1 1 0; }
+    .dgm-title { font-size: .86rem; font-weight: 600; margin: 0 0 4px; color: var(--text); }
+    .dgm-sub { font-size: .74rem; color: var(--text-muted); margin: 0; line-height: 1.6; }
+    .dgm-arrow { text-align: center; color: var(--accent); font-size: .95rem; line-height: 1; padding: 6px 0; }
+    .dgm-arrow span { font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-faint); }
+    .flow { display: flex; flex-direction: column; }
+    .flow-step { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 6px; background: var(--bg-soft); padding: 10px 12px; }
+    .flow-n { font-family: var(--font-mono); font-size: .7rem; color: var(--link); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 4px; padding: 2px 6px; flex: none; margin-top: 1px; }
+    .dgm-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .dgm-tag { font-family: var(--font-mono); font-size: .66rem; color: var(--link); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 999px; padding: 2px 9px; }
+    .stat-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .stat { flex: 1 1 0; min-width: 120px; border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 12px; background: var(--bg); }
+    .stat b { display: block; font-family: var(--font-mono); font-size: 1.25rem; color: var(--accent); line-height: 1.2; }
+    .stat span { font-size: .7rem; color: var(--text-muted); }
+    .note { border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0; padding: 10px 14px; font-size: .86rem; margin: 16px 0; }
+    .note p { margin: 0; }
+    .back-arrow { text-align: center; color: var(--text-muted); font-family: var(--font-mono); font-size: .66rem; letter-spacing: .08em; margin: 6px 0 0; }
+    .vs { display: flex; gap: 14px; flex-wrap: wrap; }
+    .vs .dgm-col { flex: 1 1 0; min-width: 250px; }
+    .vs-badge { font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .12em; border-radius: 999px; padding: 2px 10px; display: inline-block; margin-bottom: 8px; }
+    .vs-badge.a { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-line); }
+    .vs-badge.b { background: #e9f7ef; color: #1f7a4d; border: 1px solid #bfe6cf; }
+    .three { display: flex; gap: 10px; flex-wrap: wrap; }
+    .three .dgm-box { flex: 1 1 0; min-width: 170px; }
+    /* added for this article */
+    .knob { flex: 1 1 0; min-width: 190px; }
+    .knob-scale { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin: 8px 0; }
+    .knob-scale i { flex: 1 1 0; background: var(--border); }
+    .knob-scale i.hi { background: var(--accent-line); }
+    .knob-scale i.fill { background: var(--accent); }
+    .bad { color: #b34040; }
+    .good { color: #1f7a4d; }
+    .checklist li { margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <div class="page-grid">
+      <div id="site-sidebar"></div>
+
+      <main class="content">
+        <h1>
+          <span data-lang="zh">产品经理如何用好 Taste Skill（AI 前端审美技能包）</span>
+          <span data-lang="en" hidden>How Product Managers Get the Most Out of Taste Skill (an AI Frontend Aesthetic Skill Pack)</span>
+        </h1>
+        <p class="page-meta">
+          <span data-lang="zh">2026年8月7日 · AI产品 · Taste Skill · 审美</span>
+          <span data-lang="en" hidden>Aug 7, 2026 · AI Product · Taste Skill · Aesthetic</span>
+        </p>
+
+        <!-- ==================== ZH ==================== -->
+        <div data-lang="zh">
+
+          <p>AI 写代码越来越强，但它生成界面的审美，却常常停留在「千篇一律的居中卡片、蓝紫渐变、假数据」——业界管这个叫 <strong>slop</strong>（廉价模板味）。产品经理拿着 AI 生成的原型去评审，一眼就知道「不对味」，却说不出哪里不对。</p>
+
+          <p>这篇文章要讲的 <strong>Taste Skill</strong>，就是专门治这个病的。先明确定义：</p>
+
+          <div class="note">
+            <p><strong>Taste Skill 是一套给 Cursor / Claude Code / Codex / Gemini 等 AI 编码工具的开源审美规则包（SKILL.md）</strong>，核心目标是解决 AI 生成界面千篇一律、廉价模板化（slop）的问题，给 AI 植入标准化、可落地的产品设计品味规则。</p>
+          </div>
+
+          <p>对产品经理来说，它不是替代设计师，而是<strong>把 PM 的产品调性、体验规范、交互细节约束直接灌给 AI</strong>，大幅缩短「需求 → 原型 → 高保真前端 Demo → 开发交付」的周期，统一团队视觉 &amp; 交互底线。</p>
+
+          <h2>一、先搞懂 PM 用 Taste Skill 的核心价值</h2>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 01 · <b>PM 视角下 Taste Skill 的四重价值</b> / Four values from a PM's view</p>
+            <div class="stat-row">
+              <div class="stat"><b>① 品味→规则</b><span>把抽象「产品品味」变成 AI 可执行的排版、留白、层级、动效规范</span></div>
+              <div class="stat"><b>② 前置调性</b><span>PRD 后直接出可交互页面，提前暴露布局与路径问题，减少评审返工</span></div>
+              <div class="stat"><b>③ 13 套模块</b><span>分场景模块化选型，覆盖官网、后台 SaaS、改版、品牌、移动端全阶段</span></div>
+              <div class="stat"><b>④ 三旋钮</b><span>1–10 档可量化调控设计风格，替代「高级一点」式的模糊描述</span></div>
+            </div>
+          </div>
+
+          <h3>1. 把抽象「产品品味」变成 AI 可执行规则</h3>
+          <p>不用反复跟 AI 说「高级、简约、专业」——内置排版、留白、层级、动效、空状态、深色模式完整规范，规避 AI 默认的居中卡片、蓝紫渐变、假数据等廉价模板。</p>
+
+          <h3>2. 前置统一产品视觉调性，减少评审返工</h3>
+          <p>PM 写完 PRD 后直接生成匹配品牌气质的可交互页面，提前暴露布局、信息密度、操作路径问题，不用等设计师出图再改需求。</p>
+
+          <h3>3. 分场景模块化选型，覆盖产品全阶段</h3>
+          <p>内置 <strong>13 套细分技能</strong>，官网 tasteskill.dev 全部可查，适配官网、后台 SaaS、改版重构、品牌规范、移动端原型等所有 PM 工作场景。</p>
+
+          <h3>4. 可量化调控设计风格，对齐目标用户</h3>
+          <p>三大核心参数旋钮（1–10 档），PM 可以直接定义产品气质，替代模糊主观描述：</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 02 · <b>三大参数旋钮：用档位代替形容词</b> / Three parameter knobs: dials instead of adjectives</p>
+            <div class="dgm-row">
+              <div class="dgm-box knob">
+                <p class="dgm-title">DESIGN_VARIANCE 布局变化度</p>
+                <div class="knob-scale"><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="hi"></i><i></i><i></i><i></i><i></i><i></i></div>
+                <p class="dgm-sub">后台工具选 3–5（规整）；营销官网选 7–10（不对称高级感）</p>
+              </div>
+              <div class="dgm-box knob">
+                <p class="dgm-title">MOTION_INTENSITY 动效强度</p>
+                <div class="knob-scale"><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="hi"></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <p class="dgm-sub">B 端后台 3–4（仅 hover 轻动效）；C 端产品 6–8（流畅滚动动画）</p>
+              </div>
+              <div class="dgm-box knob">
+                <p class="dgm-title">VISUAL_DENSITY 信息密度</p>
+                <div class="knob-scale"><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="hi"></i><i></i><i></i></div>
+                <p class="dgm-sub">仪表盘 / 工作台 8–10；落地页 / 官网 2–4（大量留白）</p>
+              </div>
+            </div>
+            <p class="back-arrow">三个旋钮 = 产品气质的三条坐标轴</p>
+          </div>
+
+          <h2>二、PM 完整落地使用流程（从安装到交付验收）</h2>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 03 · <b>四步流程总览</b> / The four-step rollout</p>
+            <div class="dgm-row">
+              <div class="dgm-box grow"><p class="dgm-title">① 环境安装</p><p class="dgm-sub">终端一键装 v2，生成 SKILL.md</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box grow"><p class="dgm-title">② 匹配 Skill</p><p class="dgm-sub">按产品阶段选对细分技能</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box grow"><p class="dgm-title">③ Prompt 驱动</p><p class="dgm-sub">业务 brief + 三参数 + 强制约束</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box solo grow"><p class="dgm-title">④ Pre-Flight 验收</p><p class="dgm-sub">内置预检清单，杜绝半成品</p></div>
+            </div>
+          </div>
+
+          <h3>步骤 1：环境安装（1 分钟）</h3>
+          <p>支持 Cursor、Claude Code、v0、OpenCode 等主流 AI 编码工具，终端一键安装 v2（当前默认实验稳定版）：</p>
+          <pre><code>npx skills add Leonxlnx/taste-skill</code></pre>
+          <p>工具会自动在项目生成 <code>SKILL.md</code> 规则文件，AI 会自动读取；无终端工具可直接复制仓库 SKILL.md 粘贴进 AI 对话上下文使用。</p>
+
+          <h3>步骤 2：按产品阶段匹配对应 Skill（官网技能库核心选型）</h3>
+          <p>根据你的产品任务选技能，是 PM 用好这套工具的关键，避免选错风格导致输出不符预期：</p>
+
+          <table>
+            <thead>
+              <tr><th>PM 工作场景</th><th>推荐 Skill</th><th>适用说明</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>新品官网 / 落地页、营销活动页</td><td><code>design-taste-frontend</code>（核心 v2）</td><td>读取业务 brief 自动推导设计语言，反模板，支持完整响应式</td></tr>
+              <tr><td>B 端后台、SaaS 工作台、数据仪表盘</td><td><code>minimalist-skill</code> 极简 / <code>soft-skill</code> 柔和</td><td>克制配色、高密度信息、清晰表格筛选、完整异常空状态</td></tr>
+              <tr><td>旧产品改版、存量页面重构优化</td><td><code>redesign-skill</code> 审计重构</td><td>先自动审计现有 UI 缺陷，保留业务逻辑再优化视觉层级</td></tr>
+              <tr><td>移动端 APP 原型、H5 页面</td><td><code>imagegen-frontend-mobile</code></td><td>输出多屏联动、适配手机交互逻辑，按钮热区规范</td></tr>
+              <tr><td>品牌规范搭建、统一组件库</td><td><code>brandkit</code></td><td>一键生成 Logo、配色、字体、组件规范，输出设计系统文档</td></tr>
+              <tr><td>追求极简留白高端质感（工具 / 内容产品）</td><td><code>soft-skill</code></td><td>低对比度、充足留白、顺滑轻量化动效</td></tr>
+              <tr><td>工具类硬核、专业工业产品</td><td><code>brutalist-skill</code> 粗野主义</td><td>瑞士排版、强对比、清晰结构，适合开发者工具、运维平台</td></tr>
+            </tbody>
+          </table>
+
+          <h3>步骤 3：PM 标准 Prompt 模板（直接复制使用，避免 AI 跑偏）</h3>
+
+          <h4>模板 1：新建产品官网 / 落地页</h4>
+          <pre><code>启用 design-taste-frontend v2 规则，基于以下产品 brief 生成完整可响应官网首页：
+1. 产品定位：B2B 企业客户管理 SaaS，目标用户企业运营负责人，调性克制、专业、可信
+2. 参数配置：DESIGN_VARIANCE=5，MOTION_INTENSITY=4，VISUAL_DENSITY=3
+3. 强制约束：
+- 禁止全页面居中卡片、紫色渐变装饰
+- 完整包含空状态、加载、报错异常页面
+- 信息层级：产品价值标题&gt;功能介绍&gt;客户案例&gt;行动按钮
+- 适配桌面 + 移动端，不使用假测试数据
+4. 输出完整 TSX 代码，附带页面交互说明，方便前端开发落地</code></pre>
+
+          <h4>模板 2：后台 SaaS 页面重构（存量产品优化）</h4>
+          <pre><code>启用 redesign-skill，先审计当前后台页面 UI 问题，再重构页面：
+1. 约束：完全保留现有筛选、表格、批量操作业务逻辑，不改动数据流程
+2. 参数：DESIGN_VARIANCE=3，MOTION_INTENSITY=3，VISUAL_DENSITY=8
+3. 优化要求：统一按钮权重、状态色仅用于业务流程提示、数字使用等宽字体、补充空数据/无权限兜底页面
+4. 输出：审计问题清单 + 完整重构代码 + PM 验收检查清单</code></pre>
+
+          <h3>步骤 4：PM 专属验收机制（Taste Skill 内置 Pre-Flight 预校验）</h3>
+          <p>v2 版本自带<strong>强制预检清单</strong>，PM 验收时直接对照，杜绝半成品、残缺页面：</p>
+          <ul class="checklist">
+            <li>① 页面所有正向 / 异常流程完整（loading、空数据、报错、无权限、二次确认弹窗）</li>
+            <li>② 字体、间距、色彩严格遵循统一设计系统，无杂乱装饰元素</li>
+            <li>③ 深色 / 浅色双模式兼容，对比度符合可读性规范</li>
+            <li>④ 移动端响应式无布局错乱</li>
+            <li>⑤ 无占位假数据、无多余装饰性动效影响操作效率</li>
+          </ul>
+
+          <h2>三、嵌入 PM 全工作流的实战用法</h2>
+
+          <h3>1. 需求评审阶段：快速产出视觉原型，验证方案取舍</h3>
+          <div class="dgm">
+            <p class="dgm-cap">FIG 04 · <b>传统流程 vs Taste Skill 流程</b> / Traditional vs Taste Skill flow</p>
+            <div class="vs">
+              <div class="dgm-col">
+                <span class="vs-badge a">传统流程</span>
+                <div class="flow">
+                  <div class="flow-step"><span class="flow-n">1</span><div><p class="dgm-title">PRD 写需求</p><p class="dgm-sub">文字描述，视觉只能靠想象</p></div></div>
+                  <div class="dgm-arrow">→</div>
+                  <div class="flow-step"><span class="flow-n">2</span><div><p class="dgm-title">设计师出稿（3–5 天）</p><p class="dgm-sub">等待周期长</p></div></div>
+                  <div class="dgm-arrow">→</div>
+                  <div class="flow-step"><span class="flow-n">3</span><div><p class="dgm-title">评审改需求</p><p class="dgm-sub">看到视觉才改需求，来回返工</p></div></div>
+                </div>
+              </div>
+              <div class="dgm-col">
+                <span class="vs-badge b">Taste Skill 流程</span>
+                <div class="flow">
+                  <div class="flow-step"><span class="flow-n">1</span><div><p class="dgm-title">写完 PRD</p><p class="dgm-sub">同样的文字需求</p></div></div>
+                  <div class="dgm-arrow">→</div>
+                  <div class="flow-step"><span class="flow-n">2</span><div><p class="dgm-title">10 分钟生成可交互 Demo</p><p class="dgm-sub">Taste Skill 直接把需求转成页面</p></div></div>
+                  <div class="dgm-arrow">→</div>
+                  <div class="flow-step"><span class="flow-n">3</span><div><p class="dgm-title">团队评审布局 / 路径 / 密度</p><p class="dgm-sub">提前砍掉臃肿功能、别扭交互</p></div></div>
+                </div>
+              </div>
+            </div>
+            <p class="back-arrow">把「产品品味」前置到需求环节，而不是等到视觉阶段返工</p>
+          </div>
+
+          <h3>2. 和设计师协作：统一基础规范，解放创意</h3>
+          <ul>
+            <li><strong>简单官网、活动 H5、内部后台：</strong>用 Taste Skill 生成基础页面，设计师只做品牌精细化微调，不用从零搭建布局；</li>
+            <li><strong>核心旗舰产品：</strong>用 Skill 输出一套统一基础组件规范（按钮、卡片、弹窗、间距），设计师基于这套规范做差异化创意，保证全产品视觉统一。</li>
+          </ul>
+
+          <h3>3. 上线前体验验收：批量排查「品味 bug」</h3>
+          <p>很多产品逻辑没问题，但体验粗糙（弹窗过多、文案生硬、留白拥挤、无空状态）——这类就是 <strong>taste bug</strong>。你可以批量让 AI 遍历全页面，用 Skill 规则自动审计：输出一份体验缺陷清单，作为上线验收标准，不用人工逐页检查细节。</p>
+
+          <h3>4. 竞品分析：用 Skill 拆解竞品设计取舍</h3>
+          <p>输入竞品页面截图 / 链接，搭配 <code>image-to-code-skill</code>，让 AI 拆解竞品的布局、留白、信息密度、动效策略，对比自家产品参数配置差异，清晰判断竞品的产品调性取舍，不再只抄表面功能。</p>
+
+          <h2>四、PM 使用避坑指南（高频踩坑点）</h2>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 05 · <b>五个高频坑</b> / Five common pitfalls</p>
+            <div class="dgm-row">
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ 只喊「好看高级」</p><p class="dgm-sub">AI 回到通用模板 → 配 brief + 三参数</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ B 端高动效</p><p class="dgm-sub">动效 &gt;6、变化度 &gt;7 干扰操作效率</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ 跳过 Pre-Flight</p><p class="dgm-sub">异常页、移动端最易被省略</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ 混淆个人偏好与产品调性</p><p class="dgm-sub">参数服务目标用户，不是个人喜好</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ 替代成熟设计系统</p><p class="dgm-sub">适合原型与无专职设计师场景</p></div>
+            </div>
+          </div>
+
+          <ol>
+            <li><strong>不要只说「好看高级」，必须配业务 brief + 三参数。</strong>模糊描述会让 AI 回到通用模板；先讲用户、行业、产品定位，再明确三大档位参数，输出才贴合产品气质。</li>
+            <li><strong>B 端后台不要高动效、高布局变化。</strong>后台核心是高效操作，动效 &gt;6、变化度 &gt;7 会造成视觉干扰，降低运营效率。</li>
+            <li><strong>已有成熟专业设计系统的项目，不建议完全依赖。</strong>适合作为辅助原型工具，最终落地以设计师设计系统为准；适合无专职设计师、快速迭代、营销页面场景。</li>
+            <li><strong>不要跳过 Pre-Flight 预检直接交付开发。</strong>AI 容易省略异常页面、移动端适配，必须让 AI 输出自检报告，PM 核对完整流程再交付。</li>
+            <li><strong>区分「个人审美偏好」和「产品目标调性」。</strong>Skill 的参数是服务目标用户，不是 PM 个人喜好：面向中老年用户降低布局变化、减少复杂动效；面向年轻创作者可拉高变化度与动效。</li>
+          </ol>
+
+          <h2>五、进阶：搭建团队专属产品 Taste 规范</h2>
+          <ol>
+            <li>在项目根目录维护自定义 <code>SKILL.md</code>，基于官方规则修改，写入公司品牌色、字体、交互文案规范；</li>
+            <li>沉淀不同产品线的固定参数模板（ToB 后台模板、C 端 APP 模板、官网模板），团队 PM 直接复用，保证全产品线设计品味统一；</li>
+            <li>把 Skill 预检清单纳入团队 PRD 交付标准，作为需求文档附带的视觉交互规范附件。</li>
+          </ol>
+
+          <h2>总结</h2>
+          <p>Taste Skill 对产品经理的核心价值，是<strong>把模糊的「产品品味」转化为可标准化、可 AI 执行、可量化调控的设计规则</strong>，打通「需求 — 原型 — 前端 Demo — 验收」全链路，大幅降低视觉、交互、细节的沟通成本，让 PM 能快速落地有统一质感、贴合用户调性的产品界面，而非千篇一律的 AI 模板页面。</p>
+
+        </div>
+
+        <!-- ==================== EN ==================== -->
+        <div data-lang="en" hidden>
+
+          <p>AI is getting better and better at writing code — but the aesthetics of the interfaces it generates often stay stuck at "centered cards, blue-purple gradients, and fake data everywhere." In the industry we call this <strong>slop</strong>: that cheap, template-driven taste. A product manager looks at an AI-generated prototype and instantly knows something is off — yet can't say exactly what.</p>
+
+          <p>The <strong>Taste Skill</strong> this article is about exists precisely to fix that. Let's define it clearly first:</p>
+
+          <div class="note">
+            <p><strong>Taste Skill is an open-source aesthetic rule pack (SKILL.md) for AI coding tools like Cursor / Claude Code / Codex / Gemini.</strong> Its core goal is to solve the "slop" problem — AI interfaces that all look the same and feel cheap — by giving AI standardized, executable product-design taste rules.</p>
+          </div>
+
+          <p>For a product manager, it is not a replacement for designers. It is a way to <strong>inject your product's tone, experience standards, and interaction constraints directly into AI</strong>, dramatically shortening the "requirement → prototype → high-fidelity frontend demo → development handoff" cycle, and unifying the team's visual &amp; interaction floor.</p>
+
+          <h2>1. Why PMs Should Care: Core Value of Taste Skill</h2>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 01 · <b>Four values from a PM's view</b> / PM 视角下的四重价值</p>
+            <div class="stat-row">
+              <div class="stat"><b>① Taste → rules</b><span>Turns abstract "product taste" into executable rules for layout, spacing, hierarchy, motion</span></div>
+              <div class="stat"><b>② Tone up front</b><span>Interactive pages straight after the PRD; surfaces layout &amp; path issues before review rework</span></div>
+              <div class="stat"><b>③ 13 modules</b><span>Scenario-based selection covering marketing sites, SaaS dashboards, redesigns, brands, mobile</span></div>
+              <div class="stat"><b>④ Three dials</b><span>1–10 scale to quantify style, replacing vague asks like "make it premium"</span></div>
+            </div>
+          </div>
+
+          <h3>1.1 Turning abstract "product taste" into executable rules for AI</h3>
+          <p>Stop repeating "premium, minimal, professional" to AI — the pack ships complete specs for typography, spacing, hierarchy, motion, empty states, and dark mode, and steers AI away from its default of centered cards, purple gradients, and fake data.</p>
+
+          <h3>1.2 Unify product visual tone up front, cut review rework</h3>
+          <p>Write the PRD, then generate interactive pages that match your brand personality right away. Layout, information density, and operation-path problems surface early — no waiting for design deliverables to change the requirements.</p>
+
+          <h3>1.3 Modular skill selection covering every product phase</h3>
+          <p>It ships <strong>13 sub-skills</strong>, all documented at tasteskill.dev, covering marketing sites, SaaS backends, redesigns, brand specs, and mobile prototypes — every PM scenario.</p>
+
+          <h3>1.4 Quantify design style to match your target users</h3>
+          <p>Three core parameter dials (1–10) let the PM define product temperament directly, replacing vague subjective descriptions:</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 02 · <b>Three parameter knobs: dials instead of adjectives</b> / 三大参数旋钮</p>
+            <div class="dgm-row">
+              <div class="dgm-box knob">
+                <p class="dgm-title">DESIGN_VARIANCE layout variation</p>
+                <div class="knob-scale"><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="hi"></i><i></i><i></i><i></i><i></i><i></i></div>
+                <p class="dgm-sub">Admin tools: 3–5 (regular). Marketing sites: 7–10 (asymmetric premium)</p>
+              </div>
+              <div class="dgm-box knob">
+                <p class="dgm-title">MOTION_INTENSITY motion strength</p>
+                <div class="knob-scale"><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="hi"></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <p class="dgm-sub">B2B backend: 3–4 (light hover only). Consumer: 6–8 (smooth scroll animations)</p>
+              </div>
+              <div class="dgm-box knob">
+                <p class="dgm-title">VISUAL_DENSITY information density</p>
+                <div class="knob-scale"><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="fill"></i><i class="hi"></i><i></i><i></i></div>
+                <p class="dgm-sub">Dashboards / workspaces: 8–10. Landing pages: 2–4 (generous whitespace)</p>
+              </div>
+            </div>
+            <p class="back-arrow">Three dials = the three axes of a product's temperament</p>
+          </div>
+
+          <h2>2. The Full PM Rollout: From Install to Acceptance</h2>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 03 · <b>The four-step rollout</b> / 四步流程总览</p>
+            <div class="dgm-row">
+              <div class="dgm-box grow"><p class="dgm-title">① Install</p><p class="dgm-sub">One-command v2 install; generates SKILL.md</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box grow"><p class="dgm-title">② Pick a skill</p><p class="dgm-sub">Match the sub-skill to your product phase</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box grow"><p class="dgm-title">③ Prompt it</p><p class="dgm-sub">Business brief + three dials + hard constraints</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box solo grow"><p class="dgm-title">④ Pre-Flight</p><p class="dgm-sub">Built-in checklist; no half-finished pages</p></div>
+            </div>
+          </div>
+
+          <h3>2.1 Step 1 — Environment install (1 minute)</h3>
+          <p>Works with Cursor, Claude Code, v0, OpenCode, and other mainstream AI coding tools. One command installs v2 (currently the default experimental stable):</p>
+          <pre><code>npx skills add Leonxlnx/taste-skill</code></pre>
+          <p>The tool generates a <code>SKILL.md</code> rule file in your project automatically, and AI reads it automatically. No terminal? Just copy the repo's SKILL.md and paste it into the AI conversation context.</p>
+
+          <h3>2.2 Step 2 — Match the right skill to your product phase</h3>
+          <p>Picking the right skill for your task is the key to using this well — the wrong style produces output that misses your expectations:</p>
+
+          <table>
+            <thead>
+              <tr><th>PM scenario</th><th>Recommended skill</th><th>Why it fits</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>New marketing site / landing page</td><td><code>design-taste-frontend</code> (core v2)</td><td>Derives a design language from the brief, anti-template, fully responsive</td></tr>
+              <tr><td>B2B backend, SaaS workspace, dashboard</td><td><code>minimalist-skill</code> / <code>soft-skill</code></td><td>Restrained palette, dense info, clean tables &amp; filters, complete empty/error states</td></tr>
+              <tr><td>Legacy redesign, existing page refactor</td><td><code>redesign-skill</code> audit &amp; refactor</td><td>Audits current UI flaws first, keeps business logic, then improves visual hierarchy</td></tr>
+              <tr><td>Mobile app prototype, H5 pages</td><td><code>imagegen-frontend-mobile</code></td><td>Multi-screen flow, phone-first interaction, button hit-area specs</td></tr>
+              <tr><td>Brand system, unified component library</td><td><code>brandkit</code></td><td>One-click logo, palette, type, component specs — outputs a design-system doc</td></tr>
+              <tr><td>Minimal, airy, premium feel (tool / content)</td><td><code>soft-skill</code></td><td>Low contrast, generous whitespace, smooth lightweight motion</td></tr>
+              <tr><td>Hardcore industrial / dev-tool products</td><td><code>brutalist-skill</code></td><td>Swiss typography, strong contrast, crisp structure — dev tools, ops platforms</td></tr>
+            </tbody>
+          </table>
+
+          <h3>2.3 Step 3 — Standard PM prompt templates (copy-paste ready)</h3>
+
+          <h4>Template 1 — New product marketing site / landing page</h4>
+          <pre><code>Enable the design-taste-frontend v2 rules and generate a complete responsive
+homepage for the following product brief:
+1. Positioning: B2B enterprise CRM SaaS for operations leads; tone = restrained,
+   professional, trustworthy
+2. Params: DESIGN_VARIANCE=5, MOTION_INTENSITY=4, VISUAL_DENSITY=3
+3. Hard constraints:
+- No full-page centered cards, no purple-gradient decoration
+- Include empty, loading, and error states throughout
+- Hierarchy: value proposition &gt; feature intro &gt; customer cases &gt; CTA
+- Responsive on desktop + mobile; no fake test data
+4. Output complete TSX code plus an interaction spec so frontend can ship it</code></pre>
+
+          <h4>Template 2 — B2B SaaS page refactor (existing product optimization)</h4>
+          <pre><code>Enable redesign-skill. Audit the current backend UI problems first, then refactor:
+1. Constraint: fully preserve the existing filter, table, and bulk-action business
+   logic; do not change the data flow
+2. Params: DESIGN_VARIANCE=3, MOTION_INTENSITY=3, VISUAL_DENSITY=8
+3. Requirements: unify button hierarchy, use status colors only for process
+   prompts, monospace numerals, add empty-data / no-permission fallback pages
+4. Output: audit findings + full refactored code + a PM acceptance checklist</code></pre>
+
+          <h3>2.4 Step 4 — PM acceptance via the built-in Pre-Flight check</h3>
+          <p>v2 ships a <strong>mandatory pre-check list</strong>. As a PM, check against it directly to rule out half-finished, incomplete pages:</p>
+          <ul class="checklist">
+            <li>① Every positive &amp; edge flow is complete (loading, empty, error, no-permission, confirm dialogs)</li>
+            <li>② Type, spacing, color strictly follow one design system; no stray decorations</li>
+            <li>③ Dark / light modes both work; contrast meets readability norms</li>
+            <li>④ Responsive on mobile with no layout breakage</li>
+            <li>⑤ No placeholder fake data; no decorative motion that hurts task efficiency</li>
+          </ul>
+
+          <h2>3. Using Taste Skill Inside the PM Workflow</h2>
+
+          <h3>3.1 Requirement review: instant visual prototypes to validate trade-offs</h3>
+          <div class="dgm">
+            <p class="dgm-cap">FIG 04 · <b>Traditional flow vs Taste Skill flow</b> / 传统流程 vs Taste Skill 流程</p>
+            <div class="vs">
+              <div class="dgm-col">
+                <span class="vs-badge a">Traditional flow</span>
+                <div class="flow">
+                  <div class="flow-step"><span class="flow-n">1</span><div><p class="dgm-title">Write the PRD</p><p class="dgm-sub">Text only; visuals left to imagination</p></div></div>
+                  <div class="dgm-arrow">→</div>
+                  <div class="flow-step"><span class="flow-n">2</span><div><p class="dgm-title">Designer delivers (3–5 days)</p><p class="dgm-sub">Long wait</p></div></div>
+                  <div class="dgm-arrow">→</div>
+                  <div class="flow-step"><span class="flow-n">3</span><div><p class="dgm-title">Review changes the requirements</p><p class="dgm-sub">Requirements change only after seeing visuals — rework loops</p></div></div>
+                </div>
+              </div>
+              <div class="dgm-col">
+                <span class="vs-badge b">Taste Skill flow</span>
+                <div class="flow">
+                  <div class="flow-step"><span class="flow-n">1</span><div><p class="dgm-title">Write the PRD</p><p class="dgm-sub">Same text requirements</p></div></div>
+                  <div class="dgm-arrow">→</div>
+                  <div class="flow-step"><span class="flow-n">2</span><div><p class="dgm-title">Interactive demo in 10 minutes</p><p class="dgm-sub">Taste Skill turns the requirements into pages directly</p></div></div>
+                  <div class="dgm-arrow">→</div>
+                  <div class="flow-step"><span class="flow-n">3</span><div><p class="dgm-title">Team reviews layout / paths / density</p><p class="dgm-sub">Cut bloated features and awkward interactions early</p></div></div>
+                </div>
+              </div>
+            </div>
+            <p class="back-arrow">Move "product taste" to the requirements stage instead of reworking at the visual stage</p>
+          </div>
+
+          <h3>3.2 Collaborating with designers: unify baseline specs, free up creativity</h3>
+          <ul>
+            <li><strong>Simple marketing sites, event H5s, internal backends:</strong> use Taste Skill to generate the baseline pages; designers only fine-tune brand details instead of building layouts from scratch.</li>
+            <li><strong>Core flagship products:</strong> use the skill to output one unified baseline component spec (buttons, cards, modals, spacing); designers create differentiated ideas on top of it, keeping the whole product visually consistent.</li>
+          </ul>
+
+          <h3>3.3 Pre-launch experience acceptance: batch-audit "taste bugs"</h3>
+          <p>Many products work logically but feel rough — too many modals, stiff copy, cramped whitespace, no empty states. Those are <strong>taste bugs</strong>. You can have AI walk every page in bulk and auto-audit against the skill rules: output an experience-defect list as your launch acceptance standard, no manual page-by-page review.</p>
+
+          <h3>3.4 Competitive analysis: dissect competitors' design choices</h3>
+          <p>Feed in a competitor's page screenshot / link with <code>image-to-code-skill</code>, and let AI dissect their layout, whitespace, information density, and motion strategy. Compare the parameter-dial differences against your own product to judge their product-temperament trade-offs — instead of copying surface features.</p>
+
+          <h2>4. PM Pitfall Guide (The High-Frequency Traps)</h2>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 05 · <b>Five common pitfalls</b> / 五个高频坑</p>
+            <div class="dgm-row">
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ Just say "premium"</p><p class="dgm-sub">AI falls back to templates → add brief + three dials</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ High motion in B2B</p><p class="dgm-sub">Motion &gt;6, variation &gt;7 distracts from tasks</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ Skip Pre-Flight</p><p class="dgm-sub">Edge pages &amp; mobile are the first things AI omits</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ Personal taste ≠ product tone</p><p class="dgm-sub">Dials serve target users, not the PM's own preference</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ Replace mature design systems</p><p class="dgm-sub">Best for prototypes &amp; teams without dedicated designers</p></div>
+            </div>
+          </div>
+
+          <ol>
+            <li><strong>Don't just say "premium and beautiful" — always pair a business brief with the three dials.</strong> Vague descriptions push AI back to generic templates. First state the user, industry, and positioning, then set the three dial values explicitly, so the output matches the product's temperament.</li>
+            <li><strong>No high motion or high layout variation for B2B backends.</strong> A backend's core is efficient operations; motion &gt;6 and variation &gt;7 create visual noise and hurt operator efficiency.</li>
+            <li><strong>Don't fully rely on it for projects with a mature professional design system.</strong> Use it as an auxiliary prototyping tool; the shipped product follows the design system. It shines for teams without a dedicated designer, fast iteration, and marketing pages.</li>
+            <li><strong>Never skip the Pre-Flight check before handing off to development.</strong> AI tends to omit edge states and mobile adaptation. Always require a self-check report and confirm the full flows before handoff.</li>
+            <li><strong>Separate "personal aesthetic preference" from "product target tone."</strong> The dials serve your target users, not the PM's personal taste: for middle-aged/older users lower the variation and reduce complex motion; for young creators you can raise both.</li>
+          </ol>
+
+          <h2>5. Advanced: Build Your Team's Own Taste Spec</h2>
+          <ol>
+            <li>Maintain a custom <code>SKILL.md</code> at the project root, forked from the official rules, and write in your company's brand colors, type, and interaction copy standards.</li>
+            <li>Stock fixed parameter templates per product line (B2B backend template, consumer app template, marketing-site template) that the whole team reuses — keeping design taste consistent across all product lines.</li>
+            <li>Add the skill's Pre-Flight checklist to your team's PRD delivery standard, as the visual/interaction-spec appendix attached to every requirements document.</li>
+          </ol>
+
+          <h2>Summary</h2>
+          <p>Taste Skill's core value to a product manager is <strong>turning vague "product taste" into design rules that are standardized, AI-executable, and quantitatively controllable</strong> — connecting the whole "requirement → prototype → frontend demo → acceptance" chain, cutting the communication cost of visuals, interactions, and details. PMs can quickly ship interfaces with unified quality and a tone that fits their users, instead of yet another AI-template page.</p>
+
+        </div>
+
+        <nav class="post-nav">
+          <div>
+            <a href="../blog.html">
+              <span data-lang="zh">← 返回博客</span>
+              <span data-lang="en" hidden>← Back to blog</span>
+            </a>
+          </div>
+        </nav>
+      </main>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+  <script src="../assets/js/site-config.js"></script>
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

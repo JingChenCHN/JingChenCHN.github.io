@@ -246,7 +246,7 @@ function renderPosts() {
     .then((posts) => {
       const sorted = posts
         .slice()
-        .sort((a, b) => (a.date < b.date ? 1 : -1));
+        .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
 
       if (list) list.innerHTML = sorted.slice(0, max).map((p, i) => postCard(p, i)).join("");
       if (all) all.innerHTML = sorted.map((p, i) => postCard(p, i)).join("");

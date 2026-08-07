@@ -1,5 +1,24 @@
 [
   {
+    "title": "How Product Managers Get the Most Out of Taste Skill (an AI Frontend Aesthetic Skill Pack)",
+    "title_zh": "产品经理如何用好 Taste Skill（AI 前端审美技能包）",
+    "slug": "taste-skill-for-pms",
+    "date": "2026-08-07",
+    "tags": [
+      "AI Product",
+      "Taste Skill",
+      "Frontend Aesthetic"
+    ],
+    "tags_zh": [
+      "AI产品",
+      "Taste Skill",
+      "前端审美"
+    ],
+    "excerpt": "Taste Skill is an open-source aesthetic rule pack (SKILL.md) for AI coding tools that turns abstract \"product taste\" into executable design rules. This PM-focused guide covers its core value, a 4-step rollout from install to Pre-Flight acceptance, practical use cases in the PM workflow, and the five most common pitfalls.",
+    "excerpt_zh": "Taste Skill 是给 AI 编码工具的开源审美规则包（SKILL.md），把抽象的「产品品味」变成 AI 可执行的设计规则。本文从 PM 视角讲透它的核心价值、从安装到 Pre-Flight 验收的四步落地流程、嵌入 PM 工作流的实战用法，以及五个高频踩坑点。",
+    "file": "blog/taste-skill-for-pms.html"
+  },
+  {
     "title": "From Idea to Prototype: A High-Quality Delivery Playbook",
     "title_zh": "想法转换原型 · 高质量落地实践分享",
     "slug": "idea-to-prototype",

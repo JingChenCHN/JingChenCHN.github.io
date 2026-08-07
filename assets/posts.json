@@ -1,5 +1,24 @@
 [
   {
+    "title": "From Idea to Prototype: A High-Quality Delivery Playbook",
+    "title_zh": "想法转换原型 · 高质量落地实践分享",
+    "slug": "idea-to-prototype",
+    "date": "2026-08-07",
+    "tags": [
+      "AI Product",
+      "Map Agent",
+      "Vibecoding"
+    ],
+    "tags_zh": [
+      "AI产品",
+      "地图Agent",
+      "Vibecoding"
+    ],
+    "excerpt": "Using a natural-language map agent as the running example, this article shares how to steer AI from idea to prototype: let AI play technical architect, manage its limited attention one round at a time, and hand it a concrete role model like wanderboat — with Figma design first, then a coding agent.",
+    "excerpt_zh": "以自然语言驱动的地图 Agent 为例子，分享如何把想法一步步引导成高完成度原型：让 AI 当技术架构师、像管理稀缺资源一样管理它的注意力、给它一个具体的榜样（wanderboat），并让 Figma 设计先行、再由 coding agent 照着实现。",
+    "file": "blog/idea-to-prototype.html"
+  },
+  {
     "title": "Some Principles for Making a Good Product",
     "title_zh": "一些做好一个产品的principel",
     "slug": "my-thought-of-making-a-good-product",

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>想法转换原型 · 高质量落地实践分享 · Jing Chen</title>
+  <meta name="description" content="以地图 Agent 为例，分享如何引导 AI 把想法落成高质量原型：让 AI 当技术架构师、管理它的注意力、找一个好榜样（wanderboat）、用 Figma 设计先行再交给 coding agent。 / Using a map agent as the running example, this article shares how to steer AI to turn an idea into a high-quality prototype: let AI be the technical architect, manage its attention, pick a great role model (wanderboat), and let Figma design first before the coding agent builds." />
+  <link rel="icon" href="../assets/img/avatar.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <style>
+    /* ---- article diagrams (blueprint palette, scoped to this page) ---- */
+    .dgm { margin: 22px 0 30px; overflow-x: auto; }
+    .dgm-cap { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 10px; }
+    .dgm-cap b { color: var(--accent); font-weight: 600; }
+    .dgm-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+    .dgm-col { display: flex; flex-direction: column; gap: 10px; flex: 1 1 0; min-width: 220px; }
+    .dgm-box { border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 12px; background: var(--bg); min-width: 0; }
+    .dgm-box.sub { background: var(--bg-soft); border-color: var(--border); }
+    .dgm-box.solo { background: var(--accent-soft); border-color: var(--accent-line); }
+    .dgm-box.grow { flex: 1 1 0; }
+    .dgm-title { font-size: .86rem; font-weight: 600; margin: 0 0 4px; color: var(--text); }
+    .dgm-sub { font-size: .74rem; color: var(--text-muted); margin: 0; line-height: 1.6; }
+    .dgm-arrow { text-align: center; color: var(--accent); font-size: .95rem; line-height: 1; padding: 6px 0; }
+    .dgm-arrow span { font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-faint); }
+    .flow { display: flex; flex-direction: column; }
+    .flow-step { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 6px; background: var(--bg-soft); padding: 10px 12px; }
+    .flow-n { font-family: var(--font-mono); font-size: .7rem; color: var(--link); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 4px; padding: 2px 6px; flex: none; margin-top: 1px; }
+    .dgm-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .dgm-tag { font-family: var(--font-mono); font-size: .66rem; color: var(--link); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 999px; padding: 2px 9px; }
+    .stat-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .stat { flex: 1 1 0; min-width: 120px; border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 12px; background: var(--bg); }
+    .stat b { display: block; font-family: var(--font-mono); font-size: 1.25rem; color: var(--accent); line-height: 1.2; }
+    .stat span { font-size: .7rem; color: var(--text-muted); }
+    /* added for this article */
+    .cycle { display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; }
+    .cycle .dgm-box { flex: 1 1 0; min-width: 130px; text-align: center; }
+    .back-arrow { text-align: center; color: var(--text-muted); font-family: var(--font-mono); font-size: .66rem; letter-spacing: .08em; margin: 6px 0 0; }
+    .vs { display: flex; gap: 14px; flex-wrap: wrap; }
+    .vs .dgm-col { flex: 1 1 0; min-width: 250px; }
+    .vs-badge { font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .12em; border-radius: 999px; padding: 2px 10px; display: inline-block; margin-bottom: 8px; }
+    .vs-badge.a { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-line); }
+    .vs-badge.b { background: #e9f7ef; color: #1f7a4d; border: 1px solid #bfe6cf; }
+    .note { border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0; padding: 10px 14px; font-size: .86rem; margin: 16px 0; }
+    .note p { margin: 0; }
+    .three { display: flex; gap: 10px; flex-wrap: wrap; }
+    .three .dgm-box { flex: 1 1 0; min-width: 170px; }
+  </style>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <div class="page-grid">
+      <div id="site-sidebar"></div>
+
+      <main class="content">
+        <h1>
+          <span data-lang="zh">想法转换原型 · 高质量落地实践分享</span>
+          <span data-lang="en" hidden>From Idea to Prototype · A High-Quality Delivery Playbook</span>
+        </h1>
+        <p class="page-meta">
+          <span data-lang="zh">2026年8月7日 · AI产品 · 地图Agent</span>
+          <span data-lang="en" hidden>Aug 7, 2026 · AI Product · Map Agent</span>
+        </p>
+
+        <!-- ==================== ZH ==================== -->
+        <div data-lang="zh">
+
+          <p>在做产品这件事上，我最近最大的收获不是「会写代码」，而是想明白了一件事：<strong>在 AI 时代，产品经理的核心能力已经从「写出需求」变成了「引导 AI 把想法落成高质量原型」。</strong></p>
+
+          <p>这篇文章，我用一个具体的想法当例子——<strong>地图 Agent</strong>——把它从一句话变成高完成度原型的过程拆给你看。里面没有什么深奥的道理，都是我在一次次实操里踩出来的办法，重点是<strong>多图、直给</strong>：你能复用的不是结论，而是一整套可搬走的流程。</p>
+
+          <h2>〇、一个好的 idea 长什么样：以「地图 Agent」为例</h2>
+          <p>先给 idea 一个具体的形状。很多好想法起步时都只是一个模糊的方向：「想做一个更智能的地图」。但「智能」这个词太虚，落地时需要把它翻译成一组明确的动作。</p>
+
+          <p>我的版本是：<strong>用自然语言驱动地图。</strong>用户说一句话，地图就自动完成——自动地图交互、意图识别、服务调用、结果呈现、数据分析。</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 01 · <b>地图 Agent 的能力闭环</b> / The map agent's capability loop</p>
+            <div class="cycle">
+              <div class="dgm-box solo"><p class="dgm-title">自然语言输入</p><p class="dgm-sub">用户说一句话，例如「找出周边 3 公里内评分最高的咖啡店」</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">意图识别</p><p class="dgm-sub">理解用户想做什么，抽取地点、半径、排序等关键信息</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">服务调用</p><p class="dgm-sub">按意图调度地图搜索、路线、天气、POI 等能力</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">结果呈现</p><p class="dgm-sub">自动完成地图交互：定位、标注、图层、相机</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">数据分析</p><p class="dgm-sub">对结果做统计、对比、洞察，沉淀为可复用资产</p></div>
+            </div>
+            <p class="back-arrow">↺ 闭环：每一次交互结果又成为下一次对话的上下文</p>
+          </div>
+
+          <p>这一步的意义在于：它把「智能地图」这个抽象方向，拆成了五个可执行的能力。后面引导 AI 时，你手里就有了一张清晰的「能力清单」——AI 最擅长的恰恰是把清单变成系统。</p>
+
+          <h2>一、不确定技术方案？先把想法直接丢给 AI</h2>
+          <p>很多产品经理拿到 idea 之后，第一反应是慌：<em>「技术方案我还没想清楚，要不要先去研究一下？」</em></p>
+          <p>我的经验是：<strong>在不确定技术方案的时候，直接把想法和 AI 沟通，让 AI 以「技术架构师」的角色来规划整个技术栈。</strong>你不必先成为技术专家，AI 就是你的技术团队。</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 02 · <b>给 AI 一个角色，它就会替你规划技术栈</b> / Give AI a role and it plans the stack for you</p>
+            <div class="flow">
+              <div class="flow-step"><span class="flow-n">01</span><div><p class="dgm-title">把想法讲给 AI</p><p class="dgm-sub">用大白话描述能力和边界，别怕「不专业」。</p></div></div>
+              <div class="dgm-arrow">↓ <span>赋 予 角 色</span></div>
+              <div class="flow-step"><span class="flow-n">02</span><div><p class="dgm-title">让它当「技术架构师」</p><p class="dgm-sub">明确要求它输出技术栈：前端、后端、地图 SDK、LLM、数据存储。</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">03</span><div><p class="dgm-title">拿到一份技术选型</p><p class="dgm-sub">它会给理由、给备选、给取舍——你只需要做决策。</p></div></div>
+            </div>
+          </div>
+
+          <div class="note">
+            <p><strong>一句话提示词模板：</strong>「我现在想做一个 <em>自然语言驱动的地图 Agent</em>，具备意图识别、服务调用、结果呈现、数据分析四类能力。请以技术架构师的身份，为我规划一整套技术栈：前端框架、后端语言、地图渲染方案、大模型接入方式、数据存储，并说明每项选择的理由与备选方案。」</p>
+          </div>
+
+          <p>这一招的价值在于：<strong>你把「我不知道怎么实现」这个死局，变成了「你来提方案、我来拍板」的协作。</strong>AI 见过成千上万种架构组合，它的「常识」恰好补齐了产品经理最不擅长的部分。</p>
+
+          <h2>二、产品表现力是你的主场，但 AI 的注意力有限</h2>
+          <p>技术栈定了，接下来才是真正拉开差距的地方——<strong>产品表现力</strong>。这是产品经理最擅长的领域，但也最容易踩坑。</p>
+
+          <p>原因很简单：<strong>AI 的注意力是有限的。</strong>单次任务里，它很难同时做到「产品体验好、界面美观、功能又全」的满电状态。你让它一口气做太多，它每个维度都只做到及格线，结果就是一个「看着还行、用着别扭」的半成品。</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 03 · <b>注意力是有限的：一次贪多，往往样样及格</b> / Attention is limited</p>
+            <div class="dgm-row">
+              <div class="dgm-box grow" style="border-color:#d98c8c;">
+                <p class="dgm-title" style="color:#b34040;">✗ 单次任务贪多</p>
+                <p class="dgm-sub">体验 60% · 美观 60% · 功能 60% → 满盘皆平庸</p>
+                <div class="dgm-tags"><span class="dgm-tag">体验打折</span><span class="dgm-tag">视觉平庸</span><span class="dgm-tag">功能残缺</span></div>
+              </div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box solo grow">
+                <p class="dgm-title" style="color:var(--accent);">✓ 一次只做一件事</p>
+                <p class="dgm-sub">这一轮只打磨交互 → 下一轮只打磨视觉 → 再下一轮补功能</p>
+                <div class="dgm-tags"><span class="dgm-tag">交互满分</span><span class="dgm-tag">视觉满分</span><span class="dgm-tag">功能补全</span></div>
+              </div>
+            </div>
+            <p class="back-arrow">关键动作：把「满电要求」拆成「一轮一个目标」</p>
+          </div>
+
+          <p>所以产品经理真正的工作不是「指挥 AI 干活」，而是<strong>管理 AI 的注意力</strong>：把大的产品愿景拆成一轮一轮的小任务，每轮只盯一个维度，直到全部拉满。</p>
+
+          <h2>三、找一个好榜样，把「好」具象化</h2>
+          <p>「产品表现力」最难的地方在于：<em>「好」是抽象的。</em>你告诉 AI「把界面做高级一点」，它不知道该往哪使劲。这时候你需要给它一个<strong>具体的好榜样</strong>。</p>
+
+          <p>以地图 Agent 为例，一个好榜样是 <strong>wanderboat</strong>——一个用自然语言规划行程的地图产品。它把「菜单 Menu、对话 Chat、地图 MapView」三个组件的关系处理得非常克制，正是我们要的那种「简约、聚焦、高级」。</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 04 · <b>wanderboat 的组件协作模式：Menu · Chat · MapView</b> / How the three components talk to each other</p>
+            <div class="three">
+              <div class="dgm-box solo"><p class="dgm-title">Menu 菜单</p><p class="dgm-sub">轻量入口，功能藏在角落，不打扰主流程</p></div>
+              <div class="dgm-box"><p class="dgm-title">Chat 对话</p><p class="dgm-sub">常驻对话入口，是唯一的输入方式</p></div>
+              <div class="dgm-box"><p class="dgm-title">MapView 地图</p><p class="dgm-sub">右侧主画布，结果以地图形式呈现</p></div>
+            </div>
+            <div class="dgm-arrow" style="padding:10px 0 6px;">↔ <span>信息交互</span></div>
+            <div class="dgm-row">
+              <div class="dgm-box sub grow"><p class="dgm-sub"><b>输入侧：</b>用户在 Chat 里说的话 → 驱动地图定位、缩放、打点</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box sub grow"><p class="dgm-sub"><b>反馈侧：</b>地图上的操作（点选 POI）→ 回填到对话流，形成上下文</p></div>
+            </div>
+            <p class="back-arrow">核心：对话是「意图入口」，地图是「结果画布」，两者双向联动</p>
+          </div>
+
+          <p>这一步的关键是：<strong>别再口述「我要高级感」，直接把好例子丢给 AI。</strong>AI 见过 wanderboat 这类成熟产品，它学习、模仿、迁移的能力远比你用语言描述准确。</p>
+
+          <h2>四、怎么「教」AI 学 wanderboat：两个方法</h2>
+          <p>把「好榜样」喂给 AI，有两个办法，各有适用场景。</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 05 · <b>两种教法</b> / Two ways to teach AI a role model</p>
+            <div class="vs">
+              <div class="dgm-col">
+                <span class="vs-badge a">方法 A · 截图 + 地址</span>
+                <div class="flow">
+                  <div class="flow-step"><span class="flow-n">1</span><div><p class="dgm-title">截取网站图片</p><p class="dgm-sub">截一张 wanderboat 的界面图</p></div></div>
+                  <div class="dgm-arrow">↓</div>
+                  <div class="flow-step"><span class="flow-n">2</span><div><p class="dgm-title">附上网站地址</p><p class="dgm-sub">让 AI 可溯源、可查阅原站</p></div></div>
+                  <div class="dgm-arrow">↓</div>
+                  <div class="flow-step"><span class="flow-n">3</span><div><p class="dgm-title">让它学布局与风格</p><p class="dgm-sub">复制组件结构、间距、配色气质</p></div></div>
+                </div>
+                <p class="dgm-sub" style="margin-top:8px;">优点：轻量快速；缺点：只有「表面」参考，交互细节要靠 AI 脑补。</p>
+              </div>
+              <div class="dgm-col">
+                <span class="vs-badge b">方法 B · Figma 设计先行（推荐）</span>
+                <div class="flow">
+                  <div class="flow-step"><span class="flow-n">1</span><div><p class="dgm-title">进 Figma Agent</p><p class="dgm-sub">让专业设计 Agent 基于需求做一版纯 demo</p></div></div>
+                  <div class="dgm-arrow">↓</div>
+                  <div class="flow-step"><span class="flow-n">2</span><div><p class="dgm-title">要求学习 wanderboat</p><p class="dgm-sub">明确指令：吸收其设计理念与页面交互</p></div></div>
+                  <div class="dgm-arrow">↓</div>
+                  <div class="flow-step"><span class="flow-n">3</span><div><p class="dgm-title">下载成果到项目空间</p><p class="dgm-sub">把设计稿/规范拉回当前工程目录</p></div></div>
+                  <div class="dgm-arrow">↓</div>
+                  <div class="flow-step"><span class="flow-n">4</span><div><p class="dgm-title">coding agent 照着实现</p><p class="dgm-sub">基于已成形的设计，不再凭空想象</p></div></div>
+                </div>
+                <p class="dgm-sub" style="margin-top:8px;">优点：交互与结构「一次到位」；缺点：多一步工具链，值得。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="note">
+            <p><strong>更推荐方法 B。</strong>原因：设计这个环节本该由「设计 Agent」来做，截图只是把成品拍下来让代码 Agent 猜。让 <em>Figma 设计先行、代码 Agent 照做</em>，两者各司其职，成品的完成度会比「看着截图写代码」高出一大截。</p>
+          </div>
+
+          <h2>五、把整套方法串起来：从一句话到高完成度原型</h2>
+          <p>前面四步，其实是一条完整流水线。把它们串起来，就是一个可以反复使用的「想法 → 原型」方法。</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 06 · <b>完整落地流水线</b> / The full pipeline</p>
+            <div class="flow">
+              <div class="flow-step"><span class="flow-n">01</span><div><p class="dgm-title">把 idea 讲清楚</p><p class="dgm-sub">一句话 + 能力清单，例如「自然语言驱动地图 + 五类能力」</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">02</span><div><p class="dgm-title">让 AI 当架构师</p><p class="dgm-sub">先定技术栈，再做功能，避免边做边想</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">03</span><div><p class="dgm-title">找榜样、喂给它</p><p class="dgm-sub">选定 wanderboat 这类标杆，截图或 Figma 学习</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">04</span><div><p class="dgm-title">设计先行（Figma）</p><p class="dgm-sub">把「好」先落在设计稿里，再谈代码</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">05</span><div><p class="dgm-title">coding agent 实现</p><p class="dgm-sub">照着设计实现，一轮一个维度地打磨</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">06</span><div><p class="dgm-title">复盘与沉淀</p><p class="dgm-sub">数据沉淀为资产，经验回写为下一次的「榜样」</p></div></div>
+            </div>
+          </div>
+
+          <h2>结语：产品经理的下一步</h2>
+          <p>说回开头那句话。AI 时代的产品经理，拼的不是技术，而是<strong>引导力</strong>：</p>
+          <ul>
+            <li><strong>不确定技术方案？</strong>别慌，让 AI 当架构师，你拍板；</li>
+            <li><strong>怕做出来平庸？</strong>管理 AI 的注意力，一轮一个目标；</li>
+            <li><strong>说不出「好」长什么样？</strong>找一个榜样，截图或 Figma 设计先行，把「好」具象化。</li>
+          </ul>
+          <p>这套方法，我用它把一个「地图 Agent」的想法，在两天里落成了可演示、可迭代的原型。你手里也一定有类似的、被「不知道怎么实现」卡住的 idea——现在你知道了，第一步不是去学技术，而是<strong>把想法讲给 AI</strong>。</p>
+
+        </div>
+
+        <!-- ==================== EN ==================== -->
+        <div data-lang="en" hidden>
+
+          <p>The biggest lesson I've learned recently isn't "how to write code" — it's this: <strong>in the AI era, the product manager's core skill has shifted from "writing requirements" to "steering AI to turn an idea into a high-quality prototype."</strong></p>
+
+          <p>In this article I'll take a concrete idea — a <strong>map agent</strong> — and walk you through turning it from a single sentence into a high-fidelity prototype. No deep theory here, just the moves I've learned from repeated hands-on practice. Lots of diagrams, straight to the point: what you can take away is not a conclusion but a repeatable process.</p>
+
+          <h2>0. What a Good Idea Looks Like: A Map Agent</h2>
+          <p>Let's give an idea a concrete shape. Many good ideas start as a vague direction: "I want a smarter map." But "smart" is too abstract — before it can ship, you have to translate it into a clear set of actions.</p>
+
+          <p>My version: <strong>drive the map with natural language.</strong> The user says a sentence, and the map does the rest — automatic map interaction, intent recognition, service invocation, result presentation, and data analysis.</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 01 · <b>The map agent's capability loop</b> / 地图 Agent 的能力闭环</p>
+            <div class="cycle">
+              <div class="dgm-box solo"><p class="dgm-title">Natural language input</p><p class="dgm-sub">"Show me the top-rated coffee shops within 3 km."</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">Intent recognition</p><p class="dgm-sub">Figure out what to do; extract place, radius, ranking</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">Service invocation</p><p class="dgm-sub">Dispatch search, routing, weather, POI capabilities</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">Result presentation</p><p class="dgm-sub">Auto map interaction: locate, mark, layer, camera</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">Data analysis</p><p class="dgm-sub">Statistics, comparison, insight — reusable assets</p></div>
+            </div>
+            <p class="back-arrow">↺ Closed loop: each result becomes context for the next turn</p>
+          </div>
+
+          <p>This step matters because it turns the abstract direction "smart map" into five executable capabilities. When you steer AI next, you're holding a clear capability checklist — and turning a checklist into a system is exactly what AI is best at.</p>
+
+          <h2>1. Unsure of the Tech Approach? Throw the Idea Straight at AI</h2>
+          <p>Many product managers panic when they get an idea: <em>"I don't have the technical plan worked out — should I go research first?"</em></p>
+          <p>Here's my experience: <strong>when you're unsure of the technical approach, communicate the idea directly with AI, and let AI play the "technical architect" role to plan the entire stack.</strong> You don't need to become a technical expert first — AI is your engineering team.</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 02 · <b>Give AI a role, and it plans the stack for you</b> / 给 AI 一个角色，它就会替你规划技术栈</p>
+            <div class="flow">
+              <div class="flow-step"><span class="flow-n">01</span><div><p class="dgm-title">Describe the idea to AI</p><p class="dgm-sub">Plain words, capabilities and boundaries. Don't be afraid of sounding non-technical.</p></div></div>
+              <div class="dgm-arrow">↓ <span>assign a role</span></div>
+              <div class="flow-step"><span class="flow-n">02</span><div><p class="dgm-title">Make it the "technical architect"</p><p class="dgm-sub">Ask for a full stack: frontend, backend, map SDK, LLM, storage.</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">03</span><div><p class="dgm-title">Get a technology choice</p><p class="dgm-sub">It gives reasons, alternatives, trade-offs — you just decide.</p></div></div>
+            </div>
+          </div>
+
+          <div class="note">
+            <p><strong>One-line prompt template:</strong> "I want to build a <em>natural-language-driven map agent</em> with four capabilities: intent recognition, service invocation, result presentation, data analysis. As a technical architect, plan the full stack for me: frontend framework, backend language, map rendering solution, LLM integration, data storage — with reasons and alternatives for each choice."</p>
+          </div>
+
+          <p>The value of this move: <strong>you turn the dead end of "I don't know how to build it" into a collaboration of "you propose, I decide."</strong> AI has seen thousands of architecture combinations; its "common sense" fills exactly the gap product managers are weakest at.</p>
+
+          <h2>2. Product Expressiveness Is Your Home Turf — But AI's Attention Is Limited</h2>
+          <p>With the stack settled, here's where the real gap appears: <strong>product expressiveness.</strong> This is the PM's home turf — and also the easiest place to stumble.</p>
+
+          <p>The reason is simple: <strong>AI's attention is limited.</strong> In a single task, it can rarely deliver "great UX + beautiful UI + complete features" all at once, in a full-power state. Ask it to do too much in one shot and every dimension lands at the passing line — a result that "looks fine but feels off."</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 03 · <b>Attention is limited: do too much at once, everything passes</b> / 注意力是有限的</p>
+            <div class="dgm-row">
+              <div class="dgm-box grow" style="border-color:#d98c8c;">
+                <p class="dgm-title" style="color:#b34040;">✗ One greedy task</p>
+                <p class="dgm-sub">UX 60% · Visuals 60% · Features 60% → all-around mediocrity</p>
+                <div class="dgm-tags"><span class="dgm-tag">UX diluted</span><span class="dgm-tag">visuals flat</span><span class="dgm-tag">features thin</span></div>
+              </div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box solo grow">
+                <p class="dgm-title" style="color:var(--accent);">✓ One goal per round</p>
+                <p class="dgm-sub">This round polish interactions → next round visuals → then features</p>
+                <div class="dgm-tags"><span class="dgm-tag">UX perfect</span><span class="dgm-tag">visuals perfect</span><span class="dgm-tag">features complete</span></div>
+              </div>
+            </div>
+            <p class="back-arrow">Key move: split the "full-power ask" into "one target per round"</p>
+          </div>
+
+          <p>So the PM's real job isn't commanding AI to work — it's <strong>managing AI's attention</strong>: break the big product vision into small rounds, one dimension per round, until everything is maxed out.</p>
+
+          <h2>3. Find a Role Model and Make "Good" Concrete</h2>
+          <p>The hardest part of "product expressiveness" is that <em>"good" is abstract.</em> Tell AI to "make the UI more premium" and it won't know which way to push. That's when you give it a <strong>concrete role model</strong>.</p>
+
+          <p>For a map agent, a great role model is <strong>wanderboat</strong> — a natural-language travel-planning map product. It handles the relationship between three components — <em>Menu, Chat, MapView</em> — with great restraint. Exactly the minimal, focused, premium feel we're after.</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 04 · <b>How wanderboat's three components talk to each other</b> / 三组件协作模式</p>
+            <div class="three">
+              <div class="dgm-box solo"><p class="dgm-title">Menu</p><p class="dgm-sub">Lightweight entry; features tucked away, never intrusive</p></div>
+              <div class="dgm-box"><p class="dgm-title">Chat</p><p class="dgm-sub">Always-available input — the single way to express intent</p></div>
+              <div class="dgm-box"><p class="dgm-title">MapView</p><p class="dgm-sub">Main canvas on the right; results rendered as a map</p></div>
+            </div>
+            <div class="dgm-arrow" style="padding:10px 0 6px;">↔ <span>information flow</span></div>
+            <div class="dgm-row">
+              <div class="dgm-box sub grow"><p class="dgm-sub"><b>Input side:</b> what the user says in Chat → drives map locate, zoom, markers</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box sub grow"><p class="dgm-sub"><b>Feedback side:</b> map actions (pick a POI) → flow back into the conversation as context</p></div>
+            </div>
+            <p class="back-arrow">Core: Chat is the "intent entrance," MapView is the "result canvas" — bidirectionally linked</p>
+          </div>
+
+          <p>The key here: <strong>stop describing "premium feel" in words — hand AI a concrete example.</strong> AI has seen mature products like wanderboat; it learns, mimics, and transfers far more accurately from an example than from your prose.</p>
+
+          <h2>4. How to "Teach" AI a Role Model: Two Ways</h2>
+          <p>Feeding the role model to AI works two ways, each with its own use case.</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 05 · <b>Two ways to teach</b> / 两种教法</p>
+            <div class="vs">
+              <div class="dgm-col">
+                <span class="vs-badge a">Way A · Screenshot + URL</span>
+                <div class="flow">
+                  <div class="flow-step"><span class="flow-n">1</span><div><p class="dgm-title">Capture a screenshot</p><p class="dgm-sub">Grab a wanderboat interface image</p></div></div>
+                  <div class="dgm-arrow">↓</div>
+                  <div class="flow-step"><span class="flow-n">2</span><div><p class="dgm-title">Attach the site URL</p><p class="dgm-sub">So AI can trace and reference the original</p></div></div>
+                  <div class="dgm-arrow">↓</div>
+                  <div class="flow-step"><span class="flow-n">3</span><div><p class="dgm-title">Learn layout &amp; style</p><p class="dgm-sub">Copy component structure, spacing, color vibe</p></div></div>
+                </div>
+                <p class="dgm-sub" style="margin-top:8px;">Pros: lightweight &amp; fast. Cons: only "surface" reference; interaction detail is left to AI's imagination.</p>
+              </div>
+              <div class="dgm-col">
+                <span class="vs-badge b">Way B · Figma design first (recommended)</span>
+                <div class="flow">
+                  <div class="flow-step"><span class="flow-n">1</span><div><p class="dgm-title">Go into a Figma agent</p><p class="dgm-sub">Let a professional design agent produce a pure demo</p></div></div>
+                  <div class="dgm-arrow">↓</div>
+                  <div class="flow-step"><span class="flow-n">2</span><div><p class="dgm-title">Ask it to study wanderboat</p><p class="dgm-sub">Explicit instruction: absorb its design philosophy &amp; interactions</p></div></div>
+                  <div class="dgm-arrow">↓</div>
+                  <div class="flow-step"><span class="flow-n">3</span><div><p class="dgm-title">Download the result into the project</p><p class="dgm-sub">Pull the design files/spec into the working directory</p></div></div>
+                  <div class="dgm-arrow">↓</div>
+                  <div class="flow-step"><span class="flow-n">4</span><div><p class="dgm-title">Coding agent implements it</p><p class="dgm-sub">Build from a finished design instead of imagining it</p></div></div>
+                </div>
+                <p class="dgm-sub" style="margin-top:8px;">Pros: interaction &amp; structure nailed in one pass. Cons: one more step in the toolchain — worth it.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="note">
+            <p><strong>Way B is recommended.</strong> Why: design is a job for a "design agent." A screenshot only shows a finished page and asks a code agent to guess. Let <em>Figma design go first, then the code agent follows</em> — each does its own job, and the result lands far above "write code from a screenshot."</p>
+          </div>
+
+          <h2>5. Stringing It Together: From One Sentence to a High-Fidelity Prototype</h2>
+          <p>These four steps are really one pipeline. String them together and you get a reusable "idea → prototype" method.</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 06 · <b>The full pipeline</b> / 完整落地流水线</p>
+            <div class="flow">
+              <div class="flow-step"><span class="flow-n">01</span><div><p class="dgm-title">State the idea clearly</p><p class="dgm-sub">One sentence + a capability checklist, e.g. "natural-language map + five capabilities"</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">02</span><div><p class="dgm-title">Let AI be the architect</p><p class="dgm-sub">Fix the stack first, then the features — don't design as you build</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">03</span><div><p class="dgm-title">Pick a role model and feed it</p><p class="dgm-sub">Choose a benchmark like wanderboat; screenshot or Figma study</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">04</span><div><p class="dgm-title">Design first (Figma)</p><p class="dgm-sub">Put "good" into the design file before talking code</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">05</span><div><p class="dgm-title">Coding agent implements</p><p class="dgm-sub">Build from the design, one dimension per round</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">06</span><div><p class="dgm-title">Review &amp; accumulate</p><p class="dgm-sub">Data becomes assets; learnings become the next "role model"</p></div></div>
+            </div>
+          </div>
+
+          <h2>Closing: The PM's Next Move</h2>
+          <p>Back to the opening line. In the AI era, what a PM competes on isn't technology — it's <strong>steering ability</strong>:</p>
+          <ul>
+            <li><strong>Unsure of the tech approach?</strong> Don't panic — let AI be the architect; you decide.</li>
+            <li><strong>Afraid it'll come out mediocre?</strong> Manage AI's attention; one goal per round.</li>
+            <li><strong>Can't describe what "good" looks like?</strong> Find a role model — screenshot it or design it in Figma first, and make "good" concrete.</li>
+          </ul>
+          <p>With this method I turned a "map agent" idea into a demo-ready, iterable prototype in two days. You probably have a similar idea stuck on "I don't know how to build it." Now you know the first step: it's not learning technology — it's <strong>telling AI your idea</strong>.</p>
+
+        </div>
+
+        <nav class="post-nav">
+          <div>
+            <a href="../blog.html">
+              <span data-lang="zh">← 返回博客</span>
+              <span data-lang="en" hidden>← Back to blog</span>
+            </a>
+          </div>
+        </nav>
+      </main>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+  <script src="../assets/js/site-config.js"></script>
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>提示词工程 · AI 产品经理实践</title>
+  <meta name="description" content="以产品经理视角，深入浅出讲透如何写好需求提示词：六个问题的理论框架，一条真实模糊需求的现场改写，两套可直接复制的完整示例，以及四个让 AI 越用越准的进阶技巧。 / From a product manager's view, this article explains how to write good requirement prompts: a six-question framework, a live rewrite of a vague requirement, two copy-paste-ready examples, and four advanced techniques to make AI sharper with every round." />
+  <link rel="icon" href="../assets/img/avatar.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <style>
+    /* ---- article diagrams (blueprint palette, scoped to this page) ---- */
+    .dgm { margin: 22px 0 30px; overflow-x: auto; }
+    .dgm-cap { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 10px; }
+    .dgm-cap b { color: var(--accent); font-weight: 600; }
+    .dgm-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+    .dgm-col { display: flex; flex-direction: column; gap: 10px; flex: 1 1 0; min-width: 220px; }
+    .dgm-box { border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 12px; background: var(--bg); min-width: 0; }
+    .dgm-box.sub { background: var(--bg-soft); border-color: var(--border); }
+    .dgm-box.solo { background: var(--accent-soft); border-color: var(--accent-line); }
+    .dgm-box.grow { flex: 1 1 0; }
+    .dgm-title { font-size: .86rem; font-weight: 600; margin: 0 0 4px; color: var(--text); }
+    .dgm-sub { font-size: .74rem; color: var(--text-muted); margin: 0; line-height: 1.6; }
+    .dgm-arrow { text-align: center; color: var(--accent); font-size: .95rem; line-height: 1; padding: 6px 0; }
+    .dgm-arrow span { font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-faint); }
+    .flow { display: flex; flex-direction: column; }
+    .flow-step { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 6px; background: var(--bg-soft); padding: 10px 12px; }
+    .flow-n { font-family: var(--font-mono); font-size: .7rem; color: var(--link); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 4px; padding: 2px 6px; flex: none; margin-top: 1px; }
+    .dgm-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .dgm-tag { font-family: var(--font-mono); font-size: .66rem; color: var(--link); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 999px; padding: 2px 9px; }
+    .stat-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .stat { flex: 1 1 0; min-width: 120px; border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 12px; background: var(--bg); }
+    .stat b { display: block; font-family: var(--font-mono); font-size: 1.25rem; color: var(--accent); line-height: 1.2; }
+    .stat span { font-size: .7rem; color: var(--text-muted); }
+    .note { border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0; padding: 10px 14px; font-size: .86rem; margin: 16px 0; }
+    .note p { margin: 0; }
+    .back-arrow { text-align: center; color: var(--text-muted); font-family: var(--font-mono); font-size: .66rem; letter-spacing: .08em; margin: 6px 0 0; }
+    .vs { display: flex; gap: 14px; flex-wrap: wrap; }
+    .vs .dgm-col { flex: 1 1 0; min-width: 250px; }
+    .vs-badge { font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .12em; border-radius: 999px; padding: 2px 10px; display: inline-block; margin-bottom: 8px; }
+    .vs-badge.a { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-line); }
+    .vs-badge.b { background: #e9f7ef; color: #1f7a4d; border: 1px solid #bfe6cf; }
+    .cycle { display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; }
+    .cycle .dgm-box { flex: 1 1 0; min-width: 130px; text-align: center; }
+    .three { display: flex; gap: 10px; flex-wrap: wrap; }
+    .three .dgm-box { flex: 1 1 0; min-width: 170px; }
+    .bad { color: #b34040; }
+    .good { color: #1f7a4d; }
+    /* prompt blocks */
+    .prompt { border: 1px solid var(--border-strong); border-left: 3px solid var(--accent); border-radius: 6px; background: var(--bg-soft); padding: 12px 14px; margin: 14px 0; overflow-x: auto; }
+    .prompt pre { margin: 0; background: transparent; padding: 0; }
+    .prompt code { font-family: var(--font-mono); font-size: .78rem; line-height: 1.7; color: var(--text); background: transparent; }
+    .prompt-note { font-size: .72rem; color: var(--text-muted); margin: 8px 0 0; font-family: var(--font-mono); }
+    .prompt-note b { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <div class="page-grid">
+      <div id="site-sidebar"></div>
+
+      <main class="content">
+        <h1>
+          <span data-lang="zh">提示词工程 · AI 产品经理实践</span>
+          <span data-lang="en" hidden>Prompt Engineering · AI Product Manager Practice</span>
+        </h1>
+        <p class="page-meta">
+          <span data-lang="zh">2026年8月11日 · AI产品 · 提示词工程</span>
+          <span data-lang="en" hidden>Aug 11, 2026 · AI Product · Prompt Engineering</span>
+        </p>
+
+        <!-- ==================== ZH ==================== -->
+        <div data-lang="zh">
+
+          <p>写需求，是产品经理的日常；但把需求「喂」给 AI，能不能喂出好结果，却是一门值得专门练的手艺。同样是「帮我写个 PRD」，有人一句话甩过去，AI 还给你一份千篇一律的官话；有人把背景、边界、验收标准讲得明明白白，AI 交付的文档几乎可以直接评审。差别不在 AI，在提示词。</p>
+
+          <p>这篇文章，我用产品经理自己的语言，把「怎么写好一条需求提示词」讲透：先给你一个能记住的理论框架（<strong>六个问题</strong>），再带你现场改写一条真实需求，最后给两套可直接复制的完整示例。没有玄学，全是能上手的东西。</p>
+
+          <h2>〇、为什么产品经理要会写提示词</h2>
+          <p>先说结论：<strong>提示词工程，本质是「把产品经理脑子里的判断，翻译成 AI 能执行的指令」。</strong>AI 再强，也读不了心。你脑子里已经想清楚「谁是用户、为什么做、边界在哪、什么叫做好」，但如果你不写出来，AI 就只能猜。猜的结果，就是平庸、跑偏、返工。</p>
+          <p>一句话：写提示词不是技术活，是<strong>「把话说清楚」的表达活</strong>——这恰恰是产品经理的本行。</p>
+
+          <h2>一、理论框架：六个问题，写清一条需求提示词</h2>
+          <p>我把它总结成六个问题。写任何一条需求提示词，就是把这六个问题回答一遍。答得越具体，AI 交付得越准。</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 01 · <b>需求提示词的六个问题</b> / The six questions of a requirement prompt</p>
+            <div class="dgm-row">
+              <div class="dgm-box solo grow"><p class="dgm-title">① 你是谁？</p><p class="dgm-sub">角色 Role · 给 AI 一个视角和立场</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box grow"><p class="dgm-title">② 发生了什么？</p><p class="dgm-sub">背景 Context · 用户、行业、现状、痛点</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box grow"><p class="dgm-title">③ 要达成什么？</p><p class="dgm-sub">目标 Goal · 一句话说清本次交付</p></div>
+            </div>
+            <div class="dgm-row" style="margin-top:10px;">
+              <div class="dgm-box grow"><p class="dgm-title">④ 你手里有什么？</p><p class="dgm-sub">输入 Input · 需求清单、素材、访谈</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box grow"><p class="dgm-title">⑤ 有什么不能做？</p><p class="dgm-sub">约束 Constraint · 范围、边界、禁忌</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box solo grow"><p class="dgm-title">⑥ 交付成什么样？</p><p class="dgm-sub">输出 Output · 结构、格式、验收标准</p></div>
+            </div>
+            <p class="back-arrow">六个问题 = 一条高质量需求提示词的骨架</p>
+          </div>
+
+          <p>逐个展开说：</p>
+          <ol>
+            <li><strong>你是谁？——给 AI 一个角色。</strong>不指定角色，AI 就「平铺直叙」；指定角色，AI 就有了立场和视角。「资深产品经理」「目标用户」「技术架构师」，同一个任务，不同角色的输出质量完全不同。</li>
+            <li><strong>发生了什么？——交代背景。</strong>用户是谁、什么行业、现在用什么、痛点在哪。没有背景，AI 只能套通用模板；有了背景，它才知道该往哪个方向使劲。</li>
+            <li><strong>要达成什么？——一句话目标。</strong>用一句话说清这次要交付什么。目标越聚焦，AI 越不容易跑题。</li>
+            <li><strong>你手里有什么？——提供输入。</strong>需求清单、访谈纪要、竞品截图、现有代码，统统可以喂给它。你给的信息越足，它越不用瞎编。</li>
+            <li><strong>有什么不能做？——设定边界。</strong>范围、禁忌、不做的事。约束不是限制，是护栏——防止 AI 发挥过头、越做越宽。</li>
+            <li><strong>交付成什么样？——规定输出。</strong>结构、格式、字数、语言、验收标准。先定义「什么叫做好」，AI 才能对齐交付。</li>
+          </ol>
+
+          <table>
+            <thead>
+              <tr><th>问题</th><th>常见错误</th><th>正确做法</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>① 你是谁</td><td>不设角色，输出没立场</td><td>明确「你是资深产品经理 / 目标用户 / 架构师」</td></tr>
+              <tr><td>② 发生了什么</td><td>只说任务，不给背景</td><td>交代用户、行业、现状、痛点</td></tr>
+              <tr><td>③ 要达成什么</td><td>目标含糊，多个任务混在一起</td><td>一句话，聚焦单一交付物</td></tr>
+              <tr><td>④ 你手里有什么</td><td>让 AI 凭空想象素材</td><td>把清单、纪要、截图喂进去</td></tr>
+              <tr><td>⑤ 有什么不能做</td><td>不给边界，AI 越做越宽</td><td>写明范围、禁忌、不做的事</td></tr>
+              <tr><td>⑥ 交付成什么样</td><td>只要「详细一点」，无验收标准</td><td>规定结构、格式、字数、自查清单</td></tr>
+            </tbody>
+          </table>
+
+          <h2>二、现场演示：把一条模糊需求改写成结构化提示词</h2>
+          <p>先拿一条「最像真实世界」的模糊需求开刀：</p>
+
+          <div class="prompt">
+<pre><code>帮我写一个客户管理模块的需求文档，要详细一点，专业一点。</code></pre>
+            <p class="prompt-note">✗ 模糊需求 · 典型失败样本</p>
+          </div>
+
+          <p>这话丢给 AI，它只能一路猜：客户管理？ToB 还是 ToC？新功能还是改版？给谁看？写到多细？全是问号。AI 猜出来的，大概率是「看起来没错、哪都能用、哪都不贴」的通用模板。</p>
+          <p>用六个问题逐条追问，把答案填回去，就变成了下面这条：</p>
+
+          <div class="prompt">
+<pre><code>你是资深产品经理，负责一款企业客户管理 SaaS 产品。【角色】
+背景：销售获客靠手工记录，客户信息散落在 Excel 和微信群，
+跟进无提醒，线索流失率高。【背景】
+目标：产出一份「客户管理」功能模块的 PRD。【目标】
+输入：功能清单（销售线索、客户档案、跟进记录、统计分析）+
+2 条用户访谈纪要（见下文）。【输入】
+约束：只写本模块范围；不写技术实现；每条功能标 P0/P1/P2。【约束】
+输出：按「背景-目标-用户-功能清单-异常场景-验收标准」结构，
+约 800 字，中文。【输出】</code></pre>
+            <p class="prompt-note">✓ 结构化提示词 · 六问题齐备 · 每一段都能对上号</p>
+          </div>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 02 · <b>改写过程：六个问题把「模糊」拆成「明确」</b> / How six questions turn vague into explicit</p>
+            <div class="vs">
+              <div class="dgm-col">
+                <span class="vs-badge a">✗ 模糊需求</span>
+                <div class="flow">
+                  <div class="flow-step"><span class="flow-n">1</span><div><p class="dgm-sub">没有角色 → 输出没立场</p></div></div>
+                  <div class="flow-step"><span class="flow-n">2</span><div><p class="dgm-sub">没有背景 → AI 套通用模板</p></div></div>
+                  <div class="flow-step"><span class="flow-n">3</span><div><p class="dgm-sub">没有边界 → 越做越宽</p></div></div>
+                  <div class="flow-step"><span class="flow-n">4</span><div><p class="dgm-sub">没有验收 → 好坏无法判断</p></div></div>
+                </div>
+              </div>
+              <div class="dgm-arrow" style="padding-top:20px;">→<br /><span>逐条追问</span></div>
+              <div class="dgm-col">
+                <span class="vs-badge b">✓ 结构化提示词</span>
+                <div class="flow">
+                  <div class="flow-step"><span class="flow-n">①</span><div><p class="dgm-sub">角色明确：资深 PM，负责该产品</p></div></div>
+                  <div class="flow-step"><span class="flow-n">②</span><div><p class="dgm-sub">背景明确：手工记录、流失率高</p></div></div>
+                  <div class="flow-step"><span class="flow-n">③</span><div><p class="dgm-sub">边界明确：只做本模块，标优先级</p></div></div>
+                  <div class="flow-step"><span class="flow-n">④</span><div><p class="dgm-sub">验收明确：结构 + 字数 + 自查</p></div></div>
+                </div>
+              </div>
+            </div>
+            <p class="back-arrow">同样的任务，提示词不同，交付差一整个层级</p>
+          </div>
+
+          <h2>三、实践示例 1：用六问题写「PRD 需求文档」</h2>
+          <p>这是 PM 最高频的场景。照着六个问题填空即可：</p>
+
+          <div class="prompt">
+<pre><code>你是资深产品经理，负责一款企业客户管理 SaaS 产品。
+
+【背景】目前销售获客靠手工记录，客户信息散落在 Excel 和微信群，
+跟进无提醒，线索流失率高。
+
+【目标】产出一份「客户管理」功能模块的 PRD。
+
+【输入】功能清单：销售线索、客户档案、跟进记录、统计分析。
+用户访谈纪要：
+- 销售 A：我最想要的是「今天该跟进的客户」列表，不然总忘。
+- 销售 B：客户信息能合并去重就好，现在重复录得头疼。
+
+【约束】
+- 只写本模块范围，不扩展到完整 CRM 流程
+- 不写技术实现细节，只写产品逻辑
+- 每条功能标注优先级 P0 / P1 / P2
+
+【输出】按「背景 - 目标 - 用户 - 功能清单（含优先级）
+- 异常场景 - 验收标准」结构输出，约 800 字，中文。
+
+【自查】输出后自检：功能是否覆盖全部输入清单？
+异常场景是否完整？缺失请补齐。</code></pre>
+            <p class="prompt-note">六个问题全覆盖 · 可直接复制使用</p>
+          </div>
+
+          <p>注意最后那条 <strong>【自查】</strong>——它让 AI 在交卷前自己先过一遍验收标准。这一条能把「半成品」挡在交付之前，效果立竿见影。</p>
+
+          <h2>四、实践示例 2：用六问题写「产品原型 Demo」</h2>
+          <p>从需求到界面 Demo，同样用六问题。如果你想让它「长得好看」，可以顺手启用 <strong>Taste Skill</strong> 的审美规则（详见上一篇），用参数代替「高级一点」这种形容词：</p>
+
+          <div class="prompt">
+<pre><code>启用 design-taste-frontend v2 规则。
+
+【角色】你是产品经理兼前端设计者，产出可交互原型。
+
+【背景】目标用户是企业运营负责人，核心诉求是快速掌握
+「今天该跟进谁、进展如何」。
+
+【目标】生成「客户跟进看板」首页的可交互原型。
+
+【输入】功能需求：今日待跟进列表、按状态分组的跟进看板、
+点击客户卡片查看详情。
+
+【约束】
+- 信息密度 VISUAL_DENSITY=8，动效 MOTION_INTENSITY=3（B 端克制）
+- 必须有空状态与加载状态
+- 不使用假测试数据
+
+【输出】单页 HTML / CSS / JS，桌面端优先，附一页交互说明。
+
+【自查】按 Pre-Flight 清单自检：空态 / 加载态 / 深浅色 / 响应式。</code></pre>
+            <p class="prompt-note">需求 → 界面 Demo 一条链打通 · 审美交给规则，不做形容词</p>
+          </div>
+
+          <h2>五、进阶技巧：让 AI 越用越准</h2>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 03 · <b>迭代优化循环：别把 AI 当一次性工具</b> / The iteration loop</p>
+            <div class="cycle">
+              <div class="dgm-box solo"><p class="dgm-title">生成初稿</p><p class="dgm-sub">按六问题提示词交付</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">对照验收</p><p class="dgm-sub">按输出里定的标准逐条核对</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">反馈修正</p><p class="dgm-sub">指出具体问题，不给空泛意见</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">再生成</p><p class="dgm-sub">带着上一轮反馈继续迭代</p></div>
+            </div>
+            <p class="back-arrow">↺ 高质量交付 = 初始提示词 × 迭代轮数</p>
+          </div>
+
+          <ol>
+            <li><strong>给 AI 一个好例子（few-shot）。</strong>你希望它输出成什么样，先给一个样例。「按下面这个格式来：<em>（示例）</em>」——一个真实样例比十句描述都管用。</li>
+            <li><strong>让 AI 先反问，再动手。</strong>在提示词末尾加一句「如果有不清楚的地方，先问我 3 个问题再开始」。AI 会把最影响交付的盲区问出来，你补完信息，它一次到位。</li>
+            <li><strong>一轮一轮迭代，别指望一次到位。</strong>先让它出 80 分，再针对具体缺陷逐轮打磨。一次要求「全满」，它每个维度都只及格——这也是上一篇讲的「注意力管理」。</li>
+            <li><strong>让 AI 交卷前自查。</strong>在输出里规定【自查】清单，让 AI 自己先过一遍验收标准。很多遗漏（空状态、异常场景、移动端）在这一步就被它自己拦下了。</li>
+          </ol>
+
+          <h2>六、避坑指南：五个常见错误</h2>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 04 · <b>五个高频坑</b> / Five common pitfalls</p>
+            <div class="dgm-row">
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ 只给任务不给背景</p><p class="dgm-sub">AI 乱猜 → 补上用户与痛点</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ 一句话要求太多</p><p class="dgm-sub">注意力分散 → 一次一个目标</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ 只要「详细一点」</p><p class="dgm-sub">没有验收标准 → 规定输出格式与自查</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ 当一次性工具</p><p class="dgm-sub">不迭代 → 一轮轮反馈打磨</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ 不给角色视角</p><p class="dgm-sub">输出没立场 → 指定专家角色</p></div>
+            </div>
+          </div>
+
+          <ol>
+            <li><strong>只给任务，不给背景。</strong>「写个登录页需求」——什么产品、给谁用、现在卡在哪？背景越少，AI 越只能套模板。</li>
+            <li><strong>一句话要求太多。</strong>「又要写文档又要出原型又要做竞品分析」——一次塞三个任务，三个都做不好。拆成三条提示词，一条一个目标。</li>
+            <li><strong>只要「详细一点、专业一点」。</strong>这是最无效的形容词。改成「按 X 结构输出，约 X 字，含异常场景和验收标准」，好坏立刻可判。</li>
+            <li><strong>把 AI 当一次性工具。</strong>第一次输出不满意就换任务重来，等于每次都从零开始。应该把反馈喂回去，一轮比一轮准。</li>
+            <li><strong>不给角色视角。</strong>不设角色，输出是「无主视角」的流水账；设了角色，它才会从「产品经理」「用户」「架构师」的立场替你把问题想全。</li>
+          </ol>
+
+          <h2>七、总结：把提示词当成你的「第二语言」</h2>
+          <p>说到底，需求提示词就是产品经理的「第二语言」——把脑子里已经想明白的产品判断，翻译成 AI 听得懂的指令。</p>
+
+          <div class="note">
+            <p><strong>一句话公式：</strong>「你是<em>（角色）</em>。背景是<em>（用户/现状/痛点）</em>。目标是<em>（一句话）</em>。输入是<em>（素材）</em>。约束是<em>（边界/禁忌）</em>。请按<em>（结构/格式）</em>输出，并在交付前按<em>（验收清单）</em>自查。」</p>
+          </div>
+
+          <p>六个问题，一条模板，两套示例，四个技巧——这就是我从实践中沉淀下来的全部家当。下次再写需求提示词，先停下来，把六个问题在脑子里过一遍：<strong>角色、背景、目标、输入、约束、输出。</strong>你会发现，AI 的交付质量，肉眼可见地上了一个台阶。</p>
+
+        </div>
+
+        <!-- ==================== EN ==================== -->
+        <div data-lang="en" hidden>
+
+          <p>Writing requirements is a product manager's daily job. But whether those requirements, once fed to AI, come back excellent — that is a craft worth practicing deliberately. Ask two people to "write a PRD." One fires off a single vague sentence and gets back boilerplate. The other lays out context, boundaries, and acceptance criteria clearly, and gets a document almost ready for review. The difference isn't the AI. It's the prompt.</p>
+
+          <p>In this article, I'll talk in a product manager's own language about how to write a good requirement prompt: first a theoretical framework you can actually remember (<strong>six questions</strong>), then a live rewrite of a real (vague) requirement, then two complete copy-paste-ready examples. No mysticism — just things that work.</p>
+
+          <h2>0. Why a PM Should Learn to Write Prompts</h2>
+          <p>Bottom line: <strong>prompt engineering is about translating the judgments in a product manager's head into instructions AI can execute.</strong> No matter how strong the AI, it can't read your mind. You already know who the users are, why you're building this, where the boundaries lie, and what "good" looks like — but if you don't write it down, AI has to guess. Guessing yields mediocrity, drift, and rework.</p>
+          <p>In one sentence: writing prompts isn't a technical skill — it's <strong>an expression skill of "saying things clearly,"</strong> which is exactly a product manager's home turf.</p>
+
+          <h2>1. The Framework: Six Questions That Write a Requirement Prompt</h2>
+          <p>I've compressed it into six questions. To write any requirement prompt, answer these six. The more specific your answers, the closer AI lands.</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 01 · <b>The six questions of a requirement prompt</b> / 需求提示词的六个问题</p>
+            <div class="dgm-row">
+              <div class="dgm-box solo grow"><p class="dgm-title">① Who are you?</p><p class="dgm-sub">Role · give AI a viewpoint and stance</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box grow"><p class="dgm-title">② What happened?</p><p class="dgm-sub">Context · users, industry, status, pain points</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box grow"><p class="dgm-title">③ What's the goal?</p><p class="dgm-sub">Goal · one sentence for this deliverable</p></div>
+            </div>
+            <div class="dgm-row" style="margin-top:10px;">
+              <div class="dgm-box grow"><p class="dgm-title">④ What do you have?</p><p class="dgm-sub">Input · lists, materials, interviews</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box grow"><p class="dgm-title">⑤ What mustn't you do?</p><p class="dgm-sub">Constraint · scope, boundaries, taboos</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box solo grow"><p class="dgm-title">⑥ What should it look like?</p><p class="dgm-sub">Output · structure, format, acceptance</p></div>
+            </div>
+            <p class="back-arrow">Six questions = the skeleton of a high-quality requirement prompt</p>
+          </div>
+
+          <p>Let's unpack each:</p>
+          <ol>
+            <li><strong>Who are you? — give AI a role.</strong> Without a role, AI just narrates flatly. With a role, it gains a stance and a viewpoint. "Senior PM," "target user," "technical architect" — the same task yields very different quality depending on the role.</li>
+            <li><strong>What happened? — set the context.</strong> Who are the users, what industry, what do they use now, where does it hurt. Without context, AI reaches for generic templates; with context, it knows which direction to push.</li>
+            <li><strong>What's the goal? — one-sentence objective.</strong> State in one line what this task must deliver. The more focused the goal, the less AI drifts.</li>
+            <li><strong>What do you have? — provide input.</strong> Requirement lists, interview notes, competitor screenshots, existing code — feed it all in. The more you give, the less it has to invent.</li>
+            <li><strong>What mustn't you do? — set boundaries.</strong> Scope, taboos, things not to do. Constraints aren't limits; they're guardrails that stop AI from overreaching.</li>
+            <li><strong>What should it look like? — specify the output.</strong> Structure, format, length, language, acceptance criteria. Define "what good means" first, and AI can align its delivery.</li>
+          </ol>
+
+          <table>
+            <thead>
+              <tr><th>Question</th><th>Common mistake</th><th>What to do instead</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>① Who</td><td>No role, output has no stance</td><td>Name it: "You are a senior PM / target user / architect"</td></tr>
+              <tr><td>② Context</td><td>Task only, no background</td><td>Give users, industry, current state, pain points</td></tr>
+              <tr><td>③ Goal</td><td>Vague goal, mixed tasks</td><td>One sentence, one focused deliverable</td></tr>
+              <tr><td>④ Input</td><td>Let AI imagine the materials</td><td>Feed in lists, notes, screenshots</td></tr>
+              <tr><td>⑤ Constraint</td><td>No boundaries, AI overreaches</td><td>Write scope, taboos, what's out</td></tr>
+              <tr><td>⑥ Output</td><td>"Just make it detailed" — no acceptance</td><td>Specify structure, format, length, self-check</td></tr>
+            </tbody>
+          </table>
+
+          <h2>2. Live Demo: Rewriting a Vague Requirement into a Structured Prompt</h2>
+          <p>Start with a vague requirement that looks painfully familiar:</p>
+
+          <div class="prompt">
+<pre><code>Write me a requirements document for a customer-management module.
+Make it detailed and professional.</code></pre>
+            <p class="prompt-note">✗ Vague requirement · a classic failure sample</p>
+          </div>
+
+          <p>Thrown at AI, this is a guessing game: customer management? B2B or B2C? New feature or redesign? Who reads it? How detailed? All question marks. What AI guesses is usually a generic template that "looks right, works anywhere, fits nowhere."</p>
+          <p>Run each of the six questions, fill in the answers, and it becomes:</p>
+
+          <div class="prompt">
+<pre><code>You are a senior PM for a B2B customer-management SaaS. [Role]
+Context: sales acquires leads by hand; customer info is scattered
+across Excel and WeChat; follow-ups have no reminders, so lead
+attrition is high. [Context]
+Goal: produce a PRD for the "Customer Management" module. [Goal]
+Input: feature list (leads, customer profiles, follow-ups,
+analytics) + 2 interview notes (below). [Input]
+Constraints: only this module's scope; no technical implementation
+detail; tag every feature P0/P1/P2. [Constraint]
+Output: structure as "Context-Goal-Users-Features-Edge cases-
+Acceptance," about 800 words, in English. [Output]</code></pre>
+            <p class="prompt-note">✓ Structured prompt · all six questions answered · each line maps to one</p>
+          </div>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 02 · <b>The rewrite: six questions turn vague into explicit</b> / 改写过程</p>
+            <div class="vs">
+              <div class="dgm-col">
+                <span class="vs-badge a">✗ Vague requirement</span>
+                <div class="flow">
+                  <div class="flow-step"><span class="flow-n">1</span><div><p class="dgm-sub">No role → output without stance</p></div></div>
+                  <div class="flow-step"><span class="flow-n">2</span><div><p class="dgm-sub">No context → generic template</p></div></div>
+                  <div class="flow-step"><span class="flow-n">3</span><div><p class="dgm-sub">No boundary → scope creep</p></div></div>
+                  <div class="flow-step"><span class="flow-n">4</span><div><p class="dgm-sub">No acceptance → quality unjudgeable</p></div></div>
+                </div>
+              </div>
+              <div class="dgm-arrow" style="padding-top:20px;">→<br /><span>ask each one</span></div>
+              <div class="dgm-col">
+                <span class="vs-badge b">✓ Structured prompt</span>
+                <div class="flow">
+                  <div class="flow-step"><span class="flow-n">①</span><div><p class="dgm-sub">Role set: senior PM of that product</p></div></div>
+                  <div class="flow-step"><span class="flow-n">②</span><div><p class="dgm-sub">Context set: manual records, high attrition</p></div></div>
+                  <div class="flow-step"><span class="flow-n">③</span><div><p class="dgm-sub">Boundary set: module only, prioritize</p></div></div>
+                  <div class="flow-step"><span class="flow-n">④</span><div><p class="dgm-sub">Acceptance set: structure + length + self-check</p></div></div>
+                </div>
+              </div>
+            </div>
+            <p class="back-arrow">Same task, different prompt — the delivery is a whole tier apart</p>
+          </div>
+
+          <h2>3. Example 1: Writing a PRD with the Six Questions</h2>
+          <p>This is the PM's most frequent scenario. Just fill in the blanks:</p>
+
+          <div class="prompt">
+<pre><code>You are a senior PM for a B2B customer-management SaaS product.
+
+[Context] Sales acquires leads by hand; customer info is scattered
+across Excel and WeChat; follow-ups have no reminders and lead
+attrition is high.
+
+[Goal] Produce a PRD for the "Customer Management" feature module.
+
+[Input] Feature list: sales leads, customer profiles, follow-up
+records, statistics &amp; analytics.
+User interview notes:
+- Sales rep A: "What I want most is a 'follow up today' list —
+  otherwise I keep forgetting."
+- Sales rep B: "Deduping customer profiles would save me — I'm
+  re-entering the same records, and it's a headache."
+
+[Constraints]
+- Only this module's scope; don't expand to the full CRM flow
+- No technical implementation detail; product logic only
+- Tag every feature P0 / P1 / P2
+
+[Output] Structure as "Context - Goal - Users - Features (with
+priority) - Edge cases - Acceptance criteria," about 800 words.
+
+[Self-check] After writing, verify: does it cover every item in
+the input list? Are edge cases complete? Fill in anything missing.</code></pre>
+            <p class="prompt-note">All six questions covered · copy-paste ready</p>
+          </div>
+
+          <p>Note that last line, <strong>[Self-check]</strong> — it makes AI run through the acceptance criteria before handing in. That single line stops half-finished work at the door, and the effect is immediate.</p>
+
+          <h2>4. Example 2: Generating a Prototype Demo with the Six Questions</h2>
+          <p>From requirements to an interface demo, same six questions. If you want it to look good too, enable <strong>Taste Skill</strong>'s aesthetic rules (see the previous post) and replace adjectives like "premium" with parameters:</p>
+
+          <div class="prompt">
+<pre><code>Enable design-taste-frontend v2 rules.
+
+[Role] You are a product manager and frontend designer; produce an
+interactive prototype.
+
+[Context] Target users are business operations leads who need to
+quickly know "who to follow up today and how it's going."
+
+[Goal] Generate an interactive prototype of the "Customer Follow-up
+Board" homepage.
+
+[Input] Feature requirements: today's follow-up list, a follow-up
+board grouped by status, click a customer card to view details.
+
+[Constraints]
+- Visual density VISUAL_DENSITY=8, motion MOTION_INTENSITY=3
+  (restrained, B2B)
+- Must include empty state and loading state
+- No fake test data
+
+[Output] Single-page HTML / CSS / JS, desktop-first, with one page
+of interaction notes.
+
+[Self-check] Run the Pre-Flight checklist: empty / loading / light
+&amp; dark mode / responsive.</code></pre>
+            <p class="prompt-note">Requirement → interface demo in one chain · aesthetics to rules, not adjectives</p>
+          </div>
+
+          <h2>5. Advanced: Make AI Sharper with Every Round</h2>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 03 · <b>The iteration loop: don't treat AI as a one-shot tool</b> / 迭代优化循环</p>
+            <div class="cycle">
+              <div class="dgm-box solo"><p class="dgm-title">First draft</p><p class="dgm-sub">Deliver from the six-question prompt</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">Check acceptance</p><p class="dgm-sub">Verify against the criteria you set</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">Give feedback</p><p class="dgm-sub">Point at concrete flaws, not vague vibes</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">Regenerate</p><p class="dgm-sub">Iterate with last round's feedback</p></div>
+            </div>
+            <p class="back-arrow">↺ High-quality delivery = initial prompt × iteration rounds</p>
+          </div>
+
+          <ol>
+            <li><strong>Give AI a good example (few-shot).</strong> Want it to output a certain shape? Show it one sample first. "Follow this format: <em>(sample)</em>" — one real example beats ten sentences of description.</li>
+            <li><strong>Let AI ask before it acts.</strong> End the prompt with "If anything is unclear, ask me 3 questions before you start." AI surfaces the blind spots that matter most; you fill them in, and it nails it in one pass.</li>
+            <li><strong>Iterate round by round; don't expect perfection at once.</strong> Let it deliver an 80% version, then polish specific defects. Ask for "everything at once" and every dimension lands at passing — that's the attention management from the previous post.</li>
+            <li><strong>Have AI self-check before handing in.</strong> Put a [Self-check] checklist in the output spec so AI runs through the acceptance criteria itself. A lot of omissions (empty states, edge cases, mobile) get caught by AI before they reach you.</li>
+          </ol>
+
+          <h2>6. Pitfalls: Five Common Mistakes</h2>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 04 · <b>Five common pitfalls</b> / 五个高频坑</p>
+            <div class="dgm-row">
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ Task only, no context</p><p class="dgm-sub">AI guesses → add users &amp; pain points</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ One sentence, too many asks</p><p class="dgm-sub">Attention splits → one goal per prompt</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ Just "make it detailed"</p><p class="dgm-sub">No acceptance → specify format &amp; self-check</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ One-shot tool</p><p class="dgm-sub">No iteration → refine round by round</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title bad">✗ No role, no stance</p><p class="dgm-sub">Flat output → assign an expert role</p></div>
+            </div>
+          </div>
+
+          <ol>
+            <li><strong>Task only, no context.</strong> "Write requirements for a login page" — what product, who uses it, what's stuck today? Less context, and AI can only fall back on templates.</li>
+            <li><strong>Too many asks in one sentence.</strong> "Write the doc, make the prototype, and do the competitive analysis" — three tasks in one shot, three done poorly. Split into three prompts, one goal each.</li>
+            <li><strong>Just "detailed and professional."</strong> The most useless adjectives. Replace with "output as X structure, about X words, including edge cases and acceptance criteria," and quality becomes judgeable instantly.</li>
+            <li><strong>Treating AI as a one-shot tool.</strong> Give up on the first output and start a new task, and you restart from zero every time. Feed the feedback back in instead — each round lands closer.</li>
+            <li><strong>No role, no viewpoint.</strong> Without a role, output reads like an ownerless log. With a role, AI thinks through the problem from the stance of a PM, a user, or an architect.</li>
+          </ol>
+
+          <h2>7. Summary: Make the Prompt Your "Second Language"</h2>
+          <p>At the end of the day, a requirement prompt is a product manager's "second language" — translating the product judgments already in your head into instructions AI understands.</p>
+
+          <div class="note">
+            <p><strong>One-line formula:</strong> "You are <em>(role)</em>. Context: <em>(users/status/pain)</em>. Goal: <em>(one sentence)</em>. Input: <em>(materials)</em>. Constraints: <em>(boundaries/taboos)</em>. Output as <em>(structure/format)</em>, and self-check against <em>(acceptance list)</em> before delivering."</p>
+          </div>
+
+          <p>Six questions, one template, two examples, four techniques — that's the whole toolkit I've distilled from practice. Next time you write a requirement prompt, pause and run the six questions through your head: <strong>role, context, goal, input, constraint, output.</strong> You'll find AI's delivery quality climbs a visible step.</p>
+
+        </div>
+
+        <nav class="post-nav">
+          <div>
+            <a href="../blog.html">
+              <span data-lang="zh">← 返回博客</span>
+              <span data-lang="en" hidden>← Back to blog</span>
+            </a>
+          </div>
+        </nav>
+      </main>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+  <script src="../assets/js/site-config.js"></script>
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

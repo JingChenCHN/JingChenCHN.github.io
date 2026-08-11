@@ -1,5 +1,24 @@
 [
   {
+    "title": "Prompt Engineering: An AI Product Manager's Practice",
+    "title_zh": "提示词工程 · AI 产品经理实践",
+    "slug": "prompt-engineering-for-pms",
+    "date": "2026-08-11",
+    "tags": [
+      "AI Product",
+      "Prompt Engineering",
+      "Product Practice"
+    ],
+    "tags_zh": [
+      "AI产品",
+      "提示词工程",
+      "产品实践"
+    ],
+    "excerpt": "How product managers write good requirement prompts, told accessibly: a six-question framework (role, context, goal, input, constraint, output), a live rewrite of a vague requirement, two copy-paste-ready examples (PRD and prototype demo), and four techniques that make AI sharper every round.",
+    "excerpt_zh": "以产品经理视角，深入浅出讲透如何写好需求提示词：六个问题框架（角色、背景、目标、输入、约束、输出），一条模糊需求的现场改写，两套可直接复制的示例（PRD 与原型 Demo），以及四个让 AI 越用越准的进阶技巧。",
+    "file": "blog/prompt-engineering-for-pms.html"
+  },
+  {
     "title": "How Product Managers Get the Most Out of Taste Skill (an AI Frontend Aesthetic Skill Pack)",
     "title_zh": "产品经理如何用好 Taste Skill（AI 前端审美技能包）",
     "slug": "taste-skill-for-pms",

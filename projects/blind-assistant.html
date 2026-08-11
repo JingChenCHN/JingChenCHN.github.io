@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>偶发巧思 · 基于视觉大模型的盲人辅助可穿戴助手：设计与商业思路</title>
+  <meta name="description" content="一次偶发灵感下的完整推演：以视觉大模型为大脑的可穿戴盲人辅助助手，从用户场景、产品形态、技术架构、交互原则，到市场规模、商业模式、竞争格局与风险对策的专家级设计与商业思路。 / A serendipitous idea, fully worked out: a wearable assistant for the blind powered by a visual large model. An expert-level design and business study covering user scenarios, product form factors, technical architecture, interaction principles, market size, business model, competitive landscape, and risk mitigation." />
+  <link rel="icon" href="../assets/img/avatar.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <style>
+    /* ---- article diagrams (blueprint palette, scoped to this page) ---- */
+    .dgm { margin: 22px 0 30px; overflow-x: auto; }
+    .dgm-cap { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 10px; }
+    .dgm-cap b { color: var(--accent); font-weight: 600; }
+    .dgm-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+    .dgm-col { display: flex; flex-direction: column; gap: 10px; flex: 1 1 0; min-width: 220px; }
+    .dgm-box { border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 12px; background: var(--bg); min-width: 0; }
+    .dgm-box.sub { background: var(--bg-soft); border-color: var(--border); }
+    .dgm-box.solo { background: var(--accent-soft); border-color: var(--accent-line); }
+    .dgm-box.grow { flex: 1 1 0; }
+    .dgm-title { font-size: .86rem; font-weight: 600; margin: 0 0 4px; color: var(--text); }
+    .dgm-sub { font-size: .74rem; color: var(--text-muted); margin: 0; line-height: 1.6; }
+    .dgm-arrow { text-align: center; color: var(--accent); font-size: .95rem; line-height: 1; padding: 6px 0; }
+    .dgm-arrow span { font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-faint); }
+    .flow { display: flex; flex-direction: column; }
+    .flow-step { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 6px; background: var(--bg-soft); padding: 10px 12px; }
+    .flow-n { font-family: var(--font-mono); font-size: .7rem; color: var(--link); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 4px; padding: 2px 6px; flex: none; margin-top: 1px; }
+    .dgm-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .dgm-tag { font-family: var(--font-mono); font-size: .66rem; color: var(--link); background: var(--accent-soft); border: 1px solid var(--accent-line); border-radius: 999px; padding: 2px 9px; }
+    .stat-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .stat { flex: 1 1 0; min-width: 120px; border: 1px solid var(--border-strong); border-radius: 6px; padding: 10px 12px; background: var(--bg); }
+    .stat b { display: block; font-family: var(--font-mono); font-size: 1.25rem; color: var(--accent); line-height: 1.2; }
+    .stat span { font-size: .7rem; color: var(--text-muted); }
+    .note { border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0; padding: 10px 14px; font-size: .86rem; margin: 16px 0; }
+    .note p { margin: 0; }
+    .back-arrow { text-align: center; color: var(--text-muted); font-family: var(--font-mono); font-size: .66rem; letter-spacing: .08em; margin: 6px 0 0; }
+    .cycle { display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; }
+    .cycle .dgm-box { flex: 1 1 0; min-width: 130px; text-align: center; }
+    .three { display: flex; gap: 10px; flex-wrap: wrap; }
+    .three .dgm-box { flex: 1 1 0; min-width: 170px; }
+    .vs { display: flex; gap: 14px; flex-wrap: wrap; }
+    .vs .dgm-col { flex: 1 1 0; min-width: 250px; }
+    .vs-badge { font-family: var(--font-mono); font-size: .64rem; font-weight: 700; letter-spacing: .12em; border-radius: 999px; padding: 2px 10px; display: inline-block; margin-bottom: 8px; }
+    .vs-badge.a { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-line); }
+    .vs-badge.b { background: #e9f7ef; color: #1f7a4d; border: 1px solid #bfe6cf; }
+    .bad { color: #b34040; }
+    .good { color: #1f7a4d; }
+    .cap-sub { font-size: .66rem; color: var(--text-faint); font-family: var(--font-mono); letter-spacing: .06em; text-transform: uppercase; margin: 4px 0 0; }
+  </style>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <div class="page-grid">
+      <div id="site-sidebar"></div>
+
+      <main class="content">
+        <h1>
+          <span data-lang="zh">偶发巧思 · 基于视觉大模型的盲人辅助可穿戴助手：设计与商业思路</span>
+          <span data-lang="en" hidden>Serendipity · A Wearable Assistant for the Blind Powered by a Visual Large Model: Design &amp; Business Thinking</span>
+        </h1>
+        <p class="page-meta">
+          <span data-lang="zh">2026年8月11日 · 产品概念 · 可穿戴AI · 商业化推演</span>
+          <span data-lang="en" hidden>Aug 11, 2026 · Product Concept · Wearable AI · Business Model</span>
+        </p>
+
+        <!-- ==================== ZH ==================== -->
+        <div data-lang="zh">
+
+          <h2>〇、电梯陈述</h2>
+          <p>一个把「视觉大模型」装进可穿戴设备的盲人辅助助手：<strong>摄像头采集画面 → 视觉大模型理解世界 → 语音把"看见的"讲给看不见的人听。</strong>它不替代盲杖与导盲犬，而是补上盲人最稀缺的能力——<strong>随时、主动地获取视觉信息</strong>。</p>
+          <p>本篇文章不是一次产品说明书，而是一份完整的「设计与商业推演」：从用户场景、产品形态、技术架构、交互原则，到市场规模、商业模式、竞争格局与风险对策，全部摊开讲。作为一份<strong>概念级方案</strong>，它回答的问题是：如果今天要立项，怎么把它做成一件专业、可靠、能成立的事。</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 01 · <b>产品核心能力闭环</b> / The core capability loop</p>
+            <div class="cycle">
+              <div class="dgm-box solo"><p class="dgm-title">视觉采集</p><p class="dgm-sub">可穿戴摄像头，解放双手，贴近视角</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">视觉大模型理解</p><p class="dgm-sub">识物 / 识文 / 识人 / 场景叙事</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">语音输出</p><p class="dgm-sub">TTS 实时讲述，听而不见</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">主动干预</p><p class="dgm-sub">危险提醒 / 低电量 / 环境异常</p></div>
+            </div>
+            <p class="back-arrow">↺ 用户语音提问（STT）进入闭环，形成「看-懂-说-答」循环</p>
+          </div>
+
+          <h2>一、为什么是现在：三重机会窗口</h2>
+          <p>盲人辅助工具不是新赛道，但「为什么是现在做」有三个硬逻辑：</p>
+          <ol>
+            <li><strong>视觉大模型成熟了。</strong>多模态模型（识图、OCR、视觉问答）在近两年完成了一次质变：从「能识别」到「能理解」，从「读字」到「看懂画面并组织语言」。这正是盲人辅助最需要的能力——不是识别一张图片，而是<strong>把眼前的世界讲成人话</strong>。</li>
+            <li><strong>硬件成本塌下来了。</strong>轻量 AI 摄像头、骨传导耳机、低功耗芯片的量产成本大幅下降，可穿戴形态在重量、续航、价格上第一次有了「能接受」的可能。</li>
+            <li><strong>人口结构给出的长期需求。</strong>老龄化是确定性趋势，视力损伤患病率随年龄陡增——这是一个会持续放大、且几乎不受经济周期影响的需求底座。</li>
+          </ol>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 02 · <b>三重机会窗口</b> / Three windows of opportunity</p>
+            <div class="three">
+              <div class="dgm-box solo"><p class="dgm-title">模型质变</p><p class="dgm-sub">多模态大模型「能理解画面」→ 讲人话</p></div>
+              <div class="dgm-box"><p class="dgm-title">硬件降价</p><p class="dgm-sub">轻量摄像头 / 骨传导 / 低功耗芯片可量产</p></div>
+              <div class="dgm-box"><p class="dgm-title">人口结构</p><p class="dgm-sub">老龄化 → 患病率陡增的确定性长需求</p></div>
+            </div>
+          </div>
+
+          <h2>二、用户与场景：把「看不见」翻译成「能做的事」</h2>
+          <p>先看需求底座（均为公开估算口径）：WHO 估算全球约 22 亿人存在视力损伤，其中约 10 亿为可预防或尚未妥善处理的中重度损伤；全盲与低视力人群数量庞大且随老龄化增长。中国残联口径的视力残疾人数在千万级。更关键的不是总量，而是<strong>结构</strong>：用户高度分散、单点需求频率不高、但刚需强烈——这正是「软硬一体 + 主动服务」型产品擅长的结构。</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 03 · <b>八大核心场景</b> / Eight core scenarios</p>
+            <div class="dgm-row">
+              <div class="dgm-box grow"><p class="dgm-title">① 出行导航</p><p class="dgm-sub">盲道中断、红绿灯、障碍物、方向确认</p></div>
+              <div class="dgm-box grow"><p class="dgm-title">② 识物购物</p><p class="dgm-sub">商品、价格标签、保质期、药盒说明</p></div>
+              <div class="dgm-box grow"><p class="dgm-title">③ 阅读识别</p><p class="dgm-sub">书籍、信件、屏幕、票据的 OCR 朗读</p></div>
+              <div class="dgm-box grow"><p class="dgm-title">④ 社交识人</p><p class="dgm-sub">认出熟人、读取表情语气、识别名片</p></div>
+            </div>
+            <div class="dgm-row" style="margin-top:10px;">
+              <div class="dgm-box grow"><p class="dgm-title">⑤ 居家找物</p><p class="dgm-sub">找钥匙、辨颜色、识衣物、区分物品</p></div>
+              <div class="dgm-box grow"><p class="dgm-title">⑥ 钱币识别</p><p class="dgm-sub">纸币面额、找零核对、防止错付</p></div>
+              <div class="dgm-box grow"><p class="dgm-title">⑦ 医疗用药</p><p class="dgm-sub">识别药品名与用量、服药提醒</p></div>
+              <div class="dgm-box grow"><p class="dgm-title">⑧ 紧急求助</p><p class="dgm-sub">一键呼救、上报位置、联系亲属</p></div>
+            </div>
+            <p class="back-arrow">高频刚需：出行 + 识物 + 阅读 · 情感价值：识人 + 独立生活</p>
+          </div>
+
+          <p>产品经理的第一课：<strong>不要试图一次覆盖全部场景。</strong>MVP 应聚焦「出行安全 + 识物」两个最高频刚需，把每个场景做到"可用、可靠"，再逐步扩展。</p>
+
+          <h2>三、产品形态：三种方案的取舍</h2>
+          <p>「可穿戴」有不同落点，专业判断是分阶段、不押单一形态：</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 04 · <b>形态演进路线：先软后硬，逐步收敛</b> / Form-factor roadmap: software first, hardware later</p>
+            <div class="flow">
+              <div class="flow-step"><span class="flow-n">P0</span><div><p class="dgm-title">手机 App（验证期）</p><p class="dgm-sub">调用系统相机，零硬件成本，快速验证需求与付费意愿</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">P1</span><div><p class="dgm-title">胸前/夹挂摄像头（成长期）</p><p class="dgm-sub">解放双手、视角更贴近，与手机联动，成本可控</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">P2</span><div><p class="dgm-title">一体式智能眼镜（成熟期）</p><p class="dgm-sub">拍摄即视角、骨传导反馈，形态最优但成本与续航是门槛</p></div></div>
+            </div>
+            <p class="back-arrow">判断：不赌单一形态，按「成本-体验-验证」顺序演进</p>
+          </div>
+
+          <div class="note">
+            <p><strong>为什么 P0 先做 App？</strong>盲人辅助的变量不在硬件，而在「AI 讲得准不准」。用最便宜的方式把准确率、延迟、用户信任跑通，再谈硬件。这是被微软 Seeing AI、Google Lookout 验证过的路径——先证明需求，再消费升级。</p>
+          </div>
+
+          <h2>四、技术架构：以视觉大模型为大脑</h2>
+          <p>系统的核心不是摄像头，而是<strong>一个会「看、想、说」的大脑</strong>。架构遵循「端云协同、低延迟优先、安全兜底」三条原则：</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 05 · <b>端云协同架构</b> / Edge-cloud architecture</p>
+            <div class="dgm-row">
+              <div class="dgm-col">
+                <p class="dgm-cap" style="margin-top:0;"><b>端侧（穿戴设备）</b></p>
+                <div class="dgm-box sub grow"><p class="dgm-title">轻量模型</p><p class="dgm-sub">端侧小模型做"快判断"：障碍物、盲道、亮度、防抖</p></div>
+                <div class="dgm-arrow">↓ <span>关键帧上行</span></div>
+                <div class="dgm-box sub grow"><p class="dgm-title">安全兜底</p><p class="dgm-sub">断网也可用的基础识别，紧急呼救不依赖云端</p></div>
+                <div class="dgm-box sub grow"><p class="dgm-title">交互层</p><p class="dgm-sub">STT 语音输入 · TTS 语音输出 · 骨传导/震动反馈</p></div>
+              </div>
+              <div class="dgm-arrow">⇄</div>
+              <div class="dgm-col">
+                <p class="dgm-cap" style="margin-top:0;"><b>云端（大模型大脑）</b></p>
+                <div class="dgm-box solo grow"><p class="dgm-title">视觉大模型</p><p class="dgm-sub">多模态理解：识物 / OCR / 场景叙事 / 视觉问答</p></div>
+                <div class="dgm-box sub grow"><p class="dgm-title">记忆与上下文</p><p class="dgm-sub">用户偏好、常用地点、历史误识反馈，越用越准</p></div>
+                <div class="dgm-box sub grow"><p class="dgm-title">服务编排</p><p class="dgm-sub">导航 / 支付 / 通讯录 / 用药提醒等外部服务</p></div>
+              </div>
+            </div>
+            <p class="back-arrow">关键指标：端到端延迟 &lt; 1 秒 · 误报宁可保守不可冒进</p>
+          </div>
+
+          <p>两条专业判断：<strong>第一，延迟即体验。</strong>盲人辅助是实时场景，一卡一慢就失去信任。端侧负责"快而稳"，云端负责"准而全"。<strong>第二，安全永远兜底。</strong>交通危险、楼梯边缘这类判断，端侧必须有本地兜底能力，绝不把命悬在网络上。</p>
+
+          <h2>五、交互设计：看不见界面，只有"对话"</h2>
+          <p>这是本产品最反直觉、也最专业的地方：<strong>对盲人来说，屏幕是不存在的。</strong>交互只有三件事——听、说、触。</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 06 · <b>非视觉交互三原则</b> / Three principles of non-visual interaction</p>
+            <div class="three">
+              <div class="dgm-box solo"><p class="dgm-title">① 听优先</p><p class="dgm-sub">信息全部语音化，TTS 朗读与实时讲述为主</p></div>
+              <div class="dgm-box"><p class="dgm-title">② 说直给</p><p class="dgm-sub">唤醒词 + 短指令，STT 识别方言与口音要可配置</p></div>
+              <div class="dgm-box"><p class="dgm-title">③ 触兜底</p><p class="dgm-sub">震动/触觉反馈传达方向、警示、确认，不依赖声音环境</p></div>
+            </div>
+            <p class="back-arrow">设计红线：禁止任何需要"看见"才能完成的操作</p>
+          </div>
+
+          <ul>
+            <li><strong>主动叙述（proactive narration）。</strong>不是"用户问一句答一句"，而是设备在关键节点主动讲：过马路时讲红绿灯、进店时讲入口。这才叫"助手"，而不是"查询工具"。</li>
+            <li><strong>克制打扰（low-interruption）。</strong>日常安静，只在有意义时才开口——否则 30 分钟就把用户烦死。信息要有优先级：安全 &gt; 行动 &gt; 信息 &gt; 社交。</li>
+            <li><strong>隐私是信任的地基。</strong>摄像头常开是极度敏感的事。必须本地优先处理、云端数据最小化、用户可一键关闭、明确告知"看到什么、存了什么、给谁用"。隐私做不好，产品做不成。</li>
+          </ul>
+
+          <h2>六、商业模式：硬件是入口，服务是利润，公共采购是放大器</h2>
+          <p>这是最需要商业判断的部分。核心事实：<strong>盲人个体支付能力有限，但这是一个"政府与公益愿意买单"的群体。</strong></p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 07 · <b>收入结构：三层漏斗</b> / Revenue structure: three-layer funnel</p>
+            <div class="flow">
+              <div class="flow-step"><span class="flow-n">L1</span><div><p class="dgm-title">硬件销售（入口）</p><p class="dgm-sub">App 免费 / 基础功能免费；硬件平价走量，作为用户与数据的入口</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">L2</span><div><p class="dgm-title">AI 订阅（核心利润）</p><p class="dgm-sub">高级识别、实时主动叙述、多语言、个性化记忆按月订阅</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">L3</span><div><p class="dgm-title">B2G / 公益（放大器）</p><p class="dgm-sub">残联、民政、康复机构、保险、企业 CSR 采购与联合补贴</p></div></div>
+            </div>
+            <p class="back-arrow">关键：订阅的"持续付费" + 公共采购的"批量起量"双轮驱动</p>
+          </div>
+
+          <ul>
+            <li><strong>定价逻辑要认清参照系。</strong>海外先行者（如 OrCam、Envision 眼镜）售价数千美元——这既是"需求真实"的证明，也是"个人市场难复制"的警示。专业做法是：<strong>用免费 App 起量，用订阅做毛利，用 B2G 补贴把硬件价格打到大众可负担</strong>。</li>
+            <li><strong>渠道即护城河。</strong>残联、盲协、特殊教育学校、眼科医院、康复中心是天然的信任渠道。先建渠道，再放量。</li>
+            <li><strong>数据飞轮。</strong>每一句"讲错了"的反馈，都是模型修正的样本；使用越久，个人记忆与场景理解越准——这是软件层最难被复制的东西。</li>
+          </ul>
+
+          <h2>七、市场与竞争：红海里的空白</h2>
+          <p>盲人辅助不是蓝海，但<strong>「视觉大模型 + 可穿戴 + 主动叙述」这个组合，恰好站在老玩家与新玩家的空白处</strong>。</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 08 · <b>竞争格局：四类玩家</b> / Competitive landscape: four types of players</p>
+            <div class="dgm-row">
+              <div class="dgm-box sub grow"><p class="dgm-title">① 专用硬件</p><p class="dgm-sub">OrCam、Envision：技术强但昂贵，偏欧美高价市场</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title">② 手机 App</p><p class="dgm-sub">Seeing AI、Lookout：免费、普及，但依赖手持、主动触发</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title">③ 众包人工</p><p class="dgm-sub">Be My Eyes：有人情味，但依赖志愿者、响应不稳定</p></div>
+              <div class="dgm-box solo grow"><p class="dgm-title">④ 我们的位置</p><p class="dgm-sub">大模型 × 可穿戴 × 主动叙述：比 App 解放双手，比硬件平价，比人工可靠</p></div>
+            </div>
+            <p class="back-arrow">差异化落点：主动服务 + 平价 + 本地化（中文/方言/本地场景）</p>
+          </div>
+
+          <p>专业判断：与其和 Seeing AI 正面拼 App，不如<strong>在"主动叙述的可穿戴体验"上建立差异化</strong>，并以中文市场、本地场景（本地餐饮、公共交通、支付）作为纵深。规模上，这是一个「窄而深」的市场——<strong>不追求天花板最高，追求渗透率最高</strong>。</p>
+
+          <h2>八、路线图与风险：把不确定性拆成可执行步骤</h2>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 09 · <b>三阶段路线图</b> / Three-phase roadmap</p>
+            <div class="dgm-row">
+              <div class="dgm-box grow"><p class="dgm-title">① 验证期（3–6 个月）</p><p class="dgm-sub">App MVP：识物 + OCR + 语音问答，100 名种子用户跑通准确率与信任</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box grow"><p class="dgm-title">② 成长期（6–12 个月）</p><p class="dgm-sub">夹挂摄像头 + 主动叙述 + 订阅；进入 1–2 个残联/公益渠道</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box solo grow"><p class="dgm-title">③ 成熟期（12 个月+）</p><p class="dgm-sub">一体眼镜 + B2G 采购 + 多语言，形成平台与数据壁垒</p></div>
+            </div>
+          </div>
+
+          <p>商业上最大的诚实是<strong>先列风险</strong>，专业是<strong>先给对策</strong>：</p>
+
+          <table>
+            <thead>
+              <tr><th>风险</th><th>等级</th><th>对策</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>安全误判（漏报障碍/误报危险）</td><td>致命</td><td>保守策略优先：不确定就不讲；端侧安全兜底；可解释性日志</td></tr>
+              <tr><td>隐私与伦理（摄像头常开）</td><td>高</td><td>本地优先、数据最小化、一键开关、透明告知、第三方审计</td></tr>
+              <tr><td>支付能力低、获客分散</td><td>高</td><td>App 免费起量 + B2G/公益补贴 + 渠道先于广告</td></tr>
+              <tr><td>硬件成本与续航</td><td>中</td><td>先夹挂形态，性价比优先；电池管理专项</td></tr>
+              <tr><td>监管与准入</td><td>中</td><td>明确医疗器械边界，必要时走辅助器具认证路径</td></tr>
+              <tr><td>大模型幻觉（讲错话）</td><td>中</td><td>事实类场景（药名、钱币、红绿灯）用确定性模块兜底，不让模型自由发挥</td></tr>
+            </tbody>
+          </table>
+
+          <h2>九、结语：偶发巧思，认真推演</h2>
+          <p>一次偶发巧思，被商业逻辑与产品方法完整推演了一遍。把它压缩成三句判断：</p>
+          <ul>
+            <li><strong>需求是真的、且会变大。</strong>老龄化 + 视障人群 = 确定的长期需求底座，不随周期波动。</li>
+            <li><strong>技术刚刚够用。</strong>视觉大模型的「理解能力」是过去两年才兑现的，这是本产品成立的时间窗口。</li>
+            <li><strong>商业要务实。</strong>App 验证 → 订阅利润 → B2G 放大，先证明价值，再谈规模；安全与隐私是不可妥协的底线。</li>
+          </ul>
+          <p>这款产品真正的价值，不只是"让盲人看见"，而是<strong>让一群长期依赖他人的人，重新获得独立生活的可能</strong>。这件事值得被认真做。</p>
+
+        </div>
+
+        <!-- ==================== EN ==================== -->
+        <div data-lang="en" hidden>
+
+          <h2>0. The Elevator Pitch</h2>
+          <p>A wearable assistant for the blind powered by a visual large model: <strong>the camera captures the scene → the visual large model understands the world → voice narrates what is "seen" to someone who cannot see.</strong> It does not replace the white cane or the guide dog. It supplies what blind users lack most — <strong>the ability to obtain visual information anytime, proactively.</strong></p>
+          <p>This article is not a spec sheet. It is a full design-and-business study: user scenarios, product form factors, technical architecture, interaction principles, market size, business model, competitive landscape, and risk mitigation — all laid out. As a <strong>concept-level plan</strong>, it answers one question: if this were a project today, how do we make it professional, reliable, and viable?</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 01 · <b>The core capability loop</b> / 产品核心能力闭环</p>
+            <div class="cycle">
+              <div class="dgm-box solo"><p class="dgm-title">Visual capture</p><p class="dgm-sub">Wearable camera; hands-free, near-eye perspective</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">VLM understanding</p><p class="dgm-sub">Objects / OCR / faces / scene narration</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">Voice output</p><p class="dgm-sub">TTS narrates in real time</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box"><p class="dgm-title">Proactive alerts</p><p class="dgm-sub">Danger / low battery / environment</p></div>
+            </div>
+            <p class="back-arrow">↺ Voice questions (STT) join the loop: see → understand → narrate → answer</p>
+          </div>
+
+          <h2>1. Why Now: Three Windows of Opportunity</h2>
+          <p>Blind-assistance tools are not new. But "why now" rests on three hard logics:</p>
+          <ol>
+            <li><strong>Visual large models came of age.</strong> Multimodal models crossed a qualitative line in the last two years — from "can recognize" to "can understand," from reading characters to comprehending a scene and composing language. That is exactly what blind assistance needs: not recognizing an image, but <strong>turning the visible world into plain speech</strong>.</li>
+            <li><strong>Hardware costs collapsed.</strong> Lightweight AI cameras, bone-conduction earphones, and low-power chips have become cheap enough to mass-produce. Wearable form factors — in weight, battery, and price — are acceptable for the first time.</li>
+            <li><strong>Demographics guarantee long-term demand.</strong> Aging is a certainty, and vision-impairment prevalence rises steeply with age — a demand base that keeps growing and barely moves with economic cycles.</li>
+          </ol>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 02 · <b>Three windows of opportunity</b> / 三重机会窗口</p>
+            <div class="three">
+              <div class="dgm-box solo"><p class="dgm-title">Model leap</p><p class="dgm-sub">VLMs "understand scenes" → plain speech</p></div>
+              <div class="dgm-box"><p class="dgm-title">Cheaper hardware</p><p class="dgm-sub">Cameras / bone-conduction / low-power chips</p></div>
+              <div class="dgm-box"><p class="dgm-title">Demographics</p><p class="dgm-sub">Aging → steeply rising prevalence, durable demand</p></div>
+            </div>
+          </div>
+
+          <h2>2. Users &amp; Scenarios: Translating "Cannot See" into "Can Do"</h2>
+          <p>First the demand base (public estimates): the WHO estimates roughly 2.2 billion people have vision impairment, of whom at least 1 billion have moderate-or-worse impairment that is preventable or unaddressed; total blindness plus low vision is large and grows with aging. In China, disability-official counts put the visually impaired in the tens of millions. What matters more than the total is the <strong>structure</strong>: users are highly dispersed, single-point demand is not frequent, but the need is acute — precisely the structure that suits an "integrated hardware + proactive service" product.</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 03 · <b>Eight core scenarios</b> / 八大核心场景</p>
+            <div class="dgm-row">
+              <div class="dgm-box grow"><p class="dgm-title">① Navigation</p><p class="dgm-sub">Broken tactile paths, traffic lights, obstacles, orientation</p></div>
+              <div class="dgm-box grow"><p class="dgm-title">② Shopping</p><p class="dgm-sub">Products, price tags, expiry, medicine labels</p></div>
+              <div class="dgm-box grow"><p class="dgm-title">③ Reading</p><p class="dgm-sub">Books, letters, screens, receipts read aloud by OCR</p></div>
+              <div class="dgm-box grow"><p class="dgm-title">④ Social</p><p class="dgm-sub">Recognize people, read expression/tone, scan cards</p></div>
+            </div>
+            <div class="dgm-row" style="margin-top:10px;">
+              <div class="dgm-box grow"><p class="dgm-title">⑤ Around home</p><p class="dgm-sub">Find keys, tell colors, sort clothes and items</p></div>
+              <div class="dgm-box grow"><p class="dgm-title">⑥ Currency</p><p class="dgm-sub">Banknote denominations, verify change</p></div>
+              <div class="dgm-box grow"><p class="dgm-title">⑦ Medication</p><p class="dgm-sub">Identify medicine and dosage, take reminders</p></div>
+              <div class="dgm-box grow"><p class="dgm-title">⑧ Emergency</p><p class="dgm-sub">One-tap SOS, share location, contact family</p></div>
+            </div>
+            <p class="back-arrow">High-frequency needs: navigation + objects + reading · Emotional value: recognizing people + independence</p>
+          </div>
+
+          <p>The first PM lesson: <strong>do not try to cover all scenarios at once.</strong> The MVP should focus on the two highest-frequency needs — "safe navigation + object recognition" — and make each usable and reliable before expanding.</p>
+
+          <h2>3. Product Form: A Trade-off Across Three Options</h2>
+          <p>"Wearable" has different landing points. The professional call is to phase them, not bet on a single form:</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 04 · <b>Form-factor roadmap: software first, hardware later</b> / 形态演进路线</p>
+            <div class="flow">
+              <div class="flow-step"><span class="flow-n">P0</span><div><p class="dgm-title">Phone app (validation)</p><p class="dgm-sub">System camera, zero hardware cost; validate demand and willingness to pay fast</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">P1</span><div><p class="dgm-title">Chest / clip camera (growth)</p><p class="dgm-sub">Hands-free, closer to eye level; pairs with the phone; controllable cost</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">P2</span><div><p class="dgm-title">Integrated smart glasses (maturity)</p><p class="dgm-sub">What you see is what it sees; bone-conduction feedback; best form, but cost &amp; battery are the gates</p></div></div>
+            </div>
+            <p class="back-arrow">Judgment: don't bet on one form — sequence by cost, experience, and validation</p>
+          </div>
+
+          <div class="note">
+            <p><strong>Why P0 as an app?</strong> The variable in blind assistance is not hardware — it is whether the AI narrates accurately. Prove accuracy, latency, and user trust the cheapest way first, then trade up to hardware. This is the path validated by Microsoft Seeing AI and Google Lookout: prove the need, then upgrade consumption.</p>
+          </div>
+
+          <h2>4. Technical Architecture: The VLM Is the Brain</h2>
+          <p>The core of the system is not the camera — it is <strong>a brain that can see, think, and speak</strong>. The architecture follows three principles: edge-cloud synergy, low latency first, safety as the floor.</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 05 · <b>Edge-cloud architecture</b> / 端云协同架构</p>
+            <div class="dgm-row">
+              <div class="dgm-col">
+                <p class="dgm-cap" style="margin-top:0;"><b>Edge (wearable)</b></p>
+                <div class="dgm-box sub grow"><p class="dgm-title">Lightweight model</p><p class="dgm-sub">Fast on-device checks: obstacles, tactile paths, brightness, stabilization</p></div>
+                <div class="dgm-arrow">↓ <span>key frames uplink</span></div>
+                <div class="dgm-box sub grow"><p class="dgm-title">Safety fallback</p><p class="dgm-sub">Basic recognition that works offline; SOS never depends on the cloud</p></div>
+                <div class="dgm-box sub grow"><p class="dgm-title">Interaction layer</p><p class="dgm-sub">STT input · TTS output · bone-conduction / haptic feedback</p></div>
+              </div>
+              <div class="dgm-arrow">⇄</div>
+              <div class="dgm-col">
+                <p class="dgm-cap" style="margin-top:0;"><b>Cloud (VLM brain)</b></p>
+                <div class="dgm-box solo grow"><p class="dgm-title">Visual large model</p><p class="dgm-sub">Multimodal understanding: objects / OCR / scene narration / VQA</p></div>
+                <div class="dgm-box sub grow"><p class="dgm-title">Memory &amp; context</p><p class="dgm-sub">Preferences, frequent places, error feedback — sharper over time</p></div>
+                <div class="dgm-box sub grow"><p class="dgm-title">Service orchestration</p><p class="dgm-sub">Navigation / payment / contacts / medication reminders</p></div>
+              </div>
+            </div>
+            <p class="back-arrow">Key metrics: end-to-end latency &lt; 1s · false alerts lean conservative, never reckless</p>
+          </div>
+
+          <p>Two professional calls: <strong>First, latency is the experience.</strong> Blind assistance is real-time; a single lag breaks trust. Edge handles "fast and stable," cloud handles "accurate and complete." <strong>Second, safety always sits at the floor.</strong> For traffic danger and stair edges, the edge must have local fallback — never stake a life on network uptime.</p>
+
+          <h2>5. Interaction Design: No Screen, Only Conversation</h2>
+          <p>This is the most counter-intuitive and most professional part: <strong>for a blind user, the screen does not exist.</strong> Interaction is only three things — hear, speak, touch.</p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 06 · <b>Three principles of non-visual interaction</b> / 非视觉交互三原则</p>
+            <div class="three">
+              <div class="dgm-box solo"><p class="dgm-title">① Hear first</p><p class="dgm-sub">Everything is voiced; TTS narration is primary</p></div>
+              <div class="dgm-box"><p class="dgm-title">② Speak direct</p><p class="dgm-sub">Wake word + short commands; dialects and accents configurable</p></div>
+              <div class="dgm-box"><p class="dgm-title">③ Touch as floor</p><p class="dgm-sub">Vibration/haptics convey direction, warnings, confirmations</p></div>
+            </div>
+            <p class="back-arrow">Design red line: nothing may require sight to operate</p>
+          </div>
+
+          <ul>
+            <li><strong>Proactive narration.</strong> Not "answer when asked" — the device speaks at key moments: the traffic light when crossing, the entrance when entering a shop. That is an assistant, not a search tool.</li>
+            <li><strong>Low interruption.</strong> Stay quiet by default; speak only when it matters — or you will annoy the user within 30 minutes. Information has priority: safety &gt; action &gt; information &gt; social.</li>
+            <li><strong>Privacy is the foundation of trust.</strong> An always-on camera is deeply sensitive. Process locally first, minimize cloud data, one-tap off switch, and tell users plainly "what is seen, what is stored, who uses it." Get privacy wrong and the product fails.</li>
+          </ul>
+
+          <h2>6. Business Model: Hardware as the Door, Subscription as the Margin, Public Procurement as the Amplifier</h2>
+          <p>This is where business judgment matters most. The core fact: <strong>blind individuals have limited ability to pay, but this is a population that governments and charities are willing to fund.</strong></p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 07 · <b>Revenue structure: a three-layer funnel</b> / 收入结构：三层漏斗</p>
+            <div class="flow">
+              <div class="flow-step"><span class="flow-n">L1</span><div><p class="dgm-title">Hardware (entry)</p><p class="dgm-sub">App free / base features free; hardware priced to move as the user &amp; data entry</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">L2</span><div><p class="dgm-title">AI subscription (core margin)</p><p class="dgm-sub">Advanced recognition, real-time proactive narration, multi-language, personal memory — monthly</p></div></div>
+              <div class="dgm-arrow">↓</div>
+              <div class="flow-step"><span class="flow-n">L3</span><div><p class="dgm-title">B2G / public welfare (amplifier)</p><p class="dgm-sub">Disability federations, civil affairs, rehab centers, insurance, CSR procurement &amp; subsidies</p></div></div>
+            </div>
+            <p class="back-arrow">Key: recurring subscription margin + bulk public procurement, two engines</p>
+          </div>
+
+          <ul>
+            <li><strong>Know the pricing benchmark.</strong> Overseas incumbents (OrCam, Envision glasses) retail in the thousands of dollars — proof the need is real, and a warning that the personal market is hard to scale. The professional move: <strong>a free app to acquire users, subscription for margin, and B2G subsidies to push hardware into mass-affordable territory.</strong></li>
+            <li><strong>Channels are the moat.</strong> Disability federations, blind associations, special-education schools, ophthalmology clinics, and rehab centers are the natural trust channels. Build channels first, then scale.</li>
+            <li><strong>The data flywheel.</strong> Every "you got it wrong" feedback is a correction sample; the longer the use, the sharper the personal memory and scene understanding — the hardest thing for software competitors to copy.</li>
+          </ul>
+
+          <h2>7. Market &amp; Competition: The Gap Inside a Crowded Field</h2>
+          <p>Blind assistance is not a blue ocean. But the combination of <strong>"visual large model × wearable × proactive narration" sits exactly in the gap between old and new players.</strong></p>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 08 · <b>Competitive landscape: four types of players</b> / 竞争格局：四类玩家</p>
+            <div class="dgm-row">
+              <div class="dgm-box sub grow"><p class="dgm-title">① Dedicated hardware</p><p class="dgm-sub">OrCam, Envision: capable but pricey, premium Western markets</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title">② Phone apps</p><p class="dgm-sub">Seeing AI, Lookout: free and widespread, but hand-held and user-triggered</p></div>
+              <div class="dgm-box sub grow"><p class="dgm-title">③ Crowdsourced humans</p><p class="dgm-sub">Be My Eyes: humane, but volunteer-dependent and inconsistent</p></div>
+              <div class="dgm-box solo grow"><p class="dgm-title">④ Our position</p><p class="dgm-sub">VLM × wearable × proactive: hands-free vs apps, affordable vs hardware, reliable vs human</p></div>
+            </div>
+            <p class="back-arrow">Differentiation: proactive service + affordability + localization (Chinese, dialects, local scenarios)</p>
+          </div>
+
+          <p>The professional call: rather than battle Seeing AI on apps head-on, <strong>differentiate on the "proactive, wearable experience" and go deep on the Chinese market with local scenarios</strong> (local dining, public transit, payments). In scale, this is a "narrow but deep" market — <strong>not the highest ceiling, but the highest penetration rate.</strong></p>
+
+          <h2>8. Roadmap &amp; Risks: Turning Uncertainty into Executable Steps</h2>
+
+          <div class="dgm">
+            <p class="dgm-cap">FIG 09 · <b>Three-phase roadmap</b> / 三阶段路线图</p>
+            <div class="dgm-row">
+              <div class="dgm-box grow"><p class="dgm-title">① Validate (3–6 mo)</p><p class="dgm-sub">App MVP: recognition + OCR + voice Q&amp;A; 100 seed users to nail accuracy and trust</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box grow"><p class="dgm-title">② Grow (6–12 mo)</p><p class="dgm-sub">Clip camera + proactive narration + subscription; enter 1–2 disability/public channels</p></div>
+              <div class="dgm-arrow">→</div>
+              <div class="dgm-box solo grow"><p class="dgm-title">③ Mature (12 mo+)</p><p class="dgm-sub">Integrated glasses + B2G procurement + multilingual; platform &amp; data moat</p></div>
+            </div>
+          </div>
+
+          <p>Business honesty means <strong>listing risks first</strong>; professionalism means <strong>giving countermeasures first</strong>:</p>
+
+          <table>
+            <thead>
+              <tr><th>Risk</th><th>Severity</th><th>Countermeasure</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Safety misjudgment (missed obstacles / false danger)</td><td>Critical</td><td>Conservative by default: if unsure, stay silent; edge safety fallback; explainable logs</td></tr>
+              <tr><td>Privacy &amp; ethics (always-on camera)</td><td>High</td><td>Local-first, data minimization, one-tap off, transparent notice, third-party audit</td></tr>
+              <tr><td>Low payment power, scattered acquisition</td><td>High</td><td>Free app to acquire + B2G/public subsidies + channels before ads</td></tr>
+              <tr><td>Hardware cost &amp; battery</td><td>Medium</td><td>Clip form first, cost-performance first; dedicated battery management</td></tr>
+              <tr><td>Regulation &amp; access</td><td>Medium</td><td>Clarify medical-device boundary; pursue assistive-device certification where needed</td></tr>
+              <tr><td>VLM hallucination (saying the wrong thing)</td><td>Medium</td><td>Factual cases (medicine, currency, traffic lights) use deterministic modules, not free-form model output</td></tr>
+            </tbody>
+          </table>
+
+          <h2>9. Closing: A Serendipitous Idea, Rigorously Worked Out</h2>
+          <p>A fleeting spark of an idea, fully worked through by business logic and product method. Distilled into three judgments:</p>
+          <ul>
+            <li><strong>The need is real and growing.</strong> Aging plus visual impairment equals a durable demand base that barely moves with cycles.</li>
+            <li><strong>The technology just became sufficient.</strong> The VLM's "understanding ability" only materialized in the past two years — this is the window in which the product can exist.</li>
+            <li><strong>The business must stay pragmatic.</strong> App to validate, subscription for margin, B2G to amplify. Prove value first, then scale. Safety and privacy are non-negotiable floors.</li>
+          </ul>
+          <p>The real value of this product is not simply "letting the blind see." It is <strong>giving people who have long depended on others a chance to live independently again.</strong> That is worth doing carefully.</p>
+
+        </div>
+
+        <nav class="post-nav">
+          <div>
+            <a href="../projects.html">
+              <span data-lang="zh">← 返回项目</span>
+              <span data-lang="en" hidden>← Back to projects</span>
+            </a>
+          </div>
+        </nav>
+      </main>
+    </div>
+  </div>
+
+  <div id="site-footer"></div>
+  <script src="../assets/js/site-config.js"></script>
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

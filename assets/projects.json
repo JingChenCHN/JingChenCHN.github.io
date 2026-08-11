@@ -1,11 +1,38 @@
 [
   {
+    "title": "Serendipity: A Wearable Assistant for the Blind Powered by a Visual Large Model — Design & Business Thinking",
+    "title_zh": "偶发巧思 · 基于视觉大模型的盲人辅助可穿戴助手：设计与商业思路",
+    "slug": "blind-assistant",
+    "date": "2026-08-11",
+    "tags": [
+      "Wearable AI",
+      "Accessibility",
+      "Business Model"
+    ],
+    "tags_zh": [
+      "可穿戴AI",
+      "无障碍",
+      "商业化"
+    ],
+    "excerpt": "A serendipitous idea, rigorously worked out: a wearable assistant for the blind with a visual large model as its brain. An expert-level design and business study covering scenarios, form factors, edge-cloud architecture, non-visual interaction, market size, a three-layer revenue model, competitive landscape, and risk countermeasures.",
+    "excerpt_zh": "一次偶发巧思下的完整推演：以视觉大模型为大脑的盲人辅助可穿戴助手。从用户场景、形态演进、端云架构、非视觉交互，到市场规模、三层收入模型、竞争格局与风险对策的专家级设计与商业思路。",
+    "file": "projects/blind-assistant.html"
+  },
+  {
     "title": "Vibecoding: A Smart-Driving Collection Business System in 2 Days",
     "title_zh": "Vibecoding · 2天速成智驾采集业务系统",
     "slug": "sf-collection",
     "date": "2026-08-05",
-    "tags": ["Vibecoding", "ADAS Collection", "Fast Delivery"],
-    "tags_zh": ["Vibecoding", "智驾采集", "快速交付"],
+    "tags": [
+      "Vibecoding",
+      "ADAS Collection",
+      "Fast Delivery"
+    ],
+    "tags_zh": [
+      "Vibecoding",
+      "智驾采集",
+      "快速交付"
+    ],
     "excerpt": "Build a working, deployable business system for an autonomous-driving data collection fleet in about two days: a 10,340-line single-file FastAPI backend, 240 APIs, 53 tables, and dual-end React SPAs — then keep shipping through V1.9.",
     "excerpt_zh": "用 Vibecoding 在约 2 天内跑通一套能上线的智驾数据采集车队管理系统：10,340 行单文件 FastAPI 后端、240 个接口、53 张表、双端 React SPA，并在此后持续迭代到 V1.9。",
     "file": "projects/sf-collection.html"
@@ -15,8 +42,16 @@
     "title_zh": "地图XAI · 地图设计师智能体",
     "slug": "map-style-agent",
     "date": "2026-08-05",
-    "tags": ["Map", "AI Agent", "Product Practice"],
-    "tags_zh": ["地图", "AI智能体", "产品实践"],
+    "tags": [
+      "Map",
+      "AI Agent",
+      "Product Practice"
+    ],
+    "tags_zh": [
+      "地图",
+      "AI智能体",
+      "产品实践"
+    ],
     "excerpt": "Describe a map style in one sentence, and the AI generates the map style operations (ops) and drives the map engine to render it; sessions, history, and finished styles are kept as reusable product assets.",
     "excerpt_zh": "用一句话描述想要的地图样式，AI 即生成地图样式操作（ops）并驱动地图引擎渲染出成品；会话、对话历史与成品风格沉淀为可复用的产品资产。",
     "file": "projects/map-style-agent.html"
@@ -26,8 +61,16 @@
     "title_zh": "地图XAI · 未来地图解决方案收录",
     "slug": "future-map-solutions",
     "date": "2026-08-05",
-    "tags": ["Map", "AI", "Industry Atlas"],
-    "tags_zh": ["地图", "AI", "行业图谱"],
+    "tags": [
+      "Map",
+      "AI",
+      "Industry Atlas"
+    ],
+    "tags_zh": [
+      "地图",
+      "AI",
+      "行业图谱"
+    ],
     "excerpt": "A Map × AI industry solution atlas that systematically collects, showcases, and evaluates frontier solutions in the future-map space, turning them into understandable, comparable, decision-ready assets.",
     "excerpt_zh": "一个「地图 × AI 行业解决方案图谱」平台，系统化搜集、展示与评测未来地图方向的前沿方案，沉淀为可理解、可对比、可决策的信息资产。",
     "file": "projects/future-map-solutions.html"
@@ -37,8 +80,14 @@
     "title_zh": "产品经理XAI · 如何最小化实现水电自由",
     "slug": "electricity-water-freedom",
     "date": "2026-08-05",
-    "tags": ["Local LLM", "Cost Optimization"],
-    "tags_zh": ["本地大模型", "成本优化"],
+    "tags": [
+      "Local LLM",
+      "Cost Optimization"
+    ],
+    "tags_zh": [
+      "本地大模型",
+      "成本优化"
+    ],
     "excerpt": "Run an LLM locally on your own machine — pay once, trade electricity for token fees, and drive AI's marginal cost toward zero: a few hundred lines of stdlib Python turn a 1B model into a local engine that streams chat and serves as an API.",
     "excerpt_zh": "在自己机器上本地运行大模型，一次采购、电费换 Token 费，把 AI 的边际成本趋近于零——几百行标准库 Python 把 1B 模型跑成可流式对话、可当作 API 的本地引擎。",
     "file": "projects/electricity-water-freedom.html"
